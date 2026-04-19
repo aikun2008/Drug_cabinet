@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>权限组配置 - 实验室药品智能管理终端</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+    <style>
+        /* 权限组卡片样式 */
+        .group-card {
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .group-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .group-card .stat-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .group-card .stat-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #ecf0f1;
+        }
+        
+        .group-card .stat-value {
+            font-size: 14px;
+            color: #bdc3c7;
+            margin-bottom: 20px;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(145deg, #95a5a6, #7f8c8d);
+            color: white;
+            box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+        }
+        
+        .modal-content {
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            margin: 5% auto;
+            padding: 0;
+            border: 2px solid #4a6741;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 2px solid #4a6741;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .modal-title {
+            color: #ecf0f1;
+            font-size: 22px;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            margin: 0;
+        }
+        
+        .close {
+            color: #bdc3c7;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .close:hover {
+            color: #ecf0f1;
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.1);
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ecf0f1;
+            font-weight: 600;
+            font-size: 14px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #5d6d7e;
+            border-radius: 8px;
+            background: rgba(44, 62, 80, 0.8);
+            color: #ecf0f1;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .form-control::placeholder {
+            color: #95a5a6;
+            font-style: italic;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            background: rgba(44, 62, 80, 0.95);
+            box-shadow: 
+                0 0 0 3px rgba(52, 152, 219, 0.3),
+                inset 0 2px 4px rgba(0,0,0,0.3);
+            transform: translateY(-1px);
+        }
+        
+        .form-control:hover {
+            border-color: #7fb3d5;
+            background: rgba(44, 62, 80, 0.9);
+        }
+        
+        /* 滑动开关样式 */
+        .form-check {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .form-check-label {
+            color: #ecf0f1;
+            font-size: 14px;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #5d6d7e;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #3498db;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* 时间范围输入 */
+        .time-range-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .time-range-inputs input {
+            flex: 1;
+        }
+        
+        .time-range-separator {
+            color: #bdc3c7;
+            font-weight: 600;
+        }
+        
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 2px solid #4a6741;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .modal-footer .btn {
+            padding: 12px 24px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            border-radius: 6px !important;
+            transition: all 0.3s ease !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* 表格样式 */
+        .user-list table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #34495e;
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 15px;
+        }
+        
+        .user-list th {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #4a6741;
+            font-size: 14px;
+        }
+        
+        .user-list td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #3d566e;
+            color: #ecf0f1;
+            line-height: 1.5;
+        }
+        
+        .user-list tr:hover {
+            background: rgba(74, 103, 65, 0.1);
+        }
+        
+        .user-list tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* 状态标签样式 */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .status-badge.success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .status-badge.danger {
+            background: #e74c3c;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="/admin_dashboard.html" class="nav-link" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link active" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link" data-target="medicine-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <!-- 内容区域 -->
+            <div class="content">
+                <!-- 权限组配置页面 -->
+                <div id="permissions-content" class="page-content">
+                    <div class="page-title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <h1>权限组配置</h1>
+                                <div class="page-breadcrumb">
+                                    <span class="breadcrumb-item">Home</span>
+                                    <span class="icon-arrow-right"></span>
+                                    <span class="breadcrumb-item active">权限组配置</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="search-container">
+                                    <span class="search-icon icon-search"></span>
+                                    <input type="text" class="search-input" placeholder="搜索...">
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-avatar">管</div>
+                                    <div class="user-details">
+                                        <div class="user-name">管理员</div>
+                                        <div class="user-role">系统管理员</div>
+                                    </div>
+                                    <!-- 下拉菜单 -->
+                                    <div class="user-dropdown">
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" class="dropdown-item">个人资料</a></li>
+                                            <li><a href="#" class="dropdown-item">修改密码</a></li>
+                                            <li class="dropdown-divider"></li>
+                                            <li><a href="{{ url_for('logout') }}" class="dropdown-item">退出登录</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 权限组卡片 -->
+                    <div class="stats-grid" style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <div class="group-card" data-group-id="0">
+                            <div class="stat-title">管理员</div>
+                            <div class="stat-value">系统管理员，拥有所有权限</div>
+                            <button class="btn btn-primary view-users" data-group-id="0" style="margin-top: 15px;">
+                                查看用户
+                            </button>
+                        </div>
+                        <div class="group-card" data-group-id="1">
+                            <div class="stat-title">教师</div>
+                            <div class="stat-value">教师用户，拥有教学相关权限</div>
+                            <button class="btn btn-primary manage-permissions" data-group-id="1" style="margin-top: 15px;">
+                                管理权限
+                            </button>
+                        </div>
+                        <div class="group-card" data-group-id="2">
+                            <div class="stat-title">学生</div>
+                            <div class="stat-value">学生用户，拥有学习相关权限</div>
+                            <button class="btn btn-primary manage-permissions" data-group-id="2" style="margin-top: 15px;">
+                                管理权限
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 用户列表模态框 -->
+                    <div id="userListModal" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2 class="modal-title" id="userListModalLabel">用户列表</h2>
+                                <span class="close" onclick="closeUserListModal()">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <div class="user-list">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>用户名</th>
+                                                <th>真实姓名</th>
+                                                <th>部门</th>
+                                                <th>状态</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="userListBody">
+                                            <!-- 用户数据将通过JavaScript动态填充 -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" onclick="closeUserListModal()">关闭</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 权限管理模态框 -->
+                    <div id="permissionModal" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2 class="modal-title" id="permissionModalLabel">权限管理</h2>
+                                <span class="close" onclick="closePermissionModal()">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <form class="permission-form">
+                                    <input type="hidden" id="group_id" value="">
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-check-label" for="can_login">
+                                                允许登录
+                                            </label>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="can_login">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="login_time_range">登录时间范围</label>
+                                        <div class="time-range-inputs">
+                                            <input type="time" class="form-control" id="login_time_start" value="00:00">
+                                            <span class="time-range-separator">-</span>
+                                            <input type="time" class="form-control" id="login_time_end" value="23:59">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-check-label" for="can_query_drugs">
+                                                允许查询药品信息
+                                            </label>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="can_query_drugs">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-check-label" for="can_book_drugs">
+                                                允许预定药品
+                                            </label>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="can_book_drugs">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-check-label" for="can_borrow_return_drugs">
+                                                允许借出和归还药品
+                                            </label>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="can_borrow_return_drugs">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" onclick="closePermissionModal()">取消</button>
+                                <button class="btn btn-primary" id="savePermissions" onclick="savePermissions()">保存权限</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 侧边栏切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 侧边栏切换按钮
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    if (sidebar.classList.contains('active')) {
+                        mainContent.style.marginLeft = 'var(--sidebar-width)';
+                    } else {
+                        mainContent.style.marginLeft = '0';
+                    }
+                });
+            }
+            
+            // 窗口大小改变时的处理
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.add('active');
+                    mainContent.style.marginLeft = 'var(--sidebar-width)';
+                } else {
+                    sidebar.classList.remove('active');
+                    mainContent.style.marginLeft = '0';
+                }
+            });
+
+            // 查看用户按钮点击事件
+            const viewUsersButtons = document.querySelectorAll('.view-users');
+            viewUsersButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const groupId = this.getAttribute('data-group-id');
+                    const groupName = this.closest('.group-card').querySelector('.stat-title').textContent.trim();
+                    
+                    // 更新模态框标题
+                    document.getElementById('userListModalLabel').textContent = `${groupName}列表`;
+                    
+                    // 清空用户列表
+                    document.getElementById('userListBody').innerHTML = '';
+                    
+                    // 加载用户数据
+                    fetch(`/api/permission-groups/${groupId}/users`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const users = data.data;
+                                if (users.length > 0) {
+                                    users.forEach(user => {
+                                        const statusClass = user.status === 1 ? 'status-badge success' : 'status-badge danger';
+                                        const statusText = user.status === 1 ? '启用' : '禁用';
+                                        
+                                        const row = document.createElement('tr');
+                                        row.innerHTML = `
+                                            <td>${user.id}</td>
+                                            <td>${user.username}</td>
+                                            <td>${user.real_name}</td>
+                                            <td>${user.department || '-'}</td>
+                                            <td><span class="${statusClass}">${statusText}</span></td>
+                                        `;
+                                        document.getElementById('userListBody').appendChild(row);
+                                    });
+                                } else {
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = '<td colspan="5" style="text-align: center; color: #7f8c8d;">暂无用户</td>';
+                                    document.getElementById('userListBody').appendChild(row);
+                                }
+                            } else {
+                                const row = document.createElement('tr');
+                                row.innerHTML = '<td colspan="5" style="text-align: center; color: #e74c3c;">加载用户失败</td>';
+                                document.getElementById('userListBody').appendChild(row);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('加载用户失败:', error);
+                            const row = document.createElement('tr');
+                            row.innerHTML = '<td colspan="5" style="text-align: center; color: #e74c3c;">加载用户失败</td>';
+                            document.getElementById('userListBody').appendChild(row);
+                        });
+                    
+                    // 显示模态框
+                    document.getElementById('userListModal').style.display = 'block';
+                });
+            });
+            
+            // 管理权限按钮点击事件
+            const managePermissionsButtons = document.querySelectorAll('.manage-permissions');
+            managePermissionsButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const groupId = this.getAttribute('data-group-id');
+                    const groupName = this.closest('.group-card').querySelector('.stat-title').textContent.trim();
+                    
+                    // 更新模态框标题
+                    document.getElementById('permissionModalLabel').textContent = `${groupName}权限管理`;
+                    document.getElementById('group_id').value = groupId;
+                    
+                    // 加载权限数据
+                    fetch(`/api/permission-groups/${groupId}/permissions`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const permissions = data.data;
+                                document.getElementById('can_login').checked = permissions.can_login;
+                                
+                                // 解析时间范围
+                                const timeRange = permissions.login_time_range.split('-');
+                                document.getElementById('login_time_start').value = timeRange[0];
+                                document.getElementById('login_time_end').value = timeRange[1];
+                                
+                                document.getElementById('can_query_drugs').checked = permissions.can_query_drugs;
+                                document.getElementById('can_book_drugs').checked = permissions.can_book_drugs;
+                                document.getElementById('can_borrow_return_drugs').checked = permissions.can_borrow_return_drugs;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('加载权限失败:', error);
+                        });
+                    
+                    // 显示模态框
+                    document.getElementById('permissionModal').style.display = 'block';
+                });
+            });
+        });
+
+        // 关闭用户列表模态框
+        function closeUserListModal() {
+            document.getElementById('userListModal').style.display = 'none';
+        }
+
+        // 关闭权限管理模态框
+        function closePermissionModal() {
+            document.getElementById('permissionModal').style.display = 'none';
+        }
+
+        // 保存权限
+        function savePermissions() {
+            const groupId = document.getElementById('group_id').value;
+            const permissions = {
+                can_login: document.getElementById('can_login').checked,
+                login_time_range: `${document.getElementById('login_time_start').value}-${document.getElementById('login_time_end').value}`,
+                can_query_drugs: document.getElementById('can_query_drugs').checked,
+                can_book_drugs: document.getElementById('can_book_drugs').checked,
+                can_borrow_return_drugs: document.getElementById('can_borrow_return_drugs').checked
+            };
+            
+            fetch(`/api/permission-groups/${groupId}/permissions`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(permissions)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('权限设置更新成功');
+                    closePermissionModal();
+                } else {
+                    alert('权限设置更新失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('更新权限失败:', error);
+                alert('权限设置更新失败');
+            });
+        }
+
+        // 点击模态框外部关闭模态框
+        window.onclick = function(event) {
+            const userListModal = document.getElementById('userListModal');
+            const permissionModal = document.getElementById('permissionModal');
+            
+            if (event.target == userListModal) {
+                userListModal.style.display = 'none';
+            }
+            
+            if (event.target == permissionModal) {
+                permissionModal.style.display = 'none';
+            }
+        }
+    </script>
+
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

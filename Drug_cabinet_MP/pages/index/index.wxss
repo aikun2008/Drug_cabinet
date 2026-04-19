@@ -1,0 +1,231 @@
+/* index.wxss */
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 欢迎信息 */
+.welcome-section {
+  background-color: white;
+  padding: 30rpx;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.welcome-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.role-icon {
+  font-size: 48rpx;
+  margin-right: 20rpx;
+}
+
+.welcome-text {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.role-text {
+  display: block;
+  margin-top: 5rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+
+/* 状态网格 */
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+.status-item {
+  background-color: #fafafa;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  text-align: center;
+}
+
+.status-label {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.status-value {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #1976D2;
+}
+
+/* 记录项 */
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.record-item:last-child {
+  border-bottom: none;
+}
+
+.record-info {
+  flex: 1;
+}
+
+.record-action {
+  display: block;
+  font-size: 32rpx;
+  color: #333;
+  margin-bottom: 5rpx;
+}
+
+.record-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.record-status {
+  font-size: 28rpx;
+  color: #4CAF50;
+}
+
+/* 学生功能 */
+.student-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fafafa;
+  padding: 30rpx 0;
+  border-radius: 12rpx;
+  transition: all 0.3s;
+}
+
+.action-item:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.action-icon {
+  font-size: 60rpx;
+  margin-bottom: 10rpx;
+}
+
+.action-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 弹窗样式 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  width: 80%;
+  max-width: 500rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.close-btn {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+}
+
+.modal-body {
+  padding: 40rpx 30rpx;
+  text-align: center;
+  font-size: 32rpx;
+  color: #333;
+}
+
+.modal-footer {
+  padding: 20rpx 30rpx 30rpx;
+  text-align: center;
+}
+
+.btn {
+  width: 100%;
+  height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  margin: 0;
+}
+
+.btn-primary {
+  background-color: #1976D2;
+  color: white;
+}
+
+/* 购物车悬浮按钮 */
+.cart-float-button {
+  position: fixed;
+  bottom: 30rpx;
+  right: 30rpx;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-color: #1976D2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.cart-icon {
+  font-size: 40rpx;
+  color: white;
+}
+
+.cart-float-button:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}

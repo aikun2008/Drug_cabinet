@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室药品智能管理终端 - 系统报警中心</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+    <style>
+        /* 报警中心专用样式 */
+        .alarm-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        @media (max-width: 1200px) {
+            .alarm-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .alarm-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .stat-card {
+            background: #2c3e50;
+            padding: 12px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid #3498db;
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-card.env-abnormal { border-left-color: #f39c12; }
+        .stat-card.env-alarm { border-left-color: #e74c3c; }
+        .stat-card.door-abnormal { border-left-color: #9b59b6; }
+        .stat-card.door-alarm { border-left-color: #c0392b; }
+        .stat-card.total { border-left-color: #27ae60; }
+        
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #ecf0f1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #bdc3c7;
+            font-size: 0.8rem;
+        }
+        
+        /* 报警日志区域 */
+        .alarm-log-section {
+            background: #2c3e50;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .section-title {
+            color: #ecf0f1;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        /* 筛选控件 */
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: #34495e;
+            border-radius: 8px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-label {
+            font-size: 0.85rem;
+            color: #bdc3c7;
+            font-weight: 500;
+        }
+        
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #2c3e50;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            min-width: 140px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+        
+        .query-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        
+        .query-btn:hover {
+            background: #2980b9;
+        }
+        
+        /* 表格样式 */
+        .alarm-table-container {
+            background: #34495e;
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .alarm-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .alarm-table th {
+            background-color: #2c3e50;
+            font-weight: 600;
+            color: #ecf0f1;
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #34495e;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .alarm-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #2c3e50;
+            color: #ecf0f1;
+        }
+        
+        .alarm-table tbody tr:hover {
+            background-color: #2c3e50;
+        }
+        
+        /* 分类标签 */
+        .category-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .category-tag.env-abnormal {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+        }
+        
+        .category-tag.env-alarm {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        
+        .category-tag.door-abnormal {
+            background-color: rgba(155, 89, 182, 0.2);
+            color: #9b59b6;
+        }
+        
+        .category-tag.door-alarm {
+            background-color: rgba(192, 57, 43, 0.2);
+            color: #c0392b;
+        }
+        
+        /* 状态标签 */
+        .status-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-tag.pending {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        
+        .status-tag.handled {
+            background-color: rgba(39, 174, 96, 0.2);
+            color: #27ae60;
+        }
+        
+        /* 处理按钮 */
+        .handle-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.2s;
+        }
+        
+        .handle-btn:hover {
+            background: #229954;
+        }
+        
+        .handle-btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+        
+        /* 滚动条样式 */
+        .alarm-table-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .alarm-table-container::-webkit-scrollbar-track {
+            background: #2c3e50;
+        }
+        
+        .alarm-table-container::-webkit-scrollbar-thumb {
+            background: #34495e;
+            border-radius: 3px;
+        }
+        
+        .alarm-table-container::-webkit-scrollbar-thumb:hover {
+            background: #4a6278;
+        }
+        
+        /* 空数据提示 */
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        /* 实时报警区域 */
+        .realtime-alarm-section {
+            background: #2c3e50;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            min-height: calc(100vh - 280px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .realtime-alarms {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex: 1;
+            align-content: flex-start;
+            overflow-y: auto;
+            max-height: calc(100vh - 350px);
+        }
+        
+        .realtime-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .realtime-title {
+            color: #ecf0f1;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #e74c3c;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        
+        .refresh-info {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+        
+        .alarm-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #ecf0f1;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alarm-badge.env-abnormal {
+            background: linear-gradient(90deg, rgba(243, 156, 18, 0.3) 0%, rgba(243, 156, 18, 0.1) 100%);
+            border-left: 3px solid #f39c12;
+        }
+        
+        .alarm-badge.env-alarm {
+            background: linear-gradient(90deg, rgba(231, 76, 60, 0.3) 0%, rgba(231, 76, 60, 0.1) 100%);
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .alarm-badge.door-abnormal {
+            background: linear-gradient(90deg, rgba(155, 89, 182, 0.3) 0%, rgba(155, 89, 182, 0.1) 100%);
+            border-left: 3px solid #9b59b6;
+        }
+        
+        .alarm-badge.door-alarm {
+            background: linear-gradient(90deg, rgba(192, 57, 43, 0.3) 0%, rgba(192, 57, 43, 0.1) 100%);
+            border-left: 3px solid #c0392b;
+        }
+        
+        .alarm-badge .device-name {
+            font-weight: 600;
+        }
+        
+        .alarm-badge .alarm-text {
+            opacity: 0.9;
+        }
+        
+        .alarm-badge .handle-btn-small {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .alarm-badge .handle-btn-small:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .no-realtime-alarms {
+            text-align: center;
+            padding: 20px;
+            color: #27ae60;
+            font-size: 0.9rem;
+        }
+        
+        .no-realtime-alarms::before {
+            content: "✓ ";
+            font-size: 1.1rem;
+        }
+        
+        /* 处理弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #2c3e50;
+            border-radius: 8px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            color: #ecf0f1;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .modal-label {
+            display: block;
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        
+        .modal-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #34495e;
+            border-radius: 4px;
+            background: #34495e;
+            color: #ecf0f1;
+            font-size: 0.9rem;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        
+        .modal-textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .modal-btn.cancel {
+            background: #7f8c8d;
+            color: white;
+        }
+        
+        .modal-btn.cancel:hover {
+            background: #6c7a7d;
+        }
+        
+        .modal-btn.confirm {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .modal-btn.confirm:hover {
+            background: #229954;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="/admin_dashboard.html#dashboard" class="nav-link" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link" data-target="medicine-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link active" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警中心
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <div class="content">
+                <div class="page-title">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div>
+                            <h1>系统报警中心</h1>
+                            <div class="page-breadcrumb">
+                                <span class="breadcrumb-item">Home</span>
+                                <span class="icon-arrow-right"></span>
+                                <span class="breadcrumb-item">审计追踪</span>
+                                <span class="icon-arrow-right"></span>
+                                <span class="breadcrumb-item active">系统报警中心</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div class="user-info">
+                                <div class="user-avatar">管</div>
+                                <div class="user-details">
+                                    <div class="user-name">管理员</div>
+                                    <div class="user-role">系统管理员</div>
+                                </div>
+                                <div class="user-dropdown">
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#" class="dropdown-item">个人资料</a></li>
+                                        <li><a href="#" class="dropdown-item">修改密码</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ url_for('logout') }}" class="dropdown-item">退出登录</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 5个统计卡片 -->
+                <div class="alarm-stats">
+                    <div class="stat-card env-abnormal">
+                        <div class="stat-value" id="env-abnormal-count">0</div>
+                        <div class="stat-label">环境异常</div>
+                    </div>
+                    <div class="stat-card env-alarm">
+                        <div class="stat-value" id="env-alarm-count">0</div>
+                        <div class="stat-label">环境报警</div>
+                    </div>
+                    <div class="stat-card door-abnormal">
+                        <div class="stat-value" id="door-abnormal-count">0</div>
+                        <div class="stat-label">门锁异常</div>
+                    </div>
+                    <div class="stat-card door-alarm">
+                        <div class="stat-value" id="door-alarm-count">0</div>
+                        <div class="stat-label">门锁报警</div>
+                    </div>
+                    <div class="stat-card total">
+                        <div class="stat-value" id="total-count">0</div>
+                        <div class="stat-label">今日总数</div>
+                    </div>
+                </div>
+                
+                <!-- 实时报警区域 -->
+                <div class="realtime-alarm-section">
+                    <div class="realtime-header">
+                        <h3 class="realtime-title">
+                            实时未处理报警
+                            <span class="live-indicator">
+                                <span class="live-dot"></span>
+                                实时
+                            </span>
+                        </h3>
+                        <span class="refresh-info">10秒自动刷新</span>
+                    </div>
+                    <div class="realtime-alarms" id="realtime-alarms">
+                        <!-- 实时报警将在这里显示 -->
+                        <div class="no-realtime-alarms">暂无未处理报警，系统运行正常</div>
+                    </div>
+                </div>
+                
+                <!-- 报警日志区域 -->
+                <div class="alarm-log-section">
+                    <div class="section-header">
+                        <h3 class="section-title">报警日志</h3>
+                    </div>
+                    
+                    <!-- 筛选控件 -->
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label class="filter-label">开始日期</label>
+                            <input type="date" id="start-date" class="filter-input">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">结束日期</label>
+                            <input type="date" id="end-date" class="filter-input">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">设备</label>
+                            <select id="device-filter" class="filter-input">
+                                <option value="" selected>全部</option>
+                                <option value="cabinet_001">cabinet_001</option>
+                                <option value="cabinet_002">cabinet_002</option>
+                                <option value="cabinet_003">cabinet_003</option>
+                                <option value="cabinet_004">cabinet_004</option>
+                                <option value="cabinet_005">cabinet_005</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">分类</label>
+                            <select id="category-filter" class="filter-input">
+                                <option value="">全部</option>
+                                <option value="环境异常">环境异常</option>
+                                <option value="环境报警">环境报警</option>
+                                <option value="门锁异常">门锁异常</option>
+                                <option value="门锁报警">门锁报警</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">状态</label>
+                            <select id="status-filter" class="filter-input">
+                                <option value="">全部</option>
+                                <option value="未处理">未处理</option>
+                                <option value="已处理">已处理</option>
+                            </select>
+                        </div>
+                        <button class="query-btn" onclick="queryAlarmData()">查询</button>
+                    </div>
+                    
+                    <!-- 报警日志表格 -->
+                    <div class="alarm-table-container">
+                        <table class="alarm-table">
+                            <thead>
+                                <tr>
+                                    <th>时间</th>
+                                    <th>设备</th>
+                                    <th>分类</th>
+                                    <th>内容</th>
+                                    <th>状态</th>
+                                    <th>处理人</th>
+                                    <th>处理时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alarm-log-tbody">
+                                <!-- 数据将在这里动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 处理报警弹窗 -->
+    <div class="modal-overlay" id="handle-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">处理报警</h3>
+            </div>
+            <div class="modal-body">
+                <label class="modal-label">处理结果/备注：</label>
+                <textarea class="modal-textarea" id="handle-result" placeholder="请输入处理结果..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeHandleModal()">取消</button>
+                <button class="modal-btn confirm" onclick="confirmHandleAlarm()">确定处理</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ==================== 初始化 ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化日期范围（今天）
+            const today = new Date();
+            document.getElementById('start-date').value = formatDateLocal(today);
+            document.getElementById('end-date').value = formatDateLocal(today);
+            
+            // 加载数据
+            loadAlarmStatistics();
+            loadRealtimeAlarms();
+            queryAlarmData();
+            
+            // 定时刷新统计数据（每10秒）
+            setInterval(() => {
+                loadAlarmStatistics();
+            }, 10000);
+            
+            // 定时刷新实时报警（每10秒）
+            setInterval(() => {
+                loadRealtimeAlarms();
+            }, 10000);
+        });
+        
+        // ==================== 工具函数 ====================
+        function formatDateLocal(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        function formatDateTime(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString('zh-CN', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        function getCategoryClass(category) {
+            const classMap = {
+                '环境异常': 'env-abnormal',
+                '环境报警': 'env-alarm',
+                '门锁异常': 'door-abnormal',
+                '门锁报警': 'door-alarm'
+            };
+            return classMap[category] || '';
+        }
+        
+        // ==================== 加载统计数据 ====================
+        async function loadAlarmStatistics() {
+            try {
+                const deviceFilter = document.getElementById('device-filter').value;
+                // 如果选择了具体设备，则添加参数；否则不传参数（统计所有设备）
+                const url = deviceFilter 
+                    ? `/api/alarm-statistics?device_id=${deviceFilter}`
+                    : '/api/alarm-statistics';
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('env-abnormal-count').textContent = result.data.env_abnormal || 0;
+                    document.getElementById('env-alarm-count').textContent = result.data.env_alarm || 0;
+                    document.getElementById('door-abnormal-count').textContent = result.data.door_abnormal || 0;
+                    document.getElementById('door-alarm-count').textContent = result.data.door_alarm || 0;
+                    document.getElementById('total-count').textContent = result.data.total_today || 0;
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+            }
+        }
+        
+        // ==================== 加载实时未处理报警 ====================
+        async function loadRealtimeAlarms() {
+            try {
+                // 查询所有设备的未处理报警
+                const devices = ['cabinet_001', 'cabinet_002', 'cabinet_003', 'cabinet_004', 'cabinet_005'];
+                let allAlarms = [];
+                
+                for (const deviceId of devices) {
+                    const params = new URLSearchParams();
+                    params.append('device_id', deviceId);
+                    params.append('status', '未处理');
+                    
+                    try {
+                        const response = await fetch(`/api/alarm-data?${params}`);
+                        const result = await response.json();
+                        
+                        if (result.success && result.data && result.data.length > 0) {
+                            allAlarms = allAlarms.concat(result.data);
+                        }
+                    } catch (e) {
+                        // 忽略单个设备查询失败
+                    }
+                }
+                
+                // 按时间排序，最新的在前
+                allAlarms.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                renderRealtimeAlarms(allAlarms);
+            } catch (error) {
+                console.error('加载实时报警失败:', error);
+            }
+        }
+        
+        // ==================== 渲染实时报警 ====================
+        function renderRealtimeAlarms(alarms) {
+            const container = document.getElementById('realtime-alarms');
+            
+            if (!alarms || alarms.length === 0) {
+                container.innerHTML = '<div class="no-realtime-alarms">暂无未处理报警，系统运行正常</div>';
+                return;
+            }
+            
+            // 只显示最新的10个报警
+            const recentAlarms = alarms.slice(0, 10);
+            
+            container.innerHTML = recentAlarms.map(alarm => `
+                <div class="alarm-badge ${getCategoryClass(alarm.category)}">
+                    <span class="device-name">${alarm.device_id}</span>
+                    <span class="alarm-text">${alarm.category}: ${alarm.content || '异常'}</span>
+                    <button class="handle-btn-small" onclick="handleAlarm('${alarm.id}', '${alarm.device_id}')">处理</button>
+                </div>
+            `).join('');
+        }
+        
+        // ==================== 查询报警数据 ====================
+        async function queryAlarmData() {
+            try {
+                const params = new URLSearchParams();
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                const deviceFilter = document.getElementById('device-filter').value;
+                const categoryFilter = document.getElementById('category-filter').value;
+                const statusFilter = document.getElementById('status-filter').value;
+                
+                if (startDate) params.append('start_date', startDate);
+                if (endDate) params.append('end_date', endDate);
+                if (deviceFilter) params.append('device_id', deviceFilter);
+                if (categoryFilter) params.append('category', categoryFilter);
+                if (statusFilter) params.append('status', statusFilter);
+                
+                const response = await fetch(`/api/alarm-data?${params}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    renderAlarmTable(result.data);
+                } else {
+                    console.error('获取报警数据失败:', result.message);
+                }
+            } catch (error) {
+                console.error('查询报警数据失败:', error);
+            }
+        }
+        
+        // ==================== 渲染报警表格 ====================
+        function renderAlarmTable(data) {
+            const tbody = document.getElementById('alarm-log-tbody');
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            暂无报警记录
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = data.map(record => `
+                <tr data-id="${record.id}">
+                    <td>${formatDateTime(record.timestamp)}</td>
+                    <td>${record.device_id}</td>
+                    <td><span class="category-tag ${getCategoryClass(record.category)}">${record.category}</span></td>
+                    <td>${record.content || '-'}</td>
+                    <td><span class="status-tag ${record.status === '未处理' ? 'pending' : 'handled'}">${record.status}</span></td>
+                    <td>${record.handled_by || '-'}</td>
+                    <td>${record.handled_time ? formatDateTime(record.handled_time) : '-'}</td>
+                    <td>
+                        ${record.status === '未处理' 
+                            ? `<button class="handle-btn" onclick="handleAlarm('${record.id}', '${record.device_id}')">处理</button>`
+                            : '<button class="handle-btn" disabled>已处理</button>'
+                        }
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // ==================== 处理报警弹窗控制 ====================
+        let currentAlarmId = null;
+        let currentDeviceId = null;
+        
+        function openHandleModal(alarmId, deviceId) {
+            currentAlarmId = alarmId;
+            currentDeviceId = deviceId;
+            document.getElementById('handle-result').value = '';
+            document.getElementById('handle-modal').classList.add('active');
+        }
+        
+        function closeHandleModal() {
+            document.getElementById('handle-modal').classList.remove('active');
+            currentAlarmId = null;
+            currentDeviceId = null;
+        }
+        
+        async function confirmHandleAlarm() {
+            if (!currentAlarmId) return;
+            
+            const handleResult = document.getElementById('handle-result').value.trim();
+            
+            try {
+                const response = await fetch(`/api/alarm/${currentAlarmId}/handle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        device_id: currentDeviceId, 
+                        handle_result: handleResult 
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeHandleModal();
+                    // 刷新数据
+                    loadAlarmStatistics();
+                    loadRealtimeAlarms();
+                    queryAlarmData();
+                } else {
+                    alert('处理失败: ' + result.message);
+                }
+            } catch (error) {
+                console.error('处理报警失败:', error);
+                alert('处理失败');
+            }
+        }
+        
+        // ==================== 处理报警（兼容旧版本调用） ====================
+        async function handleAlarm(alarmId, deviceId) {
+            openHandleModal(alarmId, deviceId);
+        }
+        
+        // ==================== 用户下拉菜单 ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            const userInfo = document.querySelector('.user-info');
+            const dropdown = document.querySelector('.user-dropdown');
+            
+            if (userInfo && dropdown) {
+                userInfo.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                });
+                
+                document.addEventListener('click', function() {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+    </script>
+
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

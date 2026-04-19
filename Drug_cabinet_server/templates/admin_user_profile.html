@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室药品智能管理终端 - 用户档案管理</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="/admin_dashboard.html#dashboard" class="nav-link" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link active" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link" data-target="medicine-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <!-- 内容区域 -->
+            <div class="content">
+                <!-- 用户档案页面 -->
+                <div id="user-list-content" class="page-content">
+                    <div class="page-title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <h1>用户档案</h1>
+                                <div class="page-breadcrumb">
+                                    <span class="breadcrumb-item">Home</span>
+                                    <span class="icon-arrow-right"></span>
+                                    <span class="breadcrumb-item active">用户档案</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="search-container">
+                                    <span class="search-icon icon-search"></span>
+                                    <input type="text" id="search-input" class="search-input" placeholder="查找姓名/用户名/ID">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <button class="btn btn-primary" style="min-width: 80px;" onclick="refreshUserList()" id="refresh-btn">
+                                        <span id="refresh-icon" style="display: inline-block;">刷新</span>
+                                    </button>
+                                    <button class="btn btn-success" style="min-width: 80px;" onclick="showAddUserModal()">新增</button>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-avatar">管</div>
+                                    <div class="user-details">
+                                        <div class="user-name">管理员</div>
+                                        <div class="user-role">系统管理员</div>
+                                    </div>
+                                    <!-- 下拉菜单 -->
+                                    <div class="user-dropdown">
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" class="dropdown-item">个人资料</a></li>
+                                            <li><a href="#" class="dropdown-item">修改密码</a></li>
+                                            <li class="dropdown-divider"></li>
+                                            <li><a href="{{ url_for('logout') }}" class="dropdown-item">退出登录</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <style>
+                        /* 刷新按钮旋转动画 */
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                        .spin-animation {
+                            animation: spin 1s linear infinite;
+                        }
+                        /* 下拉菜单项悬停效果 */
+                        #role-dropdown > div:hover, #status-dropdown > div:hover {
+                            background-color: #2c3e50;
+                        }
+                    </style>
+                    <script>
+                        // 全局变量存储当前筛选值
+                        let currentRoleFilter = '';
+                        let currentStatusFilter = '';
+                        let currentSearchText = '';
+                        
+                        // 初始化筛选按钮事件监听
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // 查找输入框事件监听
+                            const searchInput = document.getElementById('search-input');
+                            searchInput.addEventListener('input', function() {
+                                currentSearchText = this.value.toLowerCase().trim();
+                                filterUsers();
+                            });
+                            
+                            // 身份筛选按钮
+                            const roleFilterBtn = document.getElementById('role-filter-btn');
+                            const roleDropdown = document.getElementById('role-dropdown');
+                            
+                            roleFilterBtn.addEventListener('click', function(event) {
+                                event.stopPropagation();
+                                roleDropdown.style.display = roleDropdown.style.display === 'none' ? 'block' : 'none';
+                                // 关闭另一个下拉菜单
+                                document.getElementById('status-dropdown').style.display = 'none';
+                            });
+                            
+                            // 状态筛选按钮
+                            const statusFilterBtn = document.getElementById('status-filter-btn');
+                            const statusDropdown = document.getElementById('status-dropdown');
+                            
+                            statusFilterBtn.addEventListener('click', function(event) {
+                                event.stopPropagation();
+                                statusDropdown.style.display = statusDropdown.style.display === 'none' ? 'block' : 'none';
+                                // 关闭另一个下拉菜单
+                                document.getElementById('role-dropdown').style.display = 'none';
+                            });
+                            
+                            // 点击页面其他地方关闭下拉菜单
+                            document.addEventListener('click', function() {
+                                roleDropdown.style.display = 'none';
+                                statusDropdown.style.display = 'none';
+                            });
+                            
+                            // 页面加载时自动加载用户数据
+                            loadUserData();
+                        });
+                        
+                        // 应用身份筛选
+                        function applyRoleFilter(role) {
+                            currentRoleFilter = role;
+                            document.getElementById('role-dropdown').style.display = 'none';
+                            filterUsers();
+                        }
+                        
+                        // 应用状态筛选
+                        function applyStatusFilter(status) {
+                            currentStatusFilter = status;
+                            document.getElementById('status-dropdown').style.display = 'none';
+                            filterUsers();
+                        }
+                        
+                        // 筛选用户函数
+                        function filterUsers() {
+                            const rows = document.querySelectorAll('#user-table-body tr');
+                            
+                            rows.forEach(row => {
+                                const cells = row.querySelectorAll('td');
+                                if (cells.length >= 6) {
+                                    const nameCell = cells[0]; // 姓名列（第1列）
+                                    const usernameCell = cells[1]; // 用户名列（第2列）
+                                    const idCell = cells[2]; // ID列（第3列）
+                                    const roleCell = cells[3]; // 身份列（第4列）
+                                    const statusCell = cells[5]; // 状态列（第6列）
+                                    
+                                    // 身份和状态筛选
+                                    const matchesRole = !currentRoleFilter || roleCell.textContent.trim() === currentRoleFilter;
+                                    const matchesStatus = !currentStatusFilter || statusCell.textContent.trim() === currentStatusFilter;
+                                    
+                                    // 搜索筛选（作用于姓名、用户名和ID）
+                                    const matchesSearch = !currentSearchText || 
+                                                        nameCell.textContent.toLowerCase().includes(currentSearchText) ||
+                                                        usernameCell.textContent.toLowerCase().includes(currentSearchText) ||
+                                                        idCell.textContent.toLowerCase().includes(currentSearchText);
+                                    
+                                    row.style.display = (matchesRole && matchesStatus && matchesSearch) ? '' : 'none';
+                                    
+                                    // 确保状态文本颜色与原始样式一致
+                                    const statusText = statusCell.textContent.trim();
+                                    statusCell.style.color = statusText === '启用' ? '#4CAF50' : statusText === '禁用' ? '#F44336' : '';
+                                }
+                            });
+                        }
+                    </script>
+                    <div class="user-table-container">
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 320px;">姓名</th>
+                                    <th style="width: 200px;">用户名</th>
+                                    <th style="width: 60px;">ID</th>
+                                    <th style="position: relative;">
+                                        身份 
+                                        <button id="role-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
+                                        ▼
+                                    </button>
+                                        <div id="role-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100px; background-color: #1a1a2e; border: 1px solid #444; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                            <div style="padding: 5px 10px; cursor: pointer;" onclick="applyRoleFilter('')">全部身份</div>
+                                            <div style="padding: 5px 10px; cursor: pointer;" onclick="applyRoleFilter('管理员')">管理员</div>
+                                            <div style="padding: 5px 10px; cursor: pointer;" onclick="applyRoleFilter('教师')">教师</div>
+                                            <div style="padding: 5px 10px; cursor: pointer;" onclick="applyRoleFilter('学生')">学生</div>
+                                        </div>
+                                    </th>
+                                    <th>所属部门</th>
+                                    <th style="position: relative;">
+                                        状态 
+                                        <button id="status-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
+                                        ▼
+                                    </button>
+                                        <div id="status-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100px; background-color: #1a1a2e; border: 1px solid #444; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                            <div style="padding: 5px 10px; cursor: pointer;" onclick="applyStatusFilter('')">全部状态</div>
+                                            <div style="padding: 5px 10px; cursor: pointer;" onclick="applyStatusFilter('启用')">启用</div>
+                                            <div style="padding: 5px 10px; cursor: pointer;" onclick="applyStatusFilter('禁用')">禁用</div>
+                                        </div>
+                                    </th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body">
+                                <!-- 用户数据将通过JavaScript动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 查看用户详情模态框 -->
+    <div id="view-user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">查看用户详情</h2>
+                <button class="close-btn" onclick="closeViewModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="user-details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">真实姓名</span>
+                        <span id="view-real-name" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">用户名</span>
+                        <span id="view-username" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">RFID卡号</span>
+                        <span id="view-rfid-card-id" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">角色</span>
+                        <span id="view-role" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">状态</span>
+                        <span id="view-status" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">所属部门</span>
+                        <span id="view-department" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">邮箱</span>
+                        <span id="view-email" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">手机号</span>
+                        <span id="view-phone" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">上次登录</span>
+                        <span id="view-last-login" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">登录尝试次数</span>
+                        <span id="view-login-attempts" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">账户锁定时间</span>
+                        <span id="view-locked-until" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">创建者ID</span>
+                        <span id="view-created-by" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">创建时间</span>
+                        <span id="view-created-at" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">更新时间</span>
+                        <span id="view-updated-at" class="detail-value"></span>
+                    </div>
+                    <!-- 师生关系信息 -->
+                    <div class="detail-item" style="grid-column: 1 / -1;">
+                        <span class="detail-label">师生关系</span>
+                        <div id="view-relationship" class="detail-value"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeViewModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑用户模态框 -->
+    <div id="edit-user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">编辑用户信息</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-user-form">
+                    <input type="hidden" id="edit-user-id">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label for="edit-real-name">真实姓名 <span style="color: red;">*</span></label>
+                            <input type="text" id="edit-real-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-username">用户名 <span style="color: red;">*</span></label>
+                            <input type="text" id="edit-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-rfid-card-id">RFID卡号</label>
+                            <input type="text" id="edit-rfid-card-id">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-department">所属部门</label>
+                            <input type="text" id="edit-department">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-role">角色 <span style="color: red;">*</span></label>
+                            <select id="edit-role" required>
+                                <option value="0">管理员</option>
+                                <option value="1">教师</option>
+                                <option value="2">学生</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-status">状态 <span style="color: red;">*</span></label>
+                            <select id="edit-status" required>
+                                <option value="1">启用</option>
+                                <option value="0">禁用</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-email">邮箱</label>
+                            <input type="email" id="edit-email">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-phone">手机号</label>
+                            <input type="text" id="edit-phone">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label for="edit-password">密码（留空表示不修改）</label>
+                        <input type="password" id="edit-password" placeholder="留空表示不修改密码">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" onclick="deleteUser()">删除</button>
+                <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveUserChanges()">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 绑定教师模态框 -->
+    <div id="bind-teacher-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">绑定教师</h2>
+                <button class="close-btn" onclick="closeBindTeacherModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="bind-student-id">
+                <div class="form-group">
+                    <label for="teacher-select">选择教师 <span style="color: red;">*</span></label>
+                    <select id="teacher-select" required>
+                        <option value="">请选择教师</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBindTeacherModal()">取消</button>
+                <button class="btn btn-primary" onclick="bindTeacher()">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 绑定学生模态框 -->
+    <div id="bind-students-modal" class="modal">
+        <div class="modal-content modal-large" style="min-height: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title">管理学生</h2>
+                <button class="close-btn" onclick="closeBindStudentsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="bind-teacher-id">
+                <div class="form-group">
+                    <label>选择学生 <span style="color: red;">*</span></label>
+                    <div id="students-list" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-top: 10px; width: 100%; min-width: 550px;">
+                        <!-- 学生列表将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBindStudentsModal()">取消</button>
+                <button class="btn btn-primary" onclick="bindStudents()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 侧边栏切换功能
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            sidebar.classList.toggle('active');
+            if (sidebar.classList.contains('active')) {
+                mainContent.style.marginLeft = 'var(--sidebar-width)';
+            } else {
+                mainContent.style.marginLeft = '0';
+            }
+        }
+        
+        // 加载用户数据的函数
+        function loadUserData() {
+            return fetch('/api/users')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const tbody = document.getElementById('user-table-body');
+                        tbody.innerHTML = '';
+                        
+                        data.data.forEach(user => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${user.real_name || ''}</td>
+                                <td>${user.username || ''}</td>
+                                <td>${user.rfid_card_id || ''}</td>
+                                <td>${user.role_name || ''}</td>
+                                <td>${user.department || ''}</td>
+                                <td style="color: ${user.status_name === '启用' ? '#4CAF50' : user.status_name === '禁用' ? '#F44336' : ''};">${user.status_name || ''}</td>
+                                <td>
+                                    <button class="view-btn" data-id="${user.id}">查看</button>
+                                    <button class="edit-btn" data-id="${user.id}">编辑</button>
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                        
+                        // 添加查看和编辑按钮的事件监听器
+                        document.querySelectorAll('.view-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const userId = this.getAttribute('data-id');
+                                viewUserDetails(userId);
+                            });
+                        });
+                        
+                        document.querySelectorAll('.edit-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const userId = this.getAttribute('data-id');
+                                editUser(userId);
+                            });
+                        });
+                    } else {
+                        console.error('获取用户数据失败:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载用户数据时出错:', error);
+                });
+        }
+        
+        // 格式化日期时间
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+            try {
+                return new Date(dateString).toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } catch (e) {
+                return dateString || '-';
+            }
+        }
+        
+        // 查看用户详情
+        function viewUserDetails(userId) {
+            // 获取用户详细信息
+            fetch(`/api/users/${userId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        // 如果API不存在，使用已有的数据
+                        throw new Error('API不存在');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const user = data.data;
+                        // 填充详情模态框
+                        document.getElementById('view-real-name').textContent = user.real_name || '';
+                        document.getElementById('view-username').textContent = user.username || '';
+                        document.getElementById('view-rfid-card-id').textContent = user.rfid_card_id || '';
+                        document.getElementById('view-role').textContent = user.role_name || '';
+                        document.getElementById('view-status').textContent = user.status_name || '';
+                        document.getElementById('view-department').textContent = user.department || '';
+                        document.getElementById('view-email').textContent = user.email || '';
+                        document.getElementById('view-phone').textContent = user.phone || '';
+                        document.getElementById('view-last-login').textContent = formatDateTime(user.last_login);
+                        document.getElementById('view-login-attempts').textContent = user.login_attempts || 0;
+                        document.getElementById('view-locked-until').textContent = formatDateTime(user.locked_until);
+                        document.getElementById('view-created-by').textContent = user.created_by || '-';
+                        document.getElementById('view-created-at').textContent = formatDateTime(user.created_at);
+                        document.getElementById('view-updated-at').textContent = formatDateTime(user.updated_at);
+                        
+                        // 显示师生关系信息
+                        const relationshipElement = document.getElementById('view-relationship');
+                        if (user.role === 1) { // 教师
+                            if (user.students && user.students.length > 0) {
+                                relationshipElement.innerHTML = `
+                                    <div style="margin-top: 10px;">
+                                        <strong>学生列表:</strong>
+                                        <ul style="margin-top: 5px; padding-left: 20px;">
+                                            ${user.students.map(student => `<li>${student.real_name || student.username} (ID: ${student.id})</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary" onclick="showBindStudentsModal(${user.id})" style="margin-top: 10px;">管理学生</button>
+                                `;
+                            } else {
+                                relationshipElement.innerHTML = `
+                                    <div>暂无绑定学生</div>
+                                    <button class="btn btn-sm btn-primary" onclick="showBindStudentsModal(${user.id})" style="margin-top: 10px;">绑定学生</button>
+                                `;
+                            }
+                        } else if (user.role === 2) { // 学生
+                            if (user.teacher) {
+                                relationshipElement.innerHTML = `
+                                    <div style="margin-top: 10px;">
+                                        <strong>指导教师:</strong> ${user.teacher.real_name || user.teacher.username} (ID: ${user.teacher.id})
+                                    </div>
+                                    <button class="btn btn-sm btn-primary" onclick="showBindTeacherModal(${user.id})" style="margin-top: 10px;">更换教师</button>
+                                `;
+                            } else {
+                                relationshipElement.innerHTML = `
+                                    <div>未绑定教师</div>
+                                    <button class="btn btn-sm btn-primary" onclick="showBindTeacherModal(${user.id})" style="margin-top: 10px;">绑定教师</button>
+                                `;
+                            }
+                        } else {
+                            relationshipElement.textContent = '管理员无师生关系';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('使用模拟数据填充详情:', error);
+                    // 使用表格中已有的数据作为模拟数据
+                    const row = document.querySelector(`.view-btn[data-id="${userId}"]`).closest('tr');
+                    const cells = row.querySelectorAll('td');
+                    
+                    document.getElementById('view-real-name').textContent = cells[0].textContent;
+                    document.getElementById('view-username').textContent = cells[1].textContent;
+                    document.getElementById('view-rfid-card-id').textContent = cells[2].textContent;
+                    document.getElementById('view-role').textContent = cells[3].textContent;
+                    document.getElementById('view-status').textContent = cells[5].textContent;
+                    document.getElementById('view-department').textContent = cells[4].textContent;
+                    document.getElementById('view-email').textContent = '';
+                    document.getElementById('view-phone').textContent = '';
+                    document.getElementById('view-last-login').textContent = '-';
+                    document.getElementById('view-login-attempts').textContent = '0';
+                    document.getElementById('view-locked-until').textContent = '-';
+                    document.getElementById('view-created-by').textContent = '-';
+                    document.getElementById('view-created-at').textContent = '-';
+                    document.getElementById('view-updated-at').textContent = '-';
+                })
+                .finally(() => {
+                    // 显示模态框
+                    document.getElementById('view-user-modal').style.display = 'block';
+                });
+        }
+        
+        // 编辑用户
+        function editUser(userId) {
+            // 获取用户详细信息
+            fetch(`/api/users/${userId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        // 如果API不存在，使用已有的数据
+                        throw new Error('API不存在');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const user = data.data;
+                        // 填充编辑表单
+                        document.getElementById('edit-user-id').value = user.id;
+                        document.getElementById('edit-real-name').value = user.real_name || '';
+                        document.getElementById('edit-username').value = user.username || '';
+                        document.getElementById('edit-rfid-card-id').value = user.rfid_card_id || '';
+                        document.getElementById('edit-role').value = user.role;
+                        document.getElementById('edit-department').value = user.department || '';
+                        document.getElementById('edit-status').value = user.status;
+                        document.getElementById('edit-email').value = user.email || '';
+                        document.getElementById('edit-phone').value = user.phone || '';
+                        document.getElementById('edit-password').value = '';
+                    }
+                })
+                .catch(error => {
+                    console.log('使用模拟数据填充编辑表单:', error);
+                    // 使用表格中已有的数据作为模拟数据
+                    const row = document.querySelector(`.edit-btn[data-id="${userId}"]`).closest('tr');
+                    const cells = row.querySelectorAll('td');
+                    
+                    document.getElementById('edit-user-id').value = userId;
+                    document.getElementById('edit-real-name').value = cells[0].textContent;
+                    document.getElementById('edit-username').value = cells[1].textContent;
+                    document.getElementById('edit-rfid-card-id').value = cells[2].textContent;
+                    // 根据角色名称设置value
+                    const roleMap = {
+                        '管理员': '0',
+                        '教师': '1',
+                        '学生': '2'
+                    };
+                    document.getElementById('edit-role').value = roleMap[cells[3].textContent] || '2';
+                    document.getElementById('edit-department').value = cells[4].textContent;
+                    // 根据状态名称设置value
+                    const statusMap = {
+                        '启用': '1',
+                        '禁用': '0'
+                    };
+                    document.getElementById('edit-status').value = statusMap[cells[5].textContent] || '1';
+                    document.getElementById('edit-email').value = '';
+                    document.getElementById('edit-phone').value = '';
+                    document.getElementById('edit-password').value = '';
+                })
+                .finally(() => {
+                    // 显示删除按钮
+                    const deleteButton = document.querySelector('#edit-user-modal .btn-danger');
+                    if (deleteButton) {
+                        deleteButton.style.display = 'inline-block';
+                    }
+                    
+                    // 显示模态框
+                    document.getElementById('edit-user-modal').style.display = 'block';
+                });
+        }
+        
+        // 保存用户更改
+        function saveUserChanges() {
+            // 获取表单数据
+            const userId = document.getElementById('edit-user-id').value;
+            const realName = document.getElementById('edit-real-name').value.trim();
+            const username = document.getElementById('edit-username').value.trim();
+            const rfidCardId = document.getElementById('edit-rfid-card-id').value.trim();
+            const role = parseInt(document.getElementById('edit-role').value);
+            const department = document.getElementById('edit-department').value.trim();
+            const status = parseInt(document.getElementById('edit-status').value);
+            const email = document.getElementById('edit-email').value.trim();
+            const phone = document.getElementById('edit-phone').value.trim();
+            const password = document.getElementById('edit-password').value;
+            
+            // 前端验证
+            // 1. 必填字段验证
+            if (!realName) {
+                alert('请输入真实姓名');
+                document.getElementById('edit-real-name').focus();
+                return;
+            }
+            
+            if (!username) {
+                alert('请输入用户名');
+                document.getElementById('edit-username').focus();
+                return;
+            }
+            
+            // 2. 字段长度验证
+            if (realName.length > 100) {
+                alert('真实姓名不能超过100个字符');
+                document.getElementById('edit-real-name').focus();
+                return;
+            }
+            
+            if (username.length > 100) {
+                alert('用户名不能超过100个字符');
+                document.getElementById('edit-username').focus();
+                return;
+            }
+            
+            if (rfidCardId && rfidCardId.length > 100) {
+                alert('RFID卡号不能超过100个字符');
+                document.getElementById('edit-rfid-card-id').focus();
+                return;
+            }
+            
+            if (department && department.length > 100) {
+                alert('所属部门不能超过100个字符');
+                document.getElementById('edit-department').focus();
+                return;
+            }
+            
+            if (email && email.length > 100) {
+                alert('邮箱不能超过100个字符');
+                document.getElementById('edit-email').focus();
+                return;
+            }
+            
+            if (phone && phone.length > 20) {
+                alert('手机号不能超过20个字符');
+                document.getElementById('edit-phone').focus();
+                return;
+            }
+            
+            // 3. 邮箱格式验证
+            if (email && !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+                alert('请输入有效的邮箱地址');
+                document.getElementById('edit-email').focus();
+                return;
+            }
+            
+            // 4. 手机号格式验证（简单验证，只允许数字和部分格式）
+            if (phone && !/^1[3-9]\d{9}$/.test(phone.replace(/[\s-]/g, ''))) {
+                alert('请输入有效的手机号码');
+                document.getElementById('edit-phone').focus();
+                return;
+            }
+            
+            // 5. 密码验证（如果是新增用户或修改密码）
+            if ((!userId && !password) || (userId && password && password.length < 6)) {
+                alert('密码长度不能少于6个字符');
+                document.getElementById('edit-password').focus();
+                return;
+            }
+            
+            // 构建表单数据对象
+            const formData = {
+                real_name: realName,
+                username: username,
+                rfid_card_id: rfidCardId || null,
+                role: role,
+                department: department || null,
+                status: status,
+                email: email || null,
+                phone: phone || null
+            };
+            
+            // 只有当密码不为空时才添加到请求数据中
+            if (password) {
+                formData.password = password;
+            }
+            
+            // 判断是新增还是编辑
+            let successMessage;
+            let url, method;
+            
+            if (userId) {
+                // 编辑模式 - 使用真实API调用
+                formData.id = userId;
+                successMessage = '用户信息更新成功！';
+                url = `/api/users/${userId}`;
+                method = 'PUT';
+                
+                // 实际环境中的API调用
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('更新失败');
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    alert(successMessage);
+                    // 重新加载用户列表
+                    loadUserData();
+                    // 关闭模态框
+                    closeEditModal();
+                })
+                .catch(error => {
+                    alert('更新失败: ' + error.message);
+                });
+            } else {
+                // 新增模式 - 使用真实API调用
+                successMessage = '用户添加成功！';
+                url = '/api/users';
+                method = 'POST';
+                
+                // 实际环境中的API调用
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('添加失败');
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    alert(successMessage);
+                    // 重新加载用户列表
+                    loadUserData();
+                    // 关闭模态框
+                    closeEditModal();
+                })
+                .catch(error => {
+                    alert('添加失败: ' + error.message);
+                });
+            }
+        }
+        
+        // 关闭查看模态框
+        function closeViewModal() {
+            document.getElementById('view-user-modal').style.display = 'none';
+        }
+        
+        // 关闭编辑模态框
+        function closeEditModal() {
+            document.getElementById('edit-user-modal').style.display = 'none';
+        }
+        
+        // 点击模态框外部关闭模态框
+        window.onclick = function(event) {
+            const viewModal = document.getElementById('view-user-modal');
+            const editModal = document.getElementById('edit-user-modal');
+            const bindTeacherModal = document.getElementById('bind-teacher-modal');
+            const bindStudentsModal = document.getElementById('bind-students-modal');
+            
+            if (event.target == viewModal) {
+                closeViewModal();
+            } else if (event.target == editModal) {
+                closeEditModal();
+            } else if (event.target == bindTeacherModal) {
+                closeBindTeacherModal();
+            } else if (event.target == bindStudentsModal) {
+                closeBindStudentsModal();
+            }
+        }
+        
+        // 按ESC键关闭模态框
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeViewModal();
+                closeEditModal();
+                closeBindTeacherModal();
+                closeBindStudentsModal();
+            }
+        });
+        
+        // 显示绑定教师模态框
+        function showBindTeacherModal(studentId) {
+            document.getElementById('bind-student-id').value = studentId;
+            
+            // 加载教师列表
+            fetch('/api/users')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const teacherSelect = document.getElementById('teacher-select');
+                        teacherSelect.innerHTML = '<option value="">请选择教师</option>';
+                        
+                        data.data.forEach(user => {
+                            if (user.role === 1) { // 教师角色
+                                const option = document.createElement('option');
+                                option.value = user.id;
+                                option.textContent = `${user.real_name || user.username} (ID: ${user.id})`;
+                                teacherSelect.appendChild(option);
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('加载教师列表失败:', error);
+                });
+            
+            document.getElementById('bind-teacher-modal').style.display = 'block';
+        }
+        
+        // 关闭绑定教师模态框
+        function closeBindTeacherModal() {
+            document.getElementById('bind-teacher-modal').style.display = 'none';
+        }
+        
+        // 显示绑定学生模态框
+        function showBindStudentsModal(teacherId) {
+            document.getElementById('bind-teacher-id').value = teacherId;
+            
+            // 加载学生列表
+            fetch('/api/users')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('API返回数据:', data);
+                    if (data.success) {
+                        const studentsList = document.getElementById('students-list');
+                        studentsList.innerHTML = '';
+                        
+                        // 显示学生总数
+                        const countDiv = document.createElement('div');
+                        countDiv.style.marginBottom = '15px';
+                        countDiv.style.color = 'var(--text-color)';
+                        countDiv.textContent = `找到 ${data.data.filter(user => user.role === 2).length} 个学生`;
+                        studentsList.appendChild(countDiv);
+                        
+                        data.data.forEach(user => {
+                            console.log('用户数据:', user);
+                            if (user.role === 2) { // 学生角色
+                                const studentItem = document.createElement('div');
+                                studentItem.style.display = 'flex';
+                                studentItem.style.alignItems = 'center';
+                                studentItem.style.justifyContent = 'space-between';
+                                studentItem.style.marginBottom = '10px';
+                                studentItem.style.width = '100%';
+                                studentItem.style.backgroundColor = '#34495e'; // 添加背景色以提高对比度
+                                studentItem.style.padding = '10px'; // 添加内边距
+                                studentItem.style.borderRadius = '4px'; // 添加圆角
+                                
+                                // 创建一个容器来显示学生信息
+                                const infoContainer = document.createElement('div');
+                                infoContainer.style.flex = '1';
+                                infoContainer.style.color = '#ffffff'; // 强制白色文本
+                                infoContainer.style.fontSize = '14px';
+                                infoContainer.style.lineHeight = '1.4';
+                                
+                                // 直接设置文本内容，确保即使数据不完整也能显示
+                                infoContainer.innerHTML = `
+                                    <div>ID: ${user.id}</div>
+                                    <div>名称: ${user.real_name || user.username || '无名称'}</div>
+                                `;
+                                
+                                const checkbox = document.createElement('input');
+                                checkbox.type = 'checkbox';
+                                checkbox.id = `student-${user.id}`;
+                                checkbox.value = user.id;
+                                checkbox.style.marginLeft = '20px';
+                                checkbox.style.width = '18px';
+                                checkbox.style.height = '18px';
+                                
+                                studentItem.appendChild(infoContainer);
+                                studentItem.appendChild(checkbox);
+                                studentsList.appendChild(studentItem);
+                            }
+                        });
+                    } else {
+                        const studentsList = document.getElementById('students-list');
+                        studentsList.innerHTML = '<div style="color: #ffffff; padding: 20px;">加载学生失败: ' + (data.message || '未知错误') + '</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('加载学生列表失败:', error);
+                    const studentsList = document.getElementById('students-list');
+                    studentsList.innerHTML = '<div style="color: #ffffff; padding: 20px;">网络错误: ' + error.message + '</div>';
+                });
+            
+            document.getElementById('bind-students-modal').style.display = 'block';
+        }
+        
+        // 关闭绑定学生模态框
+        function closeBindStudentsModal() {
+            document.getElementById('bind-students-modal').style.display = 'none';
+        }
+        
+        // 绑定教师
+        function bindTeacher() {
+            const studentId = document.getElementById('bind-student-id').value;
+            const teacherId = document.getElementById('teacher-select').value;
+            
+            if (!teacherId) {
+                alert('请选择教师');
+                return;
+            }
+            
+            fetch('/api/teacher-student/bind', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    teacher_id: parseInt(teacherId),
+                    student_id: parseInt(studentId)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('绑定成功');
+                    closeBindTeacherModal();
+                    // 刷新用户详情
+                    viewUserDetails(studentId);
+                } else {
+                    alert('绑定失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('绑定教师失败:', error);
+                alert('绑定失败，请稍后重试');
+            });
+        }
+        
+        // 绑定学生
+        function bindStudents() {
+            const teacherId = document.getElementById('bind-teacher-id').value;
+            const checkboxes = document.querySelectorAll('#students-list input[type="checkbox"]:checked');
+            const studentIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            
+            if (studentIds.length === 0) {
+                alert('请至少选择一个学生');
+                return;
+            }
+            
+            // 依次绑定每个学生
+            let completed = 0;
+            let success = true;
+            
+            studentIds.forEach(studentId => {
+                fetch('/api/teacher-student/bind', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        teacher_id: parseInt(teacherId),
+                        student_id: studentId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    completed++;
+                    if (!data.success) {
+                        success = false;
+                    }
+                    
+                    if (completed === studentIds.length) {
+                        if (success) {
+                            alert('绑定成功');
+                        } else {
+                            alert('部分绑定失败，请检查');
+                        }
+                        closeBindStudentsModal();
+                        // 刷新用户详情
+                        viewUserDetails(teacherId);
+                    }
+                })
+                .catch(error => {
+                    completed++;
+                    success = false;
+                    
+                    if (completed === studentIds.length) {
+                        alert('部分绑定失败，请检查');
+                        closeBindStudentsModal();
+                        // 刷新用户详情
+                        viewUserDetails(teacherId);
+                    }
+                });
+            });
+        }
+        
+        // 刷新用户列表
+        function refreshUserList() {
+            // 显示旋转动画
+            const refreshIcon = document.getElementById('refresh-icon');
+            if (refreshIcon) {
+                refreshIcon.textContent = '⟳';
+                refreshIcon.classList.add('spin-animation');
+            }
+            
+            // 调用加载用户数据函数
+            loadUserData().finally(() => {
+                // 数据加载完成后停止动画
+                setTimeout(() => {
+                    if (refreshIcon) {
+                        refreshIcon.classList.remove('spin-animation');
+                        refreshIcon.textContent = '刷新';
+                    }
+                }, 500);
+            });
+        }
+        
+        // 显示新增用户模态框
+        function showAddUserModal() {
+            // 清空表单内容
+            document.getElementById('edit-user-form').reset();
+            document.getElementById('edit-user-id').value = '';
+            
+            // 隐藏删除按钮
+            const deleteButton = document.querySelector('#edit-user-modal .btn-danger');
+            if (deleteButton) {
+                deleteButton.style.display = 'none';
+            }
+            
+            // 显示模态框
+            document.getElementById('edit-user-modal').style.display = 'block';
+        }
+        
+        // 删除用户
+        function deleteUser() {
+            const userId = document.getElementById('edit-user-id').value;
+            
+            if (!userId) {
+                alert('无法获取用户ID，无法删除');
+                return;
+            }
+            
+            if (confirm('确定要删除该用户吗？此操作不可撤销。')) {
+                // 调用删除用户的API
+                fetch(`/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('用户删除成功！');
+                        // 关闭模态框
+                        closeEditModal();
+                        // 刷新用户列表
+                        loadUserData();
+                    } else {
+                        alert('删除失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('删除用户时出错:', error);
+                    alert('删除失败，请稍后重试');
+                });
+            }
+        }
+    </script>
+            </div>
+        </main>
+    </div>
+
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

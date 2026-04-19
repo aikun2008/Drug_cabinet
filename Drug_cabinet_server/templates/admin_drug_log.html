@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室药品智能管理终端 - 药品追溯日志</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+    <style>
+        /* 药品追溯日志专用样式 */
+        .drug-log-container {
+            padding: 20px;
+            background-color: #2c3e50;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        /* 图表容器样式 */
+        .drug-chart-container {
+            background: #2c3e50;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            min-height: 400px;
+        }
+
+        .chart-time-selector {
+            display: flex;
+            gap: 8px;
+        }
+
+        .time-btn {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .time-btn:hover {
+            background: rgba(52, 152, 219, 0.2);
+            border-color: rgba(52, 152, 219, 0.5);
+        }
+
+        .time-btn.active {
+            background: #3498db;
+            border-color: #3498db;
+            color: white;
+        }
+
+        .chart-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.9);
+            color: #e0e0e0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            font-size: 14px;
+            border: 1px solid #555;
+        }
+
+        .chart-loading .spin-animation {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #555;
+            border-top: 2px solid #4fc3f7;
+            border-radius: 50%;
+        }
+
+        .spin-animation {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .drug-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        /* 筛选控件样式 */
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #2c3e50;
+            border-radius: 6px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            color: #ecf0f1;
+            font-weight: 500;
+        }
+        
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #34495e;
+            border-radius: 4px;
+            background: #34495e;
+            color: #ecf0f1;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        
+        .refresh-btn {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background: #2980b9;
+        }
+        
+        /* 表格样式 */
+        .drug-log-table {
+            background: #2c3e50;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .log-table-header {
+            padding: 16px 20px;
+            background: #34495e;
+            color: #ecf0f1;
+            font-size: 18px;
+            font-weight: 600;
+            border-bottom: 2px solid #3d566e;
+        }
+        
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .log-table th {
+            background: #34495e;
+            color: #ecf0f1;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #3d566e;
+        }
+        
+        .log-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #3d566e;
+            color: #ecf0f1;
+        }
+        
+        .log-table tbody tr:hover {
+            background: #3d566e;
+        }
+        
+        .log-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* 分页控件样式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #2980b9;
+        }
+        
+        .pagination button:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+        
+        .pagination-info {
+            color: #ecf0f1;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="/admin_dashboard.html#dashboard" class="nav-link" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link" data-target="medicine-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link active" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <div class="content">
+                <div id="drug-log-content" class="page-content">
+                    <div class="page-title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <h1>药品追溯日志</h1>
+                                <div class="page-breadcrumb">
+                                    <span class="breadcrumb-item">Home</span>
+                                    <span class="icon-arrow-right"></span>
+                                    <span class="breadcrumb-item active">药品追溯日志</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 筛选控件 -->
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label class="filter-label">开始时间</label>
+                            <input type="date" id="start-date" class="filter-input">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">结束时间</label>
+                            <input type="date" id="end-date" class="filter-input">
+                        </div>
+                        <div class="filter-group" style="flex: 1;">
+                            <label class="filter-label">搜索</label>
+                            <input type="text" id="search-input" class="filter-input" placeholder="请输入药品RFID/人员ID/设备ID" style="font-size: 16px; padding: 10px;">
+                        </div>
+                        <div class="time-range-buttons" style="display: flex; gap: 8px; margin-right: 15px;">
+                            <button class="time-btn" onclick="setTimeRange('24h')" style="background: rgba(52, 152, 219, 0.1); color: #3498db; border: 1px solid rgba(52, 152, 219, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; font-weight: 500;">
+                                24h
+                            </button>
+                            <button class="time-btn" onclick="setTimeRange('week')" style="background: rgba(52, 152, 219, 0.1); color: #3498db; border: 1px solid rgba(52, 152, 219, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; font-weight: 500;">
+                                近一周
+                            </button>
+                            <button class="time-btn" onclick="setTimeRange('month')" style="background: rgba(52, 152, 219, 0.1); color: #3498db; border: 1px solid rgba(52, 152, 219, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; font-weight: 500;">
+                                近一个月
+                            </button>
+                        </div>
+                        <div class="button-group">
+                            <button class="refresh-btn" onclick="refreshPage()">
+                                <span id="refresh-icon" style="display: inline-block;">刷新</span>
+                            </button>
+                            <button class="refresh-btn" onclick="performSearch()" style="background: #3498db;">
+                                <span id="search-icon" style="display: inline-block;">查询</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 视角内容区域 -->
+                    <div id="view-content" style="margin-top: 20px;">
+                        <!-- 药品视角（核心） -->
+                        <div id="drug-view" class="view-panel active">
+                            <div class="drug-log-container">
+                                <div class="drug-perspective-container">
+                                    
+                                    <!-- 药品生命周期流程图 -->
+                                    <div id="drug-flowchart-container" style="margin: 20px 0; padding: 20px; background: #34495e; border-radius: 8px; min-height: 200px;">
+                                        <div id="drug-flowchart" style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+                                            <div style="color: #7f8c8d; text-align: center; padding: 40px;">
+                                                请输入药品RFID查询其生命周期轨迹
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 药品完整生命周期记录 -->
+                                    <div id="drug-full-life-container" style="margin-top: 20px;">
+                                        <div class="drug-log-table">
+                                            <table class="log-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>操作时间</th>
+                                                        <th>设备ID</th>
+                                                        <th>操作人</th>
+                                                        <th>药品名称</th>
+                                                        <th>操作类型</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="drug-full-life-tbody">
+                                                    <tr>
+                                                        <td colspan="5" style="text-align: center; color: #7f8c8d;">请输入药品RFID进行查询</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 人员视角 -->
+                        <div id="person-view" class="view-panel" style="display: none;">
+                            <div class="drug-log-container">
+                                <div class="drug-perspective-container">
+                                    
+                                    <!-- 人员借还统计 -->
+                                    <div id="person-statistics" style="margin: 20px 0; padding: 20px; background: #34495e; border-radius: 8px;">
+                                        <div style="color: #7f8c8d; text-align: center; padding: 40px;">
+                                            请输入人员RFID进行查询
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 人员借还记录 -->
+                                    <div id="person-borrow-container" style="margin-top: 20px;">
+                                        <div class="log-table-header" style="margin-bottom: 15px;">
+                                            <h3 id="person-borrow-title" style="color: #ecf0f1; margin: 0;">人员借还记录</h3>
+                                        </div>
+                                        <div class="drug-log-table">
+                                            <table class="log-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>操作时间</th>
+                                                        <th>设备ID</th>
+                                                        <th>药品名称</th>
+                                                        <th>操作类型</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="person-borrow-tbody">
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: center; color: #7f8c8d;">请输入人员RFID进行查询</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 异常行为记录 -->
+                                    <div id="person-abnormal-container" style="margin-top: 20px; display: none;">
+                                        <div class="log-table-header" style="margin-bottom: 15px;">
+                                            <h3 style="color: #e74c3c; margin: 0;">异常行为记录</h3>
+                                        </div>
+                                        <div class="drug-log-table">
+                                            <table class="log-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>时间</th>
+                                                        <th>类型</th>
+                                                        <th>描述</th>
+                                                        <th>严重程度</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="person-abnormal-tbody">
+                                                    <!-- 异常行为数据将通过JavaScript动态加载 -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 药柜视角 -->
+                        <div id="cabinet-view" class="view-panel" style="display: none;">
+                            <div class="drug-log-container">
+                                <div class="drug-perspective-container">
+                                    
+                                    <!-- 药柜活动统计 -->
+                                    <div id="cabinet-statistics" style="margin: 20px 0; padding: 20px; background: #34495e; border-radius: 8px;">
+                                        <div style="color: #7f8c8d; text-align: center; padding: 40px;">
+                                            请选择药柜进行查询
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 药柜活动记录 -->
+                                    <div id="cabinet-activity-container" style="margin-top: 20px;">
+                                        <div class="log-table-header" style="margin-bottom: 15px;">
+                                            <h3 id="cabinet-activity-title" style="color: #ecf0f1; margin: 0;">药柜活动日志</h3>
+                                        </div>
+                                        <div class="drug-log-table">
+                                            <table class="log-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>操作时间</th>
+                                                        <th>操作人</th>
+                                                        <th>药品名称</th>
+                                                        <th>操作类型</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="cabinet-activity-tbody">
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: center; color: #7f8c8d;">请选择药柜进行查询</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 异常行为记录 -->
+                                    <div id="cabinet-abnormal-container" style="margin-top: 20px; display: none;">
+                                        <div class="log-table-header" style="margin-bottom: 15px;">
+                                            <h3 style="color: #e74c3c; margin: 0;">异常行为记录</h3>
+                                        </div>
+                                        <div class="drug-log-table">
+                                            <table class="log-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>时间</th>
+                                                        <th>类型</th>
+                                                        <th>描述</th>
+                                                        <th>严重程度</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="cabinet-abnormal-tbody">
+                                                    <!-- 异常行为数据将通过JavaScript动态加载 -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // 药品追溯日志相关功能
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化日期范围（最近7天）
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+            
+            // 使用本地日期格式化，避免UTC时间问题
+            document.getElementById('start-date').value = formatDateLocal(startDate);
+            document.getElementById('end-date').value = formatDateLocal(endDate);
+        });
+        
+        // 本地日期格式化函数，解决toISOString()返回UTC时间导致的日期错误
+        function formatDateLocal(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 搜索药品完整生命周期
+        async function searchDrugFullLife(searchValue = null) {
+            try {
+                // 显示加载状态
+                const searchIcon = document.getElementById('search-icon');
+                searchIcon.innerHTML = '查询中...';
+                
+                // 获取药品RFID
+                const drugRfid = searchValue || document.getElementById('search-input').value.trim();
+                
+                if (!drugRfid) {
+                    alert('请输入药品RFID');
+                    searchIcon.innerHTML = '查询';
+                    return;
+                }
+                
+                // 构建查询参数
+                const params = new URLSearchParams();
+                params.append('drug_rfid', drugRfid);
+                
+                // 添加日期范围参数
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                if (startDate) params.append('start_date', startDate);
+                if (endDate) params.append('end_date', endDate);
+                
+                // 调用API获取药品完整生命周期数据
+                const response = await fetch(`/api/drug-full-life?${params}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 渲染药品生命周期数据
+                    renderDrugFullLifeData(result.data);
+                    
+                    // 生成并显示药品生命周期流程图
+                    generateDrugFlowchart(result.data, drugRfid);
+                } else {
+                    console.error('查询药品生命周期失败:', result.message);
+                    alert('查询药品生命周期失败: ' + result.message);
+                    
+                    // 清空表格和流程图
+                    const tbody = document.getElementById('drug-full-life-tbody');
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #e74c3c;">查询失败: ' + result.message + '</td></tr>';
+                    
+                    const flowchartContainer = document.getElementById('drug-flowchart');
+                    flowchartContainer.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 40px;">查询失败: ' + result.message + '</div>';
+                }
+                
+                // 恢复查询按钮文本
+                searchIcon.innerHTML = '查询';
+            } catch (error) {
+                console.error('查询药品生命周期失败:', error);
+                alert('查询药品生命周期失败，请查看控制台了解详情');
+                document.getElementById('search-icon').innerHTML = '查询';
+                
+                // 清空表格和流程图
+                const tbody = document.getElementById('drug-full-life-tbody');
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #e74c3c;">查询失败: 网络或服务器错误</td></tr>';
+                
+                const flowchartContainer = document.getElementById('drug-flowchart');
+                flowchartContainer.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 40px;">查询失败: 网络或服务器错误</div>';
+            }
+        }
+        
+        // 生成药品生命周期流程图
+        function generateDrugFlowchart(data, drugRfid) {
+            const flowchartContainer = document.getElementById('drug-flowchart');
+            
+            if (data.length === 0) {
+                flowchartContainer.innerHTML = '<div style="color: #7f8c8d; text-align: center; padding: 40px;">未找到该药品的生命周期记录</div>';
+                return;
+            }
+            
+            // 分析药品生命周期数据
+            const lifeCycleData = analyzeDrugLifeCycle(data);
+            
+            // 生成S形流程图HTML
+            let flowchartHTML = '<div style="width: 100%;">';
+            
+            // 计算每行显示的节点数（根据数据量动态调整）
+            const totalNodes = data.length + 2; // 包括入库和当前状态节点
+            const nodesPerRow = Math.min(4, Math.ceil(totalNodes / 2));
+            
+            // 准备所有节点数据
+            const allNodes = [];
+            
+            // 添加入库节点
+            allNodes.push({
+                type: '入库',
+                content: data[0].operation_time.split(' ')[0],
+                color: '#2ecc71',
+                time: data[0].operation_time
+            });
+            
+            // 添加操作记录节点
+            for (let i = 0; i < data.length; i++) {
+                const record = data[i];
+                let nodeColor = '#3498db';
+                let nodeTitle = '';
+                let nodeContent = '';
+                
+                if (record.operation_type === '借出') {
+                    nodeColor = '#e74c3c';
+                    nodeTitle = '借出';
+                    nodeContent = record.rfid_card_id;
+                    
+                    // 计算借用时长
+                    if (i + 1 < data.length && data[i + 1].operation_type === '归还') {
+                        const borrowTime = new Date(record.operation_time);
+                        const returnTime = new Date(data[i + 1].operation_time);
+                        const duration = Math.round((returnTime - borrowTime) / (1000 * 60 * 60)); // 小时数
+                        nodeContent += '<br>时长: ' + duration + '小时';
+                    }
+                } else if (record.operation_type === '归还') {
+                    nodeColor = '#27ae60';
+                    nodeTitle = '归还';
+                    nodeContent = record.equipment_id;
+                }
+                
+                allNodes.push({
+                    type: nodeTitle,
+                    content: nodeContent,
+                    color: nodeColor,
+                    time: record.operation_time
+                });
+            }
+            
+            // 添加当前状态节点
+            allNodes.push({
+                type: '当前状态',
+                content: (data[data.length - 1].operation_type === '借出' ? '已借出' : '在柜中') + '<br>位置: ' + data[data.length - 1].equipment_id,
+                color: '#f39c12',
+                time: ''
+            });
+            
+            // 生成S形布局
+            flowchartHTML += '<div style="display: flex; flex-direction: column; gap: 30px; align-items: center; padding: 20px;">';
+            
+            let currentIndex = 0;
+            let rowIndex = 0;
+            
+            while (currentIndex < allNodes.length) {
+                // 确定当前行的节点数量
+                const remainingNodes = allNodes.length - currentIndex;
+                const currentRowNodes = Math.min(nodesPerRow, remainingNodes);
+                
+                // 确定行方向（S形）
+                const isEvenRow = rowIndex % 2 === 0;
+                
+                // 创建行容器
+                flowchartHTML += '<div style="display: flex; align-items: center; gap: 20px; width: 100%; justify-content: center;">';
+                
+                // 获取当前行的节点
+                let rowNodes = allNodes.slice(currentIndex, currentIndex + currentRowNodes);
+                
+                // 如果是偶数行，反转节点顺序（S形）
+                if (!isEvenRow) {
+                    rowNodes = rowNodes.reverse();
+                }
+                
+                // 添加行节点
+                for (let i = 0; i < rowNodes.length; i++) {
+                    const node = rowNodes[i];
+                    
+                    // 添加节点
+                    flowchartHTML += '<div class="flowchart-node" style="background: ' + node.color + '; color: white; padding: 15px; border-radius: 8px; text-align: center; min-width: 120px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">';
+                    flowchartHTML += '<div style="font-weight: bold; margin-bottom: 5px;">' + node.type + '</div>';
+                    flowchartHTML += '<div style="font-size: 12px;">' + node.content + '</div>';
+                    if (node.time) {
+                        flowchartHTML += '<div style="font-size: 11px; margin-top: 5px; opacity: 0.9;">' + node.time + '</div>';
+                    }
+                    flowchartHTML += '</div>';
+                    
+                    // 添加行内箭头（除了最后一个节点）
+                    if (i < rowNodes.length - 1) {
+                        flowchartHTML += '<div class="flowchart-arrow" style="color: #3498db; font-size: 24px;">' + (isEvenRow ? '→' : '←') + '</div>';
+                    }
+                }
+                
+                flowchartHTML += '</div>';
+                
+                // 更新索引
+                currentIndex += currentRowNodes;
+                rowIndex++;
+                
+                // 添加行间折线连接（如果不是最后一行）
+                if (currentIndex < allNodes.length) {
+                    // 创建折线连接：从当前行最后一个节点指向下一行最后一个节点
+                    const isEvenRow = (rowIndex - 1) % 2 === 0; // 当前行是偶数行
+                    const nextRowNodes = Math.min(nodesPerRow, allNodes.length - currentIndex);
+                    
+                    // 计算位置：偶数行（从左到右）-> 箭头在右边；奇数行（从右到左）-> 箭头在左边
+                    flowchartHTML += '<div style="display: flex; justify-content: ' + (isEvenRow ? 'flex-end' : 'flex-start') + '; width: 100%; padding: 0 ' + (isEvenRow ? '60px' : '60px') + ';">';
+                    flowchartHTML += '<div style="display: flex; align-items: center; color: #3498db; font-size: 20px;">';
+                    
+                    if (isEvenRow) {
+                        // 偶数行结束在右边，向下箭头在右边
+                        flowchartHTML += '<span style="transform: rotate(90deg);">→</span>';
+                    } else {
+                        // 奇数行结束在左边，向下箭头在左边
+                        flowchartHTML += '<span style="transform: rotate(-90deg);">→</span>';
+                    }
+                    
+                    flowchartHTML += '</div></div>';
+                }
+            }
+            
+            flowchartHTML += '</div></div>';
+            
+            // 添加统计信息
+            flowchartHTML += '<div style="margin-top: 20px; padding: 15px; background: #2c3e50; border-radius: 8px; color: #ecf0f1;">';
+            flowchartHTML += '<h4 style="margin: 0 0 10px 0;">药品生命周期统计</h4>';
+            flowchartHTML += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">';
+            flowchartHTML += '<div><strong>总操作次数:</strong> ' + data.length + '</div>';
+            flowchartHTML += '<div><strong>借用次数:</strong> ' + lifeCycleData.borrowCount + '</div>';
+            flowchartHTML += '<div><strong>当前状态:</strong> ' + (data[data.length - 1].operation_type === '借出' ? '已借出' : '在柜中') + '</div>';
+            flowchartHTML += '<div><strong>当前位置:</strong> ' + data[data.length - 1].equipment_id + '</div>';
+            flowchartHTML += '<div><strong>使用过的柜子:</strong> ' + lifeCycleData.uniqueCabinets.length + '个</div>';
+            flowchartHTML += '<div><strong>借用过的人:</strong> ' + lifeCycleData.uniqueUsers.length + '人</div>';
+            flowchartHTML += '</div></div>';
+            
+            // 设置流程图HTML
+            flowchartContainer.innerHTML = flowchartHTML;
+        }
+        
+        // 分析药品生命周期数据
+        function analyzeDrugLifeCycle(data) {
+            const result = {
+                borrowCount: 0,
+                uniqueCabinets: [],
+                uniqueUsers: []
+            };
+            
+            const cabinets = new Set();
+            const users = new Set();
+            
+            for (const record of data) {
+                if (record.operation_type === '借出') {
+                    result.borrowCount++;
+                    users.add(record.rfid_card_id);
+                }
+                cabinets.add(record.equipment_id);
+            }
+            
+            result.uniqueCabinets = Array.from(cabinets);
+            result.uniqueUsers = Array.from(users);
+            
+            return result;
+        }
+        
+        // 渲染药品完整生命周期数据
+        function renderDrugFullLifeData(data) {
+            const tbody = document.getElementById('drug-full-life-tbody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="5" style="text-align: center; color: #7f8c8d;">未找到该药品的生命周期记录</td>';
+                tbody.appendChild(row);
+                return;
+            }
+            
+            data.forEach(record => {
+                // 根据操作类型确定样式
+                let operationTypeHtml = '';
+                if (record.operation_type === '借出') {
+                    operationTypeHtml = '<span style="color: #e74c3c; font-weight: 600;">借出</span>';
+                } else if (record.operation_type === '归还') {
+                    operationTypeHtml = '<span style="color: #2ecc71; font-weight: 600;">归还</span>';
+                } else {
+                    operationTypeHtml = record.operation_type;
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.operation_time}</td>
+                    <td>${record.equipment_id}</td>
+                    <td>${record.rfid_card_id}</td>
+                    <td>${record.medicine_code}</td>
+                    <td>${operationTypeHtml}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // 设置时间范围
+        function setTimeRange(range) {
+            const endDate = new Date();
+            let startDate = new Date();
+            
+            // 根据选择的范围计算开始时间
+            switch (range) {
+                case '24h':
+                    startDate.setHours(startDate.getHours() - 24);
+                    break;
+                case 'week':
+                    startDate.setDate(startDate.getDate() - 7);
+                    break;
+                case 'month':
+                    startDate.setMonth(startDate.getMonth() - 1);
+                    break;
+            }
+            
+            // 更新日期输入框，使用本地日期格式化
+            document.getElementById('start-date').value = formatDateLocal(startDate);
+            document.getElementById('end-date').value = formatDateLocal(endDate);
+            
+            // 自动执行查询操作
+            performSearch();
+        }
+        
+        // 刷新页面，清空文本框内容
+        function refreshPage() {
+            // 清空搜索输入框
+            document.getElementById('search-input').value = '';
+            
+            // 重置日期范围为默认值（最近7天）
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+            
+            // 使用本地日期格式化
+            document.getElementById('start-date').value = formatDateLocal(startDate);
+            document.getElementById('end-date').value = formatDateLocal(endDate);
+            
+            // 清空所有视角的内容，恢复初始状态
+            resetAllViews();
+        }
+        
+        // 重置所有视角的内容
+        function resetAllViews() {
+            // 重置药品视角
+            const drugFlowchart = document.getElementById('drug-flowchart');
+            drugFlowchart.innerHTML = '<div style="color: #7f8c8d; text-align: center; padding: 40px;">请输入药品RFID查询其生命周期轨迹</div>';
+            
+            const drugTbody = document.getElementById('drug-full-life-tbody');
+            drugTbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #7f8c8d;">请输入药品RFID进行查询</td></tr>';
+            
+            // 重置人员视角
+            const personStats = document.getElementById('person-statistics');
+            personStats.innerHTML = '<div style="color: #7f8c8d; text-align: center; padding: 40px;">请输入人员RFID进行查询</div>';
+            
+            const personTbody = document.getElementById('person-borrow-tbody');
+            personTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #7f8c8d;">请输入人员RFID进行查询</td></tr>';
+            
+            document.getElementById('person-borrow-title').textContent = '人员借还记录';
+            
+            // 重置药柜视角
+            const cabinetStats = document.getElementById('cabinet-statistics');
+            cabinetStats.innerHTML = '<div style="color: #7f8c8d; text-align: center; padding: 40px;">请选择药柜进行查询</div>';
+            
+            const cabinetTbody = document.getElementById('cabinet-activity-tbody');
+            cabinetTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #7f8c8d;">请选择药柜进行查询</td></tr>';
+            
+            document.getElementById('cabinet-activity-title').textContent = '药柜活动日志';
+            
+            // 隐藏异常行为记录
+            document.getElementById('cabinet-abnormal-container').style.display = 'none';
+        }
+        
+        // 按回车键触发查询
+        document.addEventListener('keypress', function(e) {
+            if (e.target.id === 'search-input' && e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // 移除不再使用的函数
+        function refreshDrugTraceData() {
+            // 此函数已不再使用，因为药品使用趋势图已被移除
+            console.log('refreshDrugTraceData 已不再使用');
+        }
+        
+        function queryDrugTraceData() {
+            // 此函数已不再使用，因为药品使用趋势图已被移除
+            console.log('queryDrugTraceData 已不再使用');
+        }
+        
+        // 搜索人员借还记录
+        async function searchPersonBorrowRecords(searchValue = null) {
+            try {
+                // 显示加载状态
+                const searchIcon = document.getElementById('search-icon');
+                searchIcon.innerHTML = '查询中...';
+                
+                // 获取人员RFID
+                const personRfid = searchValue || document.getElementById('search-input').value.trim();
+                
+                if (!personRfid) {
+                    alert('请输入人员RFID');
+                    searchIcon.innerHTML = '查询';
+                    return;
+                }
+                
+                // 构建查询参数
+                const params = new URLSearchParams();
+                params.append('person_rfid', personRfid);
+                
+                // 添加日期范围参数
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                if (startDate) params.append('start_date', startDate);
+                if (endDate) params.append('end_date', endDate);
+                
+                // 调用API获取人员借还记录
+                const response = await fetch(`/api/person-borrow-records?${params}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 更新标题
+                    document.getElementById('person-borrow-title').textContent = `人员借还记录 - RFID: ${personRfid}`;
+                    
+                    // 渲染人员借还统计（包含详细信息）
+                    renderPersonStatistics(result.monthly_stats, personRfid, result.person_details);
+                    
+                    // 渲染人员借还记录
+                    renderPersonBorrowData(result.data);
+                } else {
+                    console.error('查询人员借还记录失败:', result.message);
+                    alert('查询人员借还记录失败: ' + result.message);
+                    
+                    // 清空统计和表格
+                    const statisticsContainer = document.getElementById('person-statistics');
+                    statisticsContainer.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 40px;">查询失败: ' + result.message + '</div>';
+                    
+                    const tbody = document.getElementById('person-borrow-tbody');
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #e74c3c;">查询失败: ' + result.message + '</td></tr>';
+                }
+                
+                // 恢复查询按钮文本
+                searchIcon.innerHTML = '查询';
+            } catch (error) {
+                console.error('查询人员借还记录失败:', error);
+                alert('查询人员借还记录失败，请查看控制台了解详情');
+                document.getElementById('search-icon').innerHTML = '查询';
+                
+                // 清空统计和表格
+                const statisticsContainer = document.getElementById('person-statistics');
+                statisticsContainer.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 40px;">查询失败: 网络或服务器错误</div>';
+                
+                const tbody = document.getElementById('person-borrow-tbody');
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #e74c3c;">查询失败: 网络或服务器错误</td></tr>';
+            }
+        }
+        
+        // 渲染人员借还统计
+        function renderPersonStatistics(monthlyStats, personRfid, personDetails = null) {
+            const statisticsContainer = document.getElementById('person-statistics');
+            
+            let statisticsHTML = '<div style="color: #ecf0f1;">';
+            
+            // 添加人员详细信息
+            if (personDetails) {
+                statisticsHTML += '<div style="background: #2c3e50; padding: 20px; border-radius: 8px; margin-bottom: 20px;">';
+            statisticsHTML += '<h3 style="margin: 0 0 15px 0;">人员详细信息</h3>';
+            statisticsHTML += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">';
+            statisticsHTML += '<div><strong>真实姓名:</strong> ' + personDetails.real_name + '</div>';
+            statisticsHTML += '<div><strong>用户名:</strong> ' + personDetails.username + '</div>';
+            statisticsHTML += '<div><strong>角色:</strong> ' + personDetails.role + '</div>';
+            statisticsHTML += '<div><strong>RFID:</strong> ' + personDetails.rfid_card_id + '</div>';
+            statisticsHTML += '<div><strong>所属部门:</strong> ' + personDetails.department + '</div>';
+            statisticsHTML += '<div><strong>邮箱:</strong> ' + personDetails.email + '</div>';
+            statisticsHTML += '<div><strong>电话:</strong> ' + personDetails.phone + '</div>';
+            statisticsHTML += '<div><strong>状态:</strong> ' + personDetails.status + '</div>';
+            statisticsHTML += '</div>';
+            statisticsHTML += '</div>';
+        }
+        
+        // 添加借还统计
+        statisticsHTML += '<div style="background: #2c3e50; padding: 20px; border-radius: 8px;">';
+        statisticsHTML += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">';
+        statisticsHTML += '<div style="background: #34495e; padding: 15px; border-radius: 8px;">';
+        statisticsHTML += '<div style="font-size: 14px; color: #bdc3c7; margin-bottom: 5px;">所选时间范围统计</div>';
+        statisticsHTML += '<div style="font-size: 24px; font-weight: bold; color: #3498db;">借药 ' + monthlyStats.total_borrows + '次</div>';
+        statisticsHTML += '<div style="font-size: 16px; color: #2ecc71;">平均时长 ' + monthlyStats.avg_duration + '小时</div>';
+        statisticsHTML += '</div>';
+        statisticsHTML += '</div>';
+        statisticsHTML += '</div>';
+        
+        
+        // 显示当前筛选的时间范围
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+        if (startDate || endDate) {
+            statisticsHTML += '<div style="margin-top: 15px; padding: 10px; background: #2c3e50; border-radius: 8px; font-size: 14px; color: #bdc3c7;">';
+            statisticsHTML += '<strong>时间范围:</strong> ' + (startDate || '不限') + ' 至 ' + (endDate || '不限');
+            statisticsHTML += '</div>';
+        }
+            
+            statisticsHTML += '</div>';
+            
+            statisticsContainer.innerHTML = statisticsHTML;
+        }
+        
+        // 渲染人员借还记录
+        function renderPersonBorrowData(data) {
+            const tbody = document.getElementById('person-borrow-tbody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4" style="text-align: center; color: #7f8c8d;">未找到该人员的借还记录</td>';
+                tbody.appendChild(row);
+                return;
+            }
+            
+            data.forEach(record => {
+                // 根据操作类型确定样式
+                let operationTypeHtml = '';
+                if (record.operation_type === '借出') {
+                    operationTypeHtml = '<span style="color: #e74c3c; font-weight: 600;">借出</span>';
+                } else if (record.operation_type === '归还') {
+                    operationTypeHtml = '<span style="color: #2ecc71; font-weight: 600;">归还</span>';
+                } else {
+                    operationTypeHtml = record.operation_type;
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.operation_time}</td>
+                    <td>${record.equipment_id}</td>
+                    <td>${record.medicine_code}</td>
+                    <td>${operationTypeHtml}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // 搜索药柜活动日志
+        async function searchCabinetActivityLogs(searchValue = null) {
+            try {
+                // 显示加载状态
+                const searchIcon = document.getElementById('search-icon');
+                searchIcon.innerHTML = '查询中...';
+                
+                // 获取药柜ID
+                const cabinetId = searchValue || document.getElementById('search-input').value.trim();
+                
+                if (!cabinetId) {
+                    alert('请输入药柜ID');
+                    searchIcon.innerHTML = '查询';
+                    return;
+                }
+                
+                // 构建查询参数
+                const params = new URLSearchParams();
+                params.append('cabinet_id', cabinetId);
+                
+                // 添加日期范围参数
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                if (startDate) params.append('start_date', startDate);
+                if (endDate) params.append('end_date', endDate);
+                
+                // 调用API获取药柜活动日志
+                const response = await fetch(`/api/cabinet-activity-logs?${params}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 更新标题
+                    document.getElementById('cabinet-activity-title').textContent = `药柜活动日志 - ID: ${cabinetId}`;
+                    
+                    // 渲染药柜活动统计
+                    renderCabinetStatistics(result.data, cabinetId);
+                    
+                    // 渲染药柜活动记录
+                    renderCabinetActivityData(result.data);
+                    
+                    // 渲染异常行为记录
+                    renderCabinetAbnormalData(result.abnormal_behaviors);
+                } else {
+                    console.error('查询药柜活动日志失败:', result.message);
+                    alert('查询药柜活动日志失败: ' + result.message);
+                    
+                    // 清空统计和表格
+                    const statisticsContainer = document.getElementById('cabinet-statistics');
+                    statisticsContainer.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 40px;">查询失败: ' + result.message + '</div>';
+                    
+                    const tbody = document.getElementById('cabinet-activity-tbody');
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #e74c3c;">查询失败: ' + result.message + '</td></tr>';
+                }
+                
+                // 恢复查询按钮文本
+                searchIcon.innerHTML = '查询';
+            } catch (error) {
+                console.error('查询药柜活动日志失败:', error);
+                alert('查询药柜活动日志失败，请查看控制台了解详情');
+                document.getElementById('search-icon').innerHTML = '查询';
+                
+                // 清空统计和表格
+                const statisticsContainer = document.getElementById('cabinet-statistics');
+                statisticsContainer.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 40px;">查询失败: 网络或服务器错误</div>';
+                
+                const tbody = document.getElementById('cabinet-activity-tbody');
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #e74c3c;">查询失败: 网络或服务器错误</td></tr>';
+            }
+        }
+        
+        // 渲染药柜活动统计
+        function renderCabinetStatistics(data, cabinetId) {
+            const statisticsContainer = document.getElementById('cabinet-statistics');
+            
+            // 计算统计数据
+            const totalOperations = data.length;
+            const borrowCount = data.filter(record => record.operation_type === '借出').length;
+            const returnCount = data.filter(record => record.operation_type === '归还').length;
+            
+            let statisticsHTML = '<div style="color: #ecf0f1;">';
+            statisticsHTML += '<h3 style="margin: 0 0 15px 0;">药柜活动统计 - ID: ' + cabinetId + '</h3>';
+            statisticsHTML += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">';
+            statisticsHTML += '<div style="background: #2c3e50; padding: 15px; border-radius: 8px;">';
+            statisticsHTML += '<div style="font-size: 14px; color: #bdc3c7; margin-bottom: 5px;">总操作次数</div>';
+            statisticsHTML += '<div style="font-size: 24px; font-weight: bold; color: #3498db;">' + totalOperations + '次</div>';
+            statisticsHTML += '</div>';
+            statisticsHTML += '<div style="background: #2c3e50; padding: 15px; border-radius: 8px;">';
+            statisticsHTML += '<div style="font-size: 14px; color: #bdc3c7; margin-bottom: 5px;">借出次数</div>';
+            statisticsHTML += '<div style="font-size: 24px; font-weight: bold; color: #e74c3c;">' + borrowCount + '次</div>';
+            statisticsHTML += '</div>';
+            statisticsHTML += '<div style="background: #2c3e50; padding: 15px; border-radius: 8px;">';
+            statisticsHTML += '<div style="font-size: 14px; color: #bdc3c7; margin-bottom: 5px;">归还次数</div>';
+            statisticsHTML += '<div style="font-size: 24px; font-weight: bold; color: #2ecc71;">' + returnCount + '次</div>';
+            statisticsHTML += '</div>';
+            statisticsHTML += '</div>';
+            statisticsHTML += '</div>';
+            
+            statisticsContainer.innerHTML = statisticsHTML;
+        }
+        
+        // 渲染药柜活动记录
+        function renderCabinetActivityData(data) {
+            const tbody = document.getElementById('cabinet-activity-tbody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4" style="text-align: center; color: #7f8c8d;">未找到该药柜的活动记录</td>';
+                tbody.appendChild(row);
+                return;
+            }
+            
+            data.forEach(record => {
+                // 根据操作类型确定样式
+                let operationTypeHtml = '';
+                if (record.operation_type === '借出') {
+                    operationTypeHtml = '<span style="color: #e74c3c; font-weight: 600;">借出</span>';
+                } else if (record.operation_type === '归还') {
+                    operationTypeHtml = '<span style="color: #2ecc71; font-weight: 600;">归还</span>';
+                } else {
+                    operationTypeHtml = record.operation_type;
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.operation_time}</td>
+                    <td>${record.rfid_card_id}</td>
+                    <td>${record.medicine_code}</td>
+                    <td>${operationTypeHtml}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // 渲染异常行为记录
+        function renderCabinetAbnormalData(data) {
+            const container = document.getElementById('cabinet-abnormal-container');
+            const tbody = document.getElementById('cabinet-abnormal-tbody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            data.forEach(abnormal => {
+                // 根据严重程度确定样式
+                let severityColor = '#2ecc71'; // 低
+                if (abnormal.severity === 'medium') {
+                    severityColor = '#f39c12'; // 中
+                } else if (abnormal.severity === 'high') {
+                    severityColor = '#e74c3c'; // 高
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${abnormal.time}</td>
+                    <td>${abnormal.type}</td>
+                    <td>${abnormal.description}</td>
+                    <td><span style="color: ${severityColor}; font-weight: 600;">${abnormal.severity}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // 根据当前视角执行搜索
+        async function performSearch() {
+            // 获取搜索输入内容
+            const searchValue = document.getElementById('search-input').value.trim();
+            
+            if (!searchValue) {
+                alert('请输入搜索内容');
+                return;
+            }
+            
+            // 统一搜索逻辑：先检查是不是药品RFID，再检查是不是人员ID，最后检查是不是设备ID
+            let searchResult = null;
+            let viewType = 'drug'; // 默认药品视角
+            
+            try {
+                // 获取日期范围参数
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                
+                // 构建基础查询参数
+                const drugParams = new URLSearchParams();
+                drugParams.append('drug_rfid', searchValue);
+                if (startDate) drugParams.append('start_date', startDate);
+                if (endDate) drugParams.append('end_date', endDate);
+                
+                // 1. 尝试作为药品RFID查询
+                const drugResponse = await fetch(`/api/drug-full-life?${drugParams}`);
+                const drugResult = await drugResponse.json();
+                
+                if (drugResult.success && drugResult.data.length > 0) {
+                    searchResult = drugResult;
+                    viewType = 'drug';
+                } else {
+                    // 构建人员查询参数
+                    const personParams = new URLSearchParams();
+                    personParams.append('person_rfid', searchValue);
+                    if (startDate) personParams.append('start_date', startDate);
+                    if (endDate) personParams.append('end_date', endDate);
+                    
+                    // 2. 尝试作为人员ID查询
+                    const personResponse = await fetch(`/api/person-borrow-records?${personParams}`);
+                    const personResult = await personResponse.json();
+                    
+                    if (personResult.success && personResult.data.length > 0) {
+                        searchResult = personResult;
+                        viewType = 'person';
+                    } else {
+                        // 构建设备查询参数
+                        const cabinetParams = new URLSearchParams();
+                        cabinetParams.append('cabinet_id', searchValue);
+                        if (startDate) cabinetParams.append('start_date', startDate);
+                        if (endDate) cabinetParams.append('end_date', endDate);
+                        
+                        // 3. 尝试作为设备ID查询
+                        const cabinetResponse = await fetch(`/api/cabinet-activity-logs?${cabinetParams}`);
+                        const cabinetResult = await cabinetResponse.json();
+                        
+                        if (cabinetResult.success && cabinetResult.data.length > 0) {
+                            searchResult = cabinetResult;
+                            viewType = 'cabinet';
+                        }
+                    }
+                }
+                
+                // 如果没有找到任何结果
+                if (!searchResult) {
+                    alert('未找到相关记录');
+                    return;
+                }
+                
+                // 切换到对应的视角
+                switchView(viewType);
+                
+                // 根据视角显示搜索结果
+                switch (viewType) {
+                    case 'drug':
+                        // 渲染药品生命周期数据
+                        renderDrugFullLifeData(searchResult.data);
+                        
+                        // 生成并显示药品生命周期流程图
+                        generateDrugFlowchart(searchResult.data, searchValue);
+                        break;
+                    case 'person':
+                        // 更新标题
+                        document.getElementById('person-borrow-title').textContent = `人员借还记录 - RFID: ${searchValue}`;
+                        
+                        // 渲染人员借还统计（包含详细信息）
+                        renderPersonStatistics(searchResult.monthly_stats, searchValue, searchResult.person_details);
+                        
+                        // 渲染人员借还记录
+                        renderPersonBorrowData(searchResult.data);
+                        break;
+                    case 'cabinet':
+                        // 更新标题
+                        document.getElementById('cabinet-activity-title').textContent = `药柜活动日志 - ID: ${searchValue}`;
+                        
+                        // 渲染药柜活动统计
+                        renderCabinetStatistics(searchResult.data, searchValue);
+                        
+                        // 渲染药柜活动记录
+                        renderCabinetActivityData(searchResult.data);
+                        
+                        // 渲染异常行为记录
+                        renderCabinetAbnormalData(searchResult.abnormal_behaviors);
+                        break;
+                }
+                
+                // 恢复搜索按钮文本
+                document.getElementById('search-icon').innerHTML = '查询';
+            } catch (error) {
+                console.error('搜索失败:', error);
+                alert('搜索失败，请查看控制台了解详情');
+                document.getElementById('search-icon').innerHTML = '查询';
+            }
+        }
+        
+        // 切换视角
+        function switchView(viewType) {
+            // 获取所有视角面板
+            const viewPanels = document.querySelectorAll('.view-panel');
+            
+            // 隐藏所有视角面板
+            viewPanels.forEach(panel => {
+                panel.style.display = 'none';
+            });
+            
+            // 显示对应的视角面板
+            const targetPanel = document.getElementById(viewType + '-view');
+            if (targetPanel) {
+                targetPanel.style.display = 'block';
+            }
+        }
+        
+        // 初始化所有功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 不需要初始化视角切换功能，因为已经移除了视角切换按钮
+        });
+    </script>
+
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

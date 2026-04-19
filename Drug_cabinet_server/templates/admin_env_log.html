@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室药品智能管理终端 - 环境数据日志</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+    <style>
+        /* 环境数据日志专用样式 */
+        .env-log-container {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .env-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .env-log-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card {
+            background: #2c3e50;
+            padding: 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+        
+        .stat-card.temperature { border-left-color: #e74c3c; }
+        .stat-card.humidity { border-left-color: #3498db; }
+        .stat-card.pressure { border-left-color: #27ae60; }
+        .stat-card.light { border-left-color: #f39c12; }
+        .stat-card.total { border-left-color: #9b59b6; }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ecf0f1;
+            margin-bottom: 3px;
+        }
+        
+        .stat-label {
+            color: #bdc3c7;
+            font-size: 0.8rem;
+        }
+        
+        .env-chart-container {
+            background: #2c3e50;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            position: relative;
+            min-height: 400px;
+        }
+        
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(45deg, #34495e 25%, #2c3e50 25%, #2c3e50 50%, #34495e 50%, #34495e 75%, #2c3e50 75%, #2c3e50);
+            background-size: 20px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            color: #bdc3c7;
+            font-style: italic;
+        }
+
+        .env-chart-container {
+            background: #2c3e50;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-time-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .time-btn {
+            padding: 8px 16px;
+            border: 1px solid #34495e;
+            background: #34495e;
+            color: #ecf0f1;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .time-btn:hover {
+            background: #3498db;
+            border-color: #3498db;
+        }
+
+        .time-btn.active {
+            background: #3498db;
+            border-color: #3498db;
+        }
+
+        .spin-animation {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .chart-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.9);
+            color: #e0e0e0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            font-size: 14px;
+            border: 1px solid #555;
+        }
+
+        .chart-loading .spin-animation {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #555;
+            border-top: 2px solid #4fc3f7;
+            border-radius: 50%;
+        }
+        
+        .env-log-table {
+            background: #2c3e50;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .log-table-header {
+            padding: 15px 20px;
+            background-color: #2c3e50;
+            border-bottom: 1px solid #34495e;
+            font-weight: bold;
+            color: #ecf0f1;
+        }
+        
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: #2c3e50;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-label {
+            font-size: 0.85rem;
+            color: #bdc3c7;
+            font-weight: 500;
+        }
+        
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #34495e;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            min-width: 150px;
+            background-color: #34495e;
+            color: #ecf0f1;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        
+        .refresh-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+            min-width: 60px;
+        }
+        
+        .refresh-btn:hover {
+            background: #2980b9;
+        }
+        
+        /* 时间选择按钮样式 */
+        .chart-time-selector {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .time-btn {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .time-btn:hover {
+            background: rgba(52, 152, 219, 0.2);
+            border-color: rgba(52, 152, 219, 0.5);
+        }
+        
+        .time-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .time-btn.active:hover {
+            background: #2980b9;
+            border-color: #2980b9;
+        }
+        
+        /* 旋转动画 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spin-animation {
+            animation: spin 1s linear infinite;
+        }
+        
+        .log-table th {
+            background-color: #2c3e50;
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+        
+        .log-table tbody tr:hover {
+            background-color: #34495e;
+        }
+        
+        .log-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .log-table th,
+        .log-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #34495e;
+        }
+    </style>
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="/admin_dashboard.html#dashboard" class="nav-link" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link" data-target="medicine-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link active" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <div class="content">
+                <div class="page-title">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div>
+                            <h1>环境数据日志</h1>
+                            <div class="page-breadcrumb">
+                                <span class="breadcrumb-item">Home</span>
+                                <span class="icon-arrow-right"></span>
+                                <span class="breadcrumb-item">审计追踪</span>
+                                <span class="icon-arrow-right"></span>
+                                <span class="breadcrumb-item active">环境数据日志</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div class="user-info">
+                                <div class="user-avatar">管</div>
+                                <div class="user-details">
+                                    <div class="user-name">管理员</div>
+                                    <div class="user-role">系统管理员</div>
+                                </div>
+                                <div class="user-dropdown">
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#" class="dropdown-item">个人资料</a></li>
+                                        <li><a href="#" class="dropdown-item">修改密码</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a href="{{ url_for('logout') }}" class="dropdown-item">退出登录</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 环境数据统计 -->
+                <div class="env-log-stats">
+                    <div class="stat-card temperature">
+                        <div class="stat-value" id="avg-temp">23.5°C</div>
+                        <div class="stat-label">平均温度</div>
+                    </div>
+                    <div class="stat-card humidity">
+                        <div class="stat-value" id="avg-humidity">65%</div>
+                        <div class="stat-label">平均湿度</div>
+                    </div>
+                    <div class="stat-card aqi">
+                        <div class="stat-value" id="avg-aqi">125.5ppm</div>
+                        <div class="stat-label">AQI平均值</div>
+                    </div>
+                    <div class="stat-card total">
+                        <div class="stat-value" id="total-records">22</div>
+                        <div class="stat-label">总记录数</div>
+                    </div>
+                </div>
+                
+                <!-- 筛选控件 -->
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label class="filter-label">开始日期</label>
+                        <input type="date" id="start-date" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">结束日期</label>
+                        <input type="date" id="end-date" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">设备ID</label>
+                        <select id="device-filter" class="filter-input">
+                            <option value="">全部设备</option>
+                            <option value="cabinet_001">cabinet_001</option>
+                            <option value="cabinet_002">cabinet_002</option>
+                            <option value="cabinet_003">cabinet_003</option>
+                            <option value="cabinet_004">cabinet_004</option>
+                            <option value="cabinet_005">cabinet_005</option>
+                            <option value="cabinet_006">cabinet_006</option>
+                            <option value="cabinet_007">cabinet_007</option>
+                            <option value="cabinet_008">cabinet_008</option>
+                            <option value="cabinet_009">cabinet_009</option>
+                            <option value="cabinet_010">cabinet_010</option>
+                        </select>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="refresh-btn" onclick="refreshEnvData()">
+                            <span id="refresh-icon" style="display: inline-block;">刷新</span>
+                        </button>
+                        <button class="refresh-btn" onclick="queryEnvData()" style="background: #27ae60;">
+                            <span id="query-icon" style="display: inline-block;">查询</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 环境数据图表 -->
+                <div class="env-chart-container" style="height: 400px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="color: #ecf0f1; margin: 0;">环境数据趋势图</h3>
+                        <div class="chart-time-selector">
+                            <button class="time-btn active" data-range="24h">近24h</button>
+                            <button class="time-btn" data-range="week">近一周</button>
+                            <button class="time-btn" data-range="month">近一个月</button>
+                        </div>
+                    </div>
+                    <canvas id="envChart" width="400" height="200"></canvas>
+                </div>
+                
+                <!-- 环境数据记录表格 -->
+                <div class="env-log-table">
+                    <div class="log-table-header">
+                        环境数据记录
+                    </div>
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th>设备ID</th>
+                                <th>温度(°C)</th>
+                                <th>湿度(%)</th>
+                                <th>AQI(ppm)</th>
+                                <th>记录时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="env-log-tbody">
+                            <!-- 数据将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // 环境数据日志相关功能
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化日期范围（最近7天）
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+            
+            document.getElementById('start-date').value = formatDateLocal(startDate);
+            document.getElementById('end-date').value = formatDateLocal(endDate);
+            
+            // 初始化筛选器
+            initFilters();
+            
+            // 初始化图表
+            initChart();
+            
+            // 加载环境数据
+            loadEnvData();
+            
+            // 设置时间选择按钮事件监听
+            setupTimeButtons();
+        });
+        
+        // 本地日期格式化函数，解决toISOString()返回UTC时间导致的日期错误
+        function formatDateLocal(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 初始化筛选器
+        function initFilters() {
+            // 获取当前日期
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            // 设置开始日期为今天
+            const startDateInput = document.getElementById('start-date');
+            if (startDateInput) {
+                startDateInput.value = formatDateLocal(today);
+            }
+            
+            // 设置结束日期为明天
+            const endDateInput = document.getElementById('end-date');
+            if (endDateInput) {
+                endDateInput.value = formatDateLocal(tomorrow);
+            }
+            
+            // 设置默认设备为cabinet_001
+            const deviceFilter = document.getElementById('device-filter');
+            if (deviceFilter && !deviceFilter.value) {
+                deviceFilter.value = 'cabinet_001';
+            }
+        }
+        
+        // 设置时间选择按钮事件监听
+        function setupTimeButtons() {
+            const timeButtons = document.querySelectorAll('.time-btn');
+            timeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    timeButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // 为当前点击的按钮添加active类
+                    this.classList.add('active');
+                    
+                    // 处理时间范围选择
+                    const timeRange = this.dataset.range;
+                    handleTimeRange(timeRange);
+                });
+            });
+        }
+        
+        // 处理时间范围选择
+        function handleTimeRange(timeRange) {
+            const now = new Date();
+            let startDate, endDate;
+            
+            switch (timeRange) {
+                case '24h':
+                    // 24小时前到当前时间
+                    startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                    endDate = now;
+                    break;
+                case 'week':
+                    startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    endDate = now;
+                    break;
+                case 'month':
+                    startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    endDate = now;
+                    break;
+                default:
+                    return;
+            }
+            
+            // 更新筛选控件
+            document.getElementById('start-date').value = formatDateLocal(startDate);
+            document.getElementById('end-date').value = formatDateLocal(endDate);
+            
+            console.log(`时间范围已切换到: ${timeRange}`, {
+                start: startDate.toISOString(),
+                end: endDate.toISOString()
+            });
+            
+            // 所有时间范围按钮都自动查询数据
+            console.log(`${timeRange}范围已自动触发查询操作`);
+            // 延迟100ms让用户看到日期更新，然后自动查询
+            setTimeout(() => {
+                queryEnvData();
+            }, 100);
+        }
+        
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // 加载环境数据
+        async function loadEnvData() {
+            try {
+                // 构建查询参数
+                const params = new URLSearchParams();
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                const deviceFilter = document.getElementById('device-filter').value;
+                
+                if (startDate) params.append('start_date', startDate);
+                if (endDate) params.append('end_date', endDate);
+                if (deviceFilter) params.append('device_id', deviceFilter);
+                
+                // 调用API获取数据
+                const response = await fetch(`/api/environment-data?${params}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    renderEnvData(result.data);
+                    updateStats(result.data);
+                    updateChart(result.data);  // 更新图表数据
+                } else {
+                    console.error('获取数据失败:', result.message);
+                    alert('获取数据失败: ' + result.message);
+                }
+                
+            } catch (error) {
+                console.error('加载环境数据失败:', error);
+                // 使用模拟数据进行测试
+                const mockData = generateMockEnvData();
+                renderEnvData(mockData);
+                updateStats(mockData);
+                updateChart(mockData);
+                console.log('使用模拟数据进行测试');
+            }
+        }
+        
+        // 查询环境数据（带筛选条件）
+        async function queryEnvData() {
+            try {
+                // 显示查询加载状态
+                const queryIcon = document.getElementById('query-icon');
+                if (queryIcon) {
+                    queryIcon.textContent = '⟳';
+                    queryIcon.classList.add('spin-animation');
+                }
+                
+                // 直接调用loadEnvData（现在支持筛选条件）
+                await loadEnvData();
+                
+                // 恢复查询按钮状态
+                setTimeout(() => {
+                    if (queryIcon) {
+                        queryIcon.classList.remove('spin-animation');
+                        queryIcon.textContent = '查询';
+                    }
+                }, 500);
+                
+            } catch (error) {
+                console.error('查询环境数据失败:', error);
+                alert('查询环境数据失败，请稍后重试');
+            }
+        }
+        
+        // 生成模拟环境数据
+        function generateMockEnvData() {
+            const data = [];
+            const devices = ['cabinet_001', 'cabinet_002', 'cabinet_003', 'cabinet_004', 'cabinet_005', 
+                            'cabinet_006', 'cabinet_007', 'cabinet_008', 'cabinet_009', 'cabinet_010'];
+            const statuses = ['normal', 'warning', 'critical'];
+            
+            // 获取当前激活的时间范围
+            const activeButton = document.querySelector('.time-btn.active');
+            const timeRange = activeButton ? activeButton.dataset.range : '24h';
+            
+            let dataPoints, intervalHours;
+            
+            switch (timeRange) {
+                case '24h':
+                    dataPoints = 24; // 24小时，每小时一个数据点
+                    intervalHours = 1;
+                    break;
+                case 'week':
+                    dataPoints = 168; // 7天，每小时一个数据点
+                    intervalHours = 1;
+                    break;
+                case 'month':
+                    dataPoints = 240; // 30天，每3小时一个数据点
+                    intervalHours = 3;
+                    break;
+                default:
+                    dataPoints = 50;
+                    intervalHours = 1;
+            }
+            
+            for (let i = 0; i < dataPoints; i++) {
+                const date = new Date();
+                date.setHours(date.getHours() - i * intervalHours);
+                
+                data.push({
+                    id: i + 1,
+                    timestamp: date.toISOString(),
+                    device_id: devices[Math.floor(Math.random() * devices.length)],
+                    temperature: (20 + Math.random() * 10).toFixed(1),
+                    humidity: (50 + Math.random() * 30).toFixed(1),
+                    aqi: (300 + Math.random() * 4700).toFixed(0),
+                    status: statuses[Math.floor(Math.random() * statuses.length)]
+                });
+            }
+            
+            return data;
+        }
+        
+        // 渲染环境数据
+        function renderEnvData(data) {
+            const tbody = document.getElementById('env-log-tbody');
+            tbody.innerHTML = '';
+            
+            data.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.device_id}</td>
+                    <td>${record.temperature}</td>
+                    <td>${record.humidity}</td>
+                    <td>${record.aqi}</td>
+                    <td>${new Date(record.timestamp).toLocaleString('zh-CN')}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+
+        
+        // 更新统计数据显示
+        function updateStats(data) {
+            if (data && data.length > 0) {
+                // 计算统计数据
+                const totalRecords = data.length;
+                const avgTemp = (data.reduce((sum, item) => sum + parseFloat(item.temperature), 0) / totalRecords).toFixed(1);
+                const avgHumidity = (data.reduce((sum, item) => sum + parseFloat(item.humidity), 0) / totalRecords).toFixed(1);
+                const avgAqi = (data.reduce((sum, item) => sum + parseFloat(item.aqi), 0) / totalRecords).toFixed(0);
+
+                // 更新统计卡片
+                document.getElementById('avg-temp').textContent = avgTemp + '°C';
+                document.getElementById('avg-humidity').textContent = avgHumidity + '%';
+                document.getElementById('avg-aqi').textContent = avgAqi;
+                document.getElementById('total-records').textContent = totalRecords;
+            } else {
+                // 如果没有数据，尝试调用统计API
+                updateStatistics();
+            }
+        }
+        
+        // 更新统计数据
+        async function updateStatistics() {
+            try {
+                // 构建查询参数
+                const params = new URLSearchParams();
+                const deviceFilter = document.getElementById('device-filter').value;
+                
+                if (deviceFilter) params.append('device_id', deviceFilter);
+                
+                // 调用统计API
+                const response = await fetch(`/api/environment-statistics?${params}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 更新统计卡片
+                    document.getElementById('avg-temp').textContent = result.data.avg_temperature + '°C';
+                    document.getElementById('avg-humidity').textContent = result.data.avg_humidity + '%';
+                    document.getElementById('avg-aqi').textContent = result.data.avg_aqi;
+                    document.getElementById('total-records').textContent = result.data.total_records;
+                } else {
+                    console.error('获取统计数据失败:', result.message);
+                }
+                
+            } catch (error) {
+                console.error('更新统计数据失败:', error);
+            }
+        }
+
+        // Chart.js 图表实例
+        let envChart = null;
+
+        // 初始化图表
+        function initChart() {
+            const ctx = document.getElementById('envChart').getContext('2d');
+            envChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: '温度 (°C)',
+                            data: [],
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '湿度 (%)',
+                            data: [],
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'AQI (ppm)',
+                            data: [],
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ecf0f1'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#ecf0f1'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                color: '#ecf0f1'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            min: 0,
+                            // 移除固定的max值，使用自动缩放
+                            ticks: {
+                                color: '#ecf0f1'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新图表数据
+        function updateChart(data) {
+            if (!envChart) {
+                initChart();
+            }
+
+            // 显示加载状态
+            const chartContainer = document.querySelector('.env-chart-container');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'chart-loading';
+            loadingDiv.innerHTML = '<div class="spin-animation"></div><span>正在更新图表...</span>';
+            chartContainer.appendChild(loadingDiv);
+
+            setTimeout(() => {
+                // 按时间排序数据
+                const sortedData = data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+                // 根据数据量进行智能采样，避免图表过于密集
+                let displayData = sortedData;
+                const maxDataPoints = 100; // 最大显示数据点数
+                
+                if (sortedData.length > maxDataPoints) {
+                    // 均匀采样，保持数据趋势
+                    const step = Math.ceil(sortedData.length / maxDataPoints);
+                    displayData = sortedData.filter((_, index) => index % step === 0 || index === sortedData.length - 1);
+                }
+
+                // 准备图表数据
+                const labels = displayData.map(item => {
+                    const date = new Date(item.timestamp);
+                    // 根据时间范围调整标签格式
+                    const activeButton = document.querySelector('.time-btn.active');
+                    const timeRange = activeButton ? activeButton.dataset.range : '24h';
+                    
+                    if (timeRange === '24h') {
+                        // 24小时内显示具体时间
+                        return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                    } else if (timeRange === 'week') {
+                        // 一周内显示日期和时间
+                        return date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }) + ' ' + 
+                               date.toLocaleTimeString('zh-CN', { hour: '2-digit' });
+                    } else {
+                        // 一个月内只显示日期
+                        return date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
+                    }
+                });
+
+                const temperatureData = displayData.map(item => parseFloat(item.temperature));
+                const humidityData = displayData.map(item => parseFloat(item.humidity));
+                const aqiData = displayData.map(item => parseFloat(item.aqi));
+
+                // 更新图表
+                envChart.data.labels = labels;
+                envChart.data.datasets[0].data = temperatureData;
+                envChart.data.datasets[1].data = humidityData;
+                envChart.data.datasets[2].data = aqiData;
+
+                envChart.update();
+
+                // 移除加载状态
+                if (loadingDiv.parentNode) {
+                    loadingDiv.parentNode.removeChild(loadingDiv);
+                }
+            }, 300);
+        }
+        
+        // 刷新环境数据
+        async function refreshEnvData() {
+            try {
+                // 显示刷新加载状态
+                const refreshIcon = document.getElementById('refresh-icon');
+                if (refreshIcon) {
+                    refreshIcon.textContent = '⟳';
+                    refreshIcon.classList.add('spin-animation');
+                }
+                
+                // 直接调用loadEnvData（现在支持筛选条件）
+                await loadEnvData();
+                
+                // 恢复刷新按钮状态
+                setTimeout(() => {
+                    if (refreshIcon) {
+                        refreshIcon.classList.remove('spin-animation');
+                        refreshIcon.textContent = '刷新';
+                    }
+                }, 500);
+                
+            } catch (error) {
+                console.error('刷新环境数据失败:', error);
+                alert('刷新环境数据失败，请稍后重试');
+            }
+        }
+        
+        // 查看记录详情
+        function viewRecordDetails(recordId) {
+            alert(`查看记录 ${recordId} 的详细信息\n\n这里可以显示详细的模态框或跳转到详情页面。`);
+        }
+        
+        // 用户下拉菜单功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const userInfo = document.querySelector('.user-info');
+            const dropdown = document.querySelector('.user-dropdown');
+            
+            if (userInfo && dropdown) {
+                userInfo.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                });
+                
+                document.addEventListener('click', function() {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+    </script>
+
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<view class="container">
+  <view class="search-box">
+    <input class="search-input" placeholder="搜索药品名称" bindinput="onSearchInput" value="{{searchKeyword}}" />
+    <button class="search-btn" bindtap="onSearch">搜索</button>
+  </view>
+
+  <view class="card">
+    <text class="title">药品列表</text>
+    <view class="drug-list">
+      <view wx:if="{{drugs.length > 0}}">
+        <view class="drug-item" wx:for="{{drugs}}" wx:key="id" bindtap="showDrugDetail" data-drug-id="{{item.id}}">
+          <view class="drug-image">
+            <image wx:if="{{item.image_url}}" src="{{item.image_url}}" mode="aspectFill"></image>
+            <view wx:else class="image-placeholder">
+              <text class="placeholder-text">药品图片</text>
+            </view>
+          </view>
+          <view class="drug-info">
+            <view class="drug-header">
+              <text class="drug-name">{{item.name}}</text>
+            </view>
+            <view class="drug-details">
+              <text class="drug-property">总数: {{item.quantity}} {{item.unit}}</text>
+              <text class="drug-property">可借: {{item.available_quantity}} {{item.unit}}</text>
+            </view>
+          </view>
+          <text class="arrow">></text>
+        </view>
+      </view>
+      <view class="empty" wx:else>
+        <text>暂无药品数据</text>
+      </view>
+      
+      <!-- 加载更多提示 -->
+      <view wx:if="{{loading}}" class="loading-more">
+        <text>加载中...</text>
+      </view>
+      
+      <!-- 没有更多数据提示 -->
+      <view wx:if="{{!hasMore && drugs.length > 0}}" class="no-more">
+        <text>没有更多数据了</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 药品详情弹窗 -->
+  <view class="modal" wx:if="{{showDetailModal}}" bindtap="closeModal">
+    <view class="modal-content" bindtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">药品详情</text>
+        <text class="close-btn" bindtap="closeModal">×</text>
+      </view>
+      <view class="modal-body">
+        <view class="detail-item">
+          <text class="detail-label">药品名称</text>
+          <text class="detail-value">{{selectedDrug.name}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">药品类别</text>
+          <text class="detail-value">{{selectedDrug.category}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">规格</text>
+          <text class="detail-value">{{selectedDrug.specification}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">数量</text>
+          <text class="detail-value">{{selectedDrug.quantity}} {{selectedDrug.unit}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">可借</text>
+          <text class="detail-value">{{selectedDrug.available_quantity}} {{selectedDrug.unit}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">状态</text>
+          <text class="detail-value">{{selectedDrug.status === 'in_stock' ? '可用' : '不可用'}}</text>
+        </view>
+        
+        <!-- 药品详情列表 -->
+        <view class="detail-section">
+          <text class="section-title">药品详情</text>
+          <view class="item-list">
+            <view wx:for="{{selectedDrug.items}}" wx:key="index" class="item-row">
+              <view class="item-info">
+                <text class="item-code">编码: {{item.medicine_code}}</text>
+                <text class="item-status {{item.status === 'in_stock' || item.status === 'reserved' ? 'status-in-stock' : 'status-out-stock'}}">{{item.status === 'in_stock' ? '在库' : item.status === 'lent_out' ? '已借出' : item.status === 'reserved' ? '已预定' : '已废弃'}}</text>
+              </view>
+              <view class="item-details">
+                <text class="item-property">位置: {{item.location}}</text>
+                <text class="item-property">有效期: {{item.expiry_date || '未知'}}</text>
+              </view>
+              <!-- 操作按钮 - 药品详情页只显示预定按钮，取消预定请在借药/还药页面操作 -->
+              <view class="item-actions" wx:if="{{item.status === 'in_stock' && !item.isExpired}}">
+                <button class="action-btn reserve-btn" bindtap="reserveDrug" data-drug-id="{{item.id}}">预定</button>
+              </view>
+              <view class="item-actions" wx:else>
+                <button class="action-btn disabled-btn" disabled>{{item.isExpired ? '已过期' : item.status === 'reserved' ? '已预定' : '不可操作'}}</button>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn btn-primary" bindtap="closeModal">确定</button>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 药瓶悬浮按钮 -->
+  <view class="cart-float-button" bindtap="navigateToPendingDrugs">
+    <text class="cart-icon">💊</text>
+  </view>
+</view>

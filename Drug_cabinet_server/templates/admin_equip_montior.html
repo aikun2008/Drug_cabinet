@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室药品智能管理终端 - 设备监控</title>
+    <link rel="stylesheet" href="/static/css/admin_dashboard.css">
+    <style>
+        /* 确保页面背景正确显示 */
+        body {
+            background-color: #1a252f;
+            color: #ecf0f1;
+        }
+    </style>
+    <style>
+        /* 添加一些额外的样式以确保模态框正确显示 */
+        #equipment-details-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        /* 刷新按钮旋转动画 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spin-animation {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="/admin_dashboard.html#dashboard" class="nav-link" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link active" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link" data-target="medicine-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <!-- 内容区域 -->
+            <div class="content">
+                <div id="device-list-content" class="page-content">
+                    <div class="page-title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <h1>设备监控</h1>
+                                <div class="page-breadcrumb">
+                                    <span class="breadcrumb-item">Home</span>
+                                    <span class="icon-arrow-right"></span>
+                                    <span class="breadcrumb-item active">设备监控</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="search-container">
+                                    <span class="search-icon icon-search"></span>
+                                    <input type="text" id="search-input" class="search-input" placeholder="查找设备名称/设备ID">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <button class="btn btn-primary" style="min-width: 80px;" onclick="refreshDeviceList()" id="refresh-btn">
+                                        <span id="device-refresh-icon" style="display: inline-block;">刷新</span>
+                                    </button>
+                                    <button class="btn btn-success" style="min-width: 80px;" onclick="showAddEquipmentModal()">新增</button>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-avatar">管</div>
+                                    <div class="user-details">
+                                        <div class="user-name">管理员</div>
+                                        <div class="user-role">系统管理员</div>
+                                    </div>
+                                    <!-- 下拉菜单 -->
+                                    <div class="user-dropdown">
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" class="dropdown-item">个人资料</a></li>
+                                            <li><a href="#" class="dropdown-item">修改密码</a></li>
+                                            <li class="dropdown-divider"></li>
+                                            <li><a href="{{ url_for('logout') }}" class="dropdown-item">退出登录</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 设备概览卡片 -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                        <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px; border-left: 4px solid #ffffffee;">
+                            <div style="font-size: 13px; color: #ccc; margin-bottom: 2px;">设备总数</div>
+                            <div style="font-size: 22px; font-weight: 600;" id="total-devices-count">0</div>
+                        </div>
+                        
+                        <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px; border-left: 4px solid #2196F3;">
+                            <div style="font-size: 13px; color: #ccc; margin-bottom: 2px;">在线设备</div>
+                            <div style="font-size: 22px; font-weight: 600;" id="online-devices-count">0</div>
+                        </div>
+                        
+                        <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px; border-left: 4px solid #9E9E9E;">
+                            <div style="font-size: 13px; color: #ccc; margin-bottom: 2px;">离线设备</div>
+                            <div style="font-size: 22px; font-weight: 600;" id="offline-devices-count">0</div>
+                        </div>
+                        
+                        <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px; border-left: 4px solid #FF9800;">
+                            <div style="font-size: 13px; color: #ccc; margin-bottom: 2px;">异常状态</div>
+                            <div style="font-size: 22px; font-weight: 600;" id="warning-devices-count">0</div>
+                        </div>
+                        
+                        <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px; border-left: 4px solid #F44336;">
+                            <div style="font-size: 13px; color: #ccc; margin-bottom: 2px;">报警状态</div>
+                            <div style="font-size: 22px; font-weight: 600;" id="alarm-devices-count">0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 设备状态图表 -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                        <!-- 在线/离线状态分布 -->
+                        <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 20px;">
+                            <h3 style="font-size: 16px; margin-bottom: 15px;">设备连接状态分布</h3>
+                            <div style="display: flex; justify-content: space-around; align-items: center; height: 150px;">
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                    <div id="connection-status-chart" style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#4CAF50 0% 0%, #9E9E9E 0% 100%); display: flex; align-items: center; justify-content: center;">
+                                        <div style="width: 60px; height: 60px; border-radius: 50%; background-color: #1a1a2e; display: flex; align-items: center; justify-content: center;">
+                                            <span id="connection-total-count" style="font-weight: 600;">0</span>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px; font-size: 12px; color: #ccc;">设备总数</div>
+                                </div>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <div style="display: flex; align-items: center;">
+                                        <div style="width: 15px; height: 15px; background-color: #2196F3; margin-right: 10px;"></div>
+                                        <span id="online-percentage">在线 (0%)</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center;">
+                                        <div style="width: 15px; height: 15px; background-color: #9E9E9E; margin-right: 10px;"></div>
+                                        <span id="offline-percentage">离线 (0%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 正常/异常/报警状态分布 -->
+                        <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 20px;">
+                            <h3 style="font-size: 16px; margin-bottom: 15px;">设备健康状态分布</h3>
+                            <div style="display: flex; justify-content: space-around; align-items: center; height: 150px;">
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                    <div id="health-status-chart" style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#4CAF50 0% 0%, #FF9800 0% 0%, #F44336 0% 100%); display: flex; align-items: center; justify-content: center;">
+                                        <div style="width: 60px; height: 60px; border-radius: 50%; background-color: #1a1a2e; display: flex; align-items: center; justify-content: center;">
+                                            <span id="health-total-count" style="font-weight: 600;">0</span>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px; font-size: 12px; color: #ccc;">设备总数</div>
+                                </div>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <div style="display: flex; align-items: center;">
+                                        <div style="width: 15px; height: 15px; background-color: #4CAF50; margin-right: 10px;"></div>
+                                        <span id="normal-percentage">正常 (0%)</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center;">
+                                        <div style="width: 15px; height: 15px; background-color: #FF9800; margin-right: 10px;"></div>
+                                        <span id="warning-percentage">异常 (0%)</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center;">
+                                        <div style="width: 15px; height: 15px; background-color: #F44336; margin-right: 10px;"></div>
+                                        <span id="alarm-percentage">报警 (0%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 设备列表 -->
+                    <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; overflow: hidden;">
+                        <div style="padding: 15px;">
+                            <h3 style="font-size: 16px; margin-bottom: 0;">设备列表</h3>
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: rgba(255, 255, 255, 0.05);">
+                                    <th style="padding: 12px 15px; text-align: left; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">设备名称</th>
+                                    <th style="padding: 12px 15px; text-align: left; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">设备ID</th>
+                                    <th style="padding: 12px 15px; text-align: left; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">状态</th>
+                                    <th style="padding: 12px 15px; text-align: left; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">最后在线</th>
+                                    <th style="padding: 12px 15px; text-align: left; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="equipment-table-body">
+                                <!-- 设备列表将通过JavaScript动态生成 -->
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 20px;">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 新增设备模态框 -->
+    <div id="add-equipment-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">新增设备</h2>
+                <button class="close-btn" onclick="closeAddEquipmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-equipment-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label for="add-equipment-name">设备名称 <span style="color: red;">*</span></label>
+                            <input type="text" id="add-equipment-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-equipment-id">设备ID <span style="color: red;">*</span></label>
+                            <input type="text" id="add-equipment-id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-equipment-address">设备详细地址 <span style="color: red;">*</span></label>
+                            <input type="text" id="add-equipment-address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-connection-status">连接状态</label>
+                            <select id="add-connection-status">
+                                <option value="0">在线</option>
+                                <option value="1">离线</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-health-status">健康状态</label>
+                            <select id="add-health-status">
+                                <option value="0">正常</option>
+                                <option value="1">异常</option>
+                                <option value="2">报警</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddEquipmentModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveNewEquipment()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 侧边栏切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 侧边栏切换按钮
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            // 窗口大小改变时的处理
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.add('active');
+                    mainContent.style.marginLeft = 'var(--sidebar-width)';
+                } else {
+                    sidebar.classList.remove('active');
+                    mainContent.style.marginLeft = '0';
+                }
+            });
+            
+            // 设置当前页面为活动状态
+            const deviceListLink = document.querySelector('a[data-target="device-list"]');
+            if (deviceListLink) {
+                // 移除其他链接的活动状态
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                // 设置当前链接为活动状态
+                deviceListLink.classList.add('active');
+            }
+        });
+        
+        // 获取设备列表数据
+        function fetchEquipmentList() {
+            fetch('/api/equipment')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('equipment-table-body');
+                    tableBody.innerHTML = '';
+                    
+                    // 初始化统计计数器
+                    let totalCount = 0;
+                    let onlineCount = 0;     // 在线设备总数
+                    let offlineCount = 0;    // 离线设备总数
+                    let warningCount = 0;    // 异常设备总数
+                    let alarmCount = 0;      // 报警设备总数
+                    
+                    if (data.success && data.data.length > 0) {
+                        totalCount = data.data.length;
+                        
+                        // 统计各状态设备数量
+                        data.data.forEach(equipment => {
+                            // 统计在线/离线
+                            if (equipment.connection_status === 0) {
+                                onlineCount++;
+                            } else {
+                                offlineCount++;
+                            }
+                            
+                            // 统计异常/报警
+                            if (equipment.health_status === 1) {
+                                warningCount++;
+                            } else if (equipment.health_status === 2) {
+                                alarmCount++;
+                            }
+                        });
+                        
+                        // 更新统计卡片
+                        document.getElementById('total-devices-count').textContent = totalCount;
+                        document.getElementById('online-devices-count').textContent = onlineCount;
+                        document.getElementById('offline-devices-count').textContent = offlineCount;
+                        document.getElementById('warning-devices-count').textContent = warningCount;
+                        document.getElementById('alarm-devices-count').textContent = alarmCount;
+                        
+                        // 更新状态分布图表
+                        updateStatusChart(totalCount, onlineCount, offlineCount, warningCount, alarmCount);
+                        
+                        // 渲染设备列表
+                        data.data.forEach((equipment, index) => {
+                            const row = document.createElement('tr');
+                            if (index < data.data.length - 1) {
+                                row.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                            }
+                            
+                            // 根据状态获取背景色
+                            let statusBgColor = 'rgba(255, 255, 255, 0.1)';
+                            if (equipment.status_name.includes('在线正常')) {
+                                statusBgColor = 'rgba(76, 175, 80, 0.2)';
+                            } else if (equipment.status_name.includes('在线异常')) {
+                                statusBgColor = 'rgba(255, 152, 0, 0.2)';
+                            } else if (equipment.status_name.includes('报警')) {
+                                statusBgColor = 'rgba(244, 67, 54, 0.2)';
+                            } else if (equipment.status_name.includes('离线正常')) {
+                                statusBgColor = 'rgba(158, 158, 158, 0.2)';
+                            } else if (equipment.status_name.includes('离线异常')) {
+                                statusBgColor = 'rgba(255, 87, 34, 0.2)';
+                            }
+                            
+                            row.innerHTML = `
+                                <td style="padding: 12px 15px;">${equipment.equipment_name}</td>
+                                <td style="padding: 12px 15px;">${equipment.equipment_id}</td>
+                                <td style="padding: 12px 15px;">
+                                    <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; background-color: ${statusBgColor}; color: #fff; font-size: 14px; line-height: 1.5;">
+                                        ${equipment.status_emoji} ${equipment.status_name}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 15px;">${equipment.last_online_display}</td>
+                                <td style="padding: 12px 15px;">
+                                    <button style="background: none; border: 1px solid #2196F3; border-radius: 4px; color: #2196F3; cursor: pointer; padding: 6px 12px; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(33, 150, 243, 0.1)';" onmouseout="this.style.backgroundColor='none';" onclick="viewEquipment('${equipment.equipment_id}')">查看详情</button>
+                                </td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        // 显示无数据提示
+                        const noDataRow = document.createElement('tr');
+                        noDataRow.innerHTML = `
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #999;">暂无设备数据</td>
+                        `;
+                        tableBody.appendChild(noDataRow);
+                        
+                        // 重置统计卡片
+                        document.getElementById('total-devices-count').textContent = '0';
+                        document.getElementById('online-devices-count').textContent = '0';
+                        document.getElementById('offline-devices-count').textContent = '0';
+                        document.getElementById('warning-devices-count').textContent = '0';
+                        document.getElementById('alarm-devices-count').textContent = '0';
+                        
+                        // 重置状态图表
+                        updateStatusChart(0, 0, 0, 0, 0);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取设备列表失败:', error);
+                    const tableBody = document.getElementById('equipment-table-body');
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #f44336;">加载数据失败，请稍后重试</td>
+                        </tr>
+                    `;
+                });
+        }
+        
+        // 更新状态分布图表
+        function updateStatusChart(totalCount, onlineCount, offlineCount, warningCount, alarmCount) {
+            // 计算正常设备数量（非异常非报警）
+            const normalCount = totalCount - warningCount - alarmCount;
+            
+            // 更新连接状态图表（在线/离线）
+            updateConnectionStatusChart(totalCount, onlineCount, offlineCount);
+            
+            // 更新健康状态图表（正常/异常/报警）
+            updateHealthStatusChart(totalCount, normalCount, warningCount, alarmCount);
+        }
+        
+        // 更新连接状态图表（在线/离线）
+        function updateConnectionStatusChart(totalCount, onlineCount, offlineCount) {
+            // 更新总数显示
+            document.getElementById('connection-total-count').textContent = totalCount;
+            
+            // 计算百分比
+            const onlinePercentage = totalCount > 0 ? (onlineCount / totalCount * 100).toFixed(1) : 0;
+            const offlinePercentage = totalCount > 0 ? (offlineCount / totalCount * 100).toFixed(1) : 0;
+            
+            // 更新百分比显示
+            document.getElementById('online-percentage').textContent = `在线 (${onlinePercentage}%)`;
+            document.getElementById('offline-percentage').textContent = `离线 (${offlinePercentage}%)`;
+            
+            // 更新饼图
+            const connectionChart = document.getElementById('connection-status-chart');
+            connectionChart.style.background = `conic-gradient(
+                #2196F3 0% ${onlinePercentage}%,
+                #9E9E9E ${onlinePercentage}% 100%
+            )`;
+        }
+        
+        // 更新健康状态图表（正常/异常/报警）
+        function updateHealthStatusChart(totalCount, normalCount, warningCount, alarmCount) {
+            // 更新总数显示
+            document.getElementById('health-total-count').textContent = totalCount;
+            
+            // 计算百分比
+            const normalPercentage = totalCount > 0 ? (normalCount / totalCount * 100).toFixed(1) : 0;
+            const warningPercentage = totalCount > 0 ? (warningCount / totalCount * 100).toFixed(1) : 0;
+            const alarmPercentage = totalCount > 0 ? (alarmCount / totalCount * 100).toFixed(1) : 0;
+            
+            // 更新百分比显示
+            document.getElementById('normal-percentage').textContent = `正常 (${normalPercentage}%)`;
+            document.getElementById('warning-percentage').textContent = `异常 (${warningPercentage}%)`;
+            document.getElementById('alarm-percentage').textContent = `报警 (${alarmPercentage}%)`;
+            
+            // 更新饼图
+            const healthChart = document.getElementById('health-status-chart');
+            const normalEnd = normalPercentage;
+            const warningEnd = parseFloat(normalPercentage) + parseFloat(warningPercentage);
+            
+            healthChart.style.background = `conic-gradient(
+                #4CAF50 0% ${normalEnd}%,
+                #FF9800 ${normalEnd}% ${warningEnd}%,
+                #F44336 ${warningEnd}% 100%
+            )`;
+        }
+        
+        // 设备列表刷新函数
+        function refreshDeviceList() {
+            const refreshIcon = document.getElementById('device-refresh-icon');
+            const refreshBtn = document.getElementById('refresh-btn');
+            
+            if (refreshIcon && refreshBtn) {
+                refreshIcon.classList.add('spin-animation');
+                refreshBtn.disabled = true;
+            }
+            
+            // 重新获取设备列表
+            fetchEquipmentList();
+            
+            // 保持动画效果
+            setTimeout(() => {
+                if (refreshIcon && refreshBtn) {
+                    refreshIcon.classList.remove('spin-animation');
+                    refreshBtn.disabled = false;
+                }
+            }, 1000);
+        }
+        
+        // 存储轮询定时器ID的字典
+        const pollingTimers = {};
+        
+        // 初始化动画样式
+        function initAnimationStyles() {
+            // 创建并添加全局样式
+            if (!document.getElementById('data-animation-styles')) {
+                const style = document.createElement('style');
+                style.id = 'data-animation-styles';
+                style.textContent = `
+                    /* 为所有数据元素添加过渡效果 */
+                    [id^="temperature-"] {
+                        transition: all 0.5s ease;
+                    }
+                    [id^="humidity-"] {
+                        transition: all 0.5s ease;
+                    }
+                    [id^="aqi-"] {
+                        transition: all 0.5s ease;
+                    }
+                    [id^="door-status-"] {
+                        transition: all 0.5s ease;
+                    }
+                    [id^="lock-status-"] {
+                        transition: all 0.5s ease;
+                    }
+                    [id^="buzzer-status-"] {
+                        transition: all 0.5s ease;
+                    }
+                    [id^="last-update-time-"] {
+                        transition: all 0.5s ease;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // 初始化动画样式
+        initAnimationStyles();
+
+        // 更新实时数据显示
+        function updateRealtimeDataDisplay(equipmentId, data) {
+            // 更新更新时间
+            const timeElement = document.getElementById(`last-update-time-${equipmentId}`);
+            if (timeElement && data.time) {
+                timeElement.textContent = data.time;
+                // 添加数据更新动画效果 - 使用淡入淡出效果
+                timeElement.style.backgroundColor = 'rgba(33, 150, 243, 0.2)';
+                setTimeout(() => {
+                    timeElement.style.backgroundColor = 'transparent';
+                }, 800); // 延长持续时间使过渡更自然
+            }
+            
+            // 更新环境数据 - 使用更自然的动画效果
+            if (data.temp !== undefined) {
+                const tempElement = document.getElementById(`temperature-${equipmentId}`);
+                if (tempElement) {
+                    // 只有当值发生变化时才触发动画
+                    if (tempElement.textContent !== `${data.temp}°C`) {
+                        tempElement.textContent = `${data.temp}°C`;
+                        tempElement.style.transform = 'scale(1.05)'; // 稍微缩小缩放比例
+                        tempElement.style.color = '#2196F3'; // 暂时改变颜色
+                        setTimeout(() => {
+                            tempElement.style.transform = 'scale(1)';
+                            tempElement.style.color = ''; // 恢复默认颜色
+                        }, 800); // 延长持续时间
+                    }
+                }
+            }
+            
+            if (data.humi !== undefined) {
+                const humiElement = document.getElementById(`humidity-${equipmentId}`);
+                if (humiElement) {
+                    if (humiElement.textContent !== `${data.humi}%`) {
+                        humiElement.textContent = `${data.humi}%`;
+                        humiElement.style.transform = 'scale(1.05)';
+                        humiElement.style.color = '#2196F3';
+                        setTimeout(() => {
+                            humiElement.style.transform = 'scale(1)';
+                            humiElement.style.color = '';
+                        }, 800);
+                    }
+                }
+            }
+            
+            if (data.AQI !== undefined) {
+                const aqiElement = document.getElementById(`aqi-${equipmentId}`);
+                if (aqiElement) {
+                    if (aqiElement.textContent !== `${data.AQI}ppm`) {
+                        aqiElement.textContent = `${data.AQI}ppm`;
+                        aqiElement.style.transform = 'scale(1.05)';
+                        aqiElement.style.color = '#2196F3';
+                        setTimeout(() => {
+                            aqiElement.style.transform = 'scale(1)';
+                            aqiElement.style.color = '';
+                        }, 800);
+                    }
+                }
+            }
+            
+            // 更新设备状态
+            if (data.door !== undefined) {
+                const doorElement = document.getElementById(`door-status-${equipmentId}`);
+                if (doorElement) {
+                    const status = data.door === 1 ? '打开' : '关闭';
+                    if (doorElement.textContent !== status) {
+                        doorElement.textContent = status;
+                        doorElement.style.color = status === '打开' ? '#F44336' : '#4CAF50';
+                        doorElement.style.transform = 'scale(1.05)';
+                        setTimeout(() => {
+                            doorElement.style.transform = 'scale(1)';
+                        }, 800);
+                    }
+                }
+            }
+            
+            if (data.lock !== undefined) {
+                const lockElement = document.getElementById(`lock-status-${equipmentId}`);
+                if (lockElement) {
+                    const status = data.lock === 1 ? '已锁定' : '未锁定';
+                    if (lockElement.textContent !== status) {
+                        lockElement.textContent = status;
+                        lockElement.style.color = status === '已锁定' ? '#4CAF50' : '#F44336';
+                        lockElement.style.transform = 'scale(1.05)';
+                        setTimeout(() => {
+                            lockElement.style.transform = 'scale(1)';
+                        }, 800);
+                    }
+                }
+            }
+            
+            if (data.buzzer !== undefined) {
+                const buzzerElement = document.getElementById(`buzzer-status-${equipmentId}`);
+                if (buzzerElement) {
+                    const status = data.buzzer === 1 ? '开启' : '关闭';
+                    if (buzzerElement.textContent !== status) {
+                        buzzerElement.textContent = status;
+                        buzzerElement.style.color = status === '开启' ? '#F44336' : '#4CAF50';
+                        buzzerElement.style.transform = 'scale(1.05)';
+                        setTimeout(() => {
+                            buzzerElement.style.transform = 'scale(1)';
+                        }, 800);
+                    }
+                }
+            }
+        }
+        
+        // 启动实时数据轮询
+        function startRealtimeDataPolling(equipmentId) {
+            // 先清除可能存在的旧定时器
+            if (pollingTimers[equipmentId]) {
+                clearInterval(pollingTimers[equipmentId]);
+            }
+            
+            // 设置新的轮询定时器，每3秒查询一次实时数据
+            pollingTimers[equipmentId] = setInterval(() => {
+                fetch(`/api/equipment-realtime-data/${equipmentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.data) {
+                            updateRealtimeDataDisplay(equipmentId, data.data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('获取实时数据错误:', error);
+                    });
+            }, 3000);
+            console.log(`已启动设备${equipmentId}的实时数据轮询`);
+        }
+        
+        // 设备查看函数
+        function viewEquipment(equipmentId) {
+            console.log('查看设备详情:', equipmentId);
+             
+            // 启动MQTT订阅任务
+            fetch(`/api/start-subscription/${equipmentId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('启动MQTT订阅任务:', data);
+            })
+            .catch(error => {
+                console.error('启动订阅任务错误:', error);
+            });
+             
+            // 启动定时发布环境数据查询命令
+            fetch(`/api/start-publish/${equipmentId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('启动定时发布任务:', data);
+            })
+            .catch(error => {
+                console.error('启动发布任务错误:', error);
+            });
+             
+            // 调用API获取设备详情数据
+            fetch(`/api/equipment/${equipmentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 获取设备详情数据
+                    let deviceDetails;
+                    if (data.success && data.data) {
+                        // 使用API返回的实际设备数据
+                        deviceDetails = {
+                            equipment_id: data.data.equipment_id,
+                            equipment_name: data.data.equipment_name || '未命名设备',
+                            temperature: '--.-°C',
+                            humidity: '--%',
+                            aqi: '--ppm',
+                            door_status: '--',
+                            lock_status: '--',
+                            buzzer_status: '--'
+                        };
+                    } else {
+                        // 使用默认数据
+                        deviceDetails = {
+                            equipment_id: equipmentId,
+                            equipment_name: '未命名设备',
+                            temperature: '--.-°C',
+                            humidity: '--%',
+                            aqi: '--ppm',
+                            door_status: '--',
+                            lock_status: '--',
+                            buzzer_status: '--'
+                        };
+                    }
+                     
+                    // 显示设备详情模态框
+                    showEquipmentDetails(deviceDetails);
+                     
+                    // 启动实时数据轮询
+                    startRealtimeDataPolling(equipmentId);
+                })
+                .catch(error => {
+                    console.error('获取设备详情失败:', error);
+                    // 出错时使用默认数据
+                    const deviceDetails = {
+                        equipment_id: equipmentId,
+                        equipment_name: '未命名设备',
+                        temperature: '--.-°C',
+                        humidity: '--%',
+                        aqi: '--ppm',
+                        door_status: '--',
+                        lock_status: '--',
+                        buzzer_status: '--'
+                    };
+                     
+                    // 显示设备详情模态框
+                    showEquipmentDetails(deviceDetails);
+                     
+                    // 启动实时数据轮询
+                    startRealtimeDataPolling(equipmentId);
+                });
+        }
+        
+        // 显示设备详情模态框
+        function showEquipmentDetails(deviceDetails) {
+            // 创建模态框HTML
+            const modalHTML = `
+                <div id="equipment-details-modal">
+                    <div style="background-color: #1a1a2e; border-radius: 12px; padding: 20px; width: 850px; max-width: 95%; border: 1px solid #333; overflow: visible;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0; color: white;">设备详情 - ${deviceDetails.equipment_name}</h3>
+                            <div style="display: flex; gap: 10px;">
+                                <button id="refresh-data-btn" style="background: none; border: none; color: #2196F3; font-size: 24px; cursor: pointer; padding: 5px 10px; border-radius: 4px; transition: all 0.3s;">🔄</button>
+                                <button id="close-modal-btn" style="background: none; border: none; color: #999; font-size: 32px; cursor: pointer; padding: 5px 10px; border-radius: 4px; transition: all 0.3s;">&times;</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 基本信息 -->
+                        <div style="background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                            <h4 style="color: #ccc; margin-top: 0; margin-bottom: 15px;">基本信息</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">设备ID</div>
+                                    <div style="font-size: 14px; color: white;">${deviceDetails.equipment_id}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">设备名称</div>
+                                    <div style="font-size: 14px; color: white;">${deviceDetails.equipment_name}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">更新时间</div>
+                                    <div style="font-size: 14px; color: white;" id="last-update-time-${deviceDetails.equipment_id}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 环境参数 -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">🌡️</div>
+                                <div style="font-size: 12px; color: #ccc; margin-bottom: 5px;">温度</div>
+                                <div style="font-size: 24px; font-weight: 600; color: #4CAF50;" id="temperature-${deviceDetails.equipment_id}">${deviceDetails.temperature}</div>
+                            </div>
+                            
+                            <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">💧</div>
+                                <div style="font-size: 12px; color: #ccc; margin-bottom: 5px;">湿度</div>
+                                <div style="font-size: 24px; font-weight: 600; color: #2196F3;" id="humidity-${deviceDetails.equipment_id}">${deviceDetails.humidity}</div>
+                            </div>
+                            
+                            <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">🌬️</div>
+                                <div style="font-size: 12px; color: #ccc; margin-bottom: 5px;">空气质量指数</div>
+                                <div style="font-size: 24px; font-weight: 600; color: #FF9800;" id="aqi-${deviceDetails.equipment_id}">${deviceDetails.aqi}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 设备状态 -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">🚪</div>
+                                <div style="font-size: 12px; color: #ccc; margin-bottom: 5px;">门状态</div>
+                                <div style="font-size: 24px; font-weight: 600; color: ${deviceDetails.door_status === '打开' ? '#F44336' : '#4CAF50'};" id="door-status-${deviceDetails.equipment_id}">${deviceDetails.door_status}</div>
+                            </div>
+
+                            <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">🔒</div>
+                                <div style="font-size: 12px; color: #ccc; margin-bottom: 5px;">锁状态</div>
+                                <div style="font-size: 24px; font-weight: 600; color: ${deviceDetails.lock_status === '已锁定' ? '#4CAF50' : '#F44336'};" id="lock-status-${deviceDetails.equipment_id}">${deviceDetails.lock_status}</div>
+                            </div>
+
+                            <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">🔔</div>
+                                <div style="font-size: 12px; color: #ccc; margin-bottom: 5px;">蜂鸣器状态</div>
+                                <div style="font-size: 24px; font-weight: 600; color: ${deviceDetails.buzzer_status === '开启' ? '#F44336' : '#4CAF50'};" id="buzzer-status-${deviceDetails.equipment_id}">${deviceDetails.buzzer_status}</div>
+                            </div>
+                        </div>
+
+                        <!-- 远程控制 -->
+                        <div style="background-color: rgba(0, 212, 255, 0.05); border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(0, 212, 255, 0.2);">
+                            <h4 style="color: #00d4ff; margin-top: 0; margin-bottom: 15px;">🔧 远程控制</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <button id="remote-unlock-btn-${deviceDetails.equipment_id}" onclick="remoteControlLock('${deviceDetails.equipment_id}', 'unlock')" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); border: none; border-radius: 8px; padding: 12px 20px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <span>🔓</span> 远程开锁
+                                </button>
+                                <button id="remote-lock-btn-${deviceDetails.equipment_id}" onclick="remoteControlLock('${deviceDetails.equipment_id}', 'lock')" style="background: linear-gradient(135deg, #F44336 0%, #d32f2f 100%); border: none; border-radius: 8px; padding: 12px 20px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <span>🔒</span> 远程上锁
+                                </button>
+                            </div>
+                            <div id="remote-control-status-${deviceDetails.equipment_id}" style="margin-top: 10px; font-size: 13px; color: #999; text-align: center; min-height: 20px;"></div>
+                        </div>
+                        
+                        <!-- 扩展信息 -->
+                        <div style="background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                            <h4 style="color: #ccc; margin-top: 0; margin-bottom: 15px;">扩展信息</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">设备位置</div>
+                                    <div style="font-size: 14px; color: white;">实验室A区</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">运行时长</div>
+                                    <div style="font-size: 14px; color: white;">128天5小时</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 添加模态框到页面
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // 添加事件监听器
+            const modal = document.getElementById('equipment-details-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const refreshDataBtn = document.getElementById('refresh-data-btn');
+                
+            // 关闭模态框函数
+            function closeModal() {
+                    // 停止MQTT订阅任务
+                    fetch(`/api/stop-subscription/${deviceDetails.equipment_id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('停止MQTT订阅任务:', data);
+                    })
+                    .catch(error => {
+                        console.error('停止订阅任务错误:', error);
+                    });
+                    
+                    // 停止定时发布环境数据查询命令
+                    fetch(`/api/stop-publish/${deviceDetails.equipment_id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('停止定时发布任务:', data);
+                    })
+                    .catch(error => {
+                        console.error('停止发布任务错误:', error);
+                    });
+                    
+                    // 清除轮询定时器
+                    if (pollingTimers[deviceDetails.equipment_id]) {
+                        clearInterval(pollingTimers[deviceDetails.equipment_id]);
+                        delete pollingTimers[deviceDetails.equipment_id];
+                        console.log(`已停止设备${deviceDetails.equipment_id}的实时数据轮询`);
+                    }
+                    
+                    // 删除模态框
+                    if (modal && modal.parentNode) {
+                        modal.parentNode.removeChild(modal);
+                    }
+                }
+            
+            // 刷新数据函数
+            function refreshData() {
+                    console.log('刷新设备详情数据:', deviceDetails.equipment_id);
+                    refreshDataBtn.style.transform = 'rotate(360deg)';
+                    refreshDataBtn.style.transition = 'transform 0.5s ease-in-out';
+                    
+                    // 立即获取一次实时数据
+                    fetch(`/api/equipment-realtime-data/${deviceDetails.equipment_id}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.data) {
+                                updateRealtimeDataDisplay(deviceDetails.equipment_id, data.data);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('刷新数据错误:', error);
+                        })
+                        .finally(() => {
+                            setTimeout(() => {
+                                refreshDataBtn.style.transform = 'rotate(0deg)';
+                            }, 500);
+                        });
+                }
+            
+            // 绑定事件
+            closeModalBtn.addEventListener('click', closeModal);
+            refreshDataBtn.addEventListener('click', refreshData);
+
+            // 点击模态框外部关闭
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        // 远程控制锁
+        async function remoteControlLock(equipmentId, action) {
+            const statusDiv = document.getElementById(`remote-control-status-${equipmentId}`);
+            const unlockBtn = document.getElementById(`remote-unlock-btn-${equipmentId}`);
+            const lockBtn = document.getElementById(`remote-lock-btn-${equipmentId}`);
+
+            // 禁用按钮防止重复点击
+            if (unlockBtn) unlockBtn.disabled = true;
+            if (lockBtn) lockBtn.disabled = true;
+
+            statusDiv.innerHTML = '<span style="color: #00d4ff;">⏳ 正在发送指令...</span>';
+
+            try {
+                const response = await fetch('/api/equipment/remote-control', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        equipment_id: equipmentId,
+                        action: action
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    statusDiv.innerHTML = `<span style="color: #4CAF50;">✅ ${action === 'unlock' ? '开锁' : '上锁'}指令已发送</span>`;
+                    // 3秒后刷新状态
+                    setTimeout(() => {
+                        refreshLockStatus(equipmentId);
+                    }, 3000);
+                } else {
+                    statusDiv.innerHTML = `<span style="color: #F44336;">❌ ${result.message || '操作失败'}</span>`;
+                }
+            } catch (error) {
+                console.error('远程控制错误:', error);
+                statusDiv.innerHTML = '<span style="color: #F44336;">❌ 网络错误，请重试</span>';
+            } finally {
+                // 重新启用按钮
+                setTimeout(() => {
+                    if (unlockBtn) unlockBtn.disabled = false;
+                    if (lockBtn) lockBtn.disabled = false;
+                }, 3000);
+            }
+        }
+
+        // 刷新锁状态
+        async function refreshLockStatus(equipmentId) {
+            try {
+                const response = await fetch(`/api/equipment/${equipmentId}`);
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const lockStatusDiv = document.getElementById(`lock-status-${equipmentId}`);
+                    if (lockStatusDiv) {
+                        const lockStatus = result.data.lock_status === 1 ? '已锁定' : '未锁定';
+                        const lockColor = result.data.lock_status === 1 ? '#4CAF50' : '#F44336';
+                        lockStatusDiv.textContent = lockStatus;
+                        lockStatusDiv.style.color = lockColor;
+                    }
+                }
+            } catch (error) {
+                console.error('刷新锁状态错误:', error);
+            }
+        }
+        
+        // 页面加载时获取设备列表
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchEquipmentList();
+            
+            // 搜索框功能
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    filterDeviceList(searchInput.value);
+                });
+            }
+        });
+        
+        // 显示新增设备模态框
+        function showAddEquipmentModal() {
+            const modal = document.getElementById('add-equipment-modal');
+            if (modal) {
+                modal.style.display = 'block';
+                // 清空表单
+                document.getElementById('add-equipment-form').reset();
+            }
+        }
+        
+        // 关闭新增设备模态框
+        function closeAddEquipmentModal() {
+            const modal = document.getElementById('add-equipment-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // 保存新设备
+        function saveNewEquipment() {
+            // 获取表单数据
+            const equipmentName = document.getElementById('add-equipment-name').value;
+            const equipmentId = document.getElementById('add-equipment-id').value;
+            const equipmentAddress = document.getElementById('add-equipment-address').value;
+            const connectionStatus = document.getElementById('add-connection-status').value;
+            const healthStatus = document.getElementById('add-health-status').value;
+            
+            // 验证必填字段
+            if (!equipmentName || !equipmentId || !equipmentAddress) {
+                alert('请填写所有必填字段');
+                return;
+            }
+            
+            // 构建请求数据
+            const equipmentData = {
+                equipment_name: equipmentName,
+                equipment_id: equipmentId,
+                equipment_address: equipmentAddress,
+                connection_status: parseInt(connectionStatus),
+                health_status: parseInt(healthStatus),
+                door_status: 0,
+                lock_status: 0
+            };
+            
+            // 发送请求
+            fetch('/admin/equipment/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(equipmentData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 成功后刷新设备列表并关闭模态框
+                    alert('设备添加成功');
+                    fetchEquipmentList();
+                    closeAddEquipmentModal();
+                } else {
+                    alert('设备添加失败: ' + (data.message || '未知错误'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('设备添加失败: 网络错误');
+            });
+        }
+        
+        // 搜索过滤设备列表
+        function filterDeviceList(searchTerm) {
+            const rows = document.querySelectorAll('#equipment-table-body tr');
+            searchTerm = searchTerm.toLowerCase();
+            
+            rows.forEach(row => {
+                const equipmentName = row.cells[0]?.textContent.toLowerCase() || '';
+                const equipmentId = row.cells[1]?.textContent.toLowerCase() || '';
+                
+                if (equipmentName.includes(searchTerm) || equipmentId.includes(searchTerm) || searchTerm === '') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

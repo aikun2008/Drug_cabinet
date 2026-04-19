@@ -1,0 +1,147 @@
+<view class="container">
+  <!-- 欢迎信息 -->
+  <view class="welcome-section" style="border-left: 8rpx solid {{roleColor}}">
+    <view class="welcome-header">
+      <text class="role-icon">{{roleIcon}}</text>
+      <text class="welcome-text">欢迎回来，{{userInfo.real_name || userInfo.username}}</text>
+    </view>
+    <text class="role-text" style="color: {{roleColor}}">{{roleText}}</text>
+  </view>
+
+  <!-- 学生功能卡片 -->
+  <view class="card" wx:if="{{userInfo.role === 2}}">
+    <text class="title">学生功能</text>
+    <view class="student-actions">
+      <view class="action-item" bindtap="navigateToDrugInfo">
+        <text class="action-icon">🔍</text>
+        <text class="action-text">查询药品</text>
+      </view>
+      <view class="action-item" bindtap="navigateToApplicationQuery">
+        <text class="action-icon">📋</text>
+        <text class="action-text">申请查询</text>
+      </view>
+      <view class="action-item" bindtap="showDrugManageModal">
+        <text class="action-icon">💊</text>
+        <text class="action-text">借药/还药</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 教师功能卡片 -->
+  <view class="card" wx:elif="{{userInfo.role === 1}}">
+    <text class="title">教师功能</text>
+    <view class="student-actions">
+      <view class="action-item" bindtap="navigateToDrugInfo">
+        <text class="action-icon">🔍</text>
+        <text class="action-text">查询药品</text>
+      </view>
+      <view class="action-item" bindtap="showApproveModal">
+        <text class="action-icon">✅</text>
+        <text class="action-text">审批申请</text>
+      </view>
+      <view class="action-item" bindtap="showDrugManageModal">
+        <text class="action-icon">💊</text>
+        <text class="action-text">借药/还药</text>
+      </view>
+      <view class="action-item" bindtap="showStudentRecordsModal">
+        <text class="action-icon">📝</text>
+        <text class="action-text">学生记录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 管理员功能卡片 -->
+  <view class="card" wx:else>
+    <text class="title">管理功能</text>
+    <view class="student-actions">
+      <view class="action-item" bindtap="navigateToDrugInfo">
+        <text class="action-icon">🔍</text>
+        <text class="action-text">查询药品</text>
+      </view>
+      <view class="action-item" bindtap="showUserManageModal">
+        <text class="action-icon">👥</text>
+        <text class="action-text">用户管理</text>
+      </view>
+      <view class="action-item" bindtap="showEquipManageModal">
+        <text class="action-icon">⚙️</text>
+        <text class="action-text">设备管理</text>
+      </view>
+      <view class="action-item" bindtap="showSystemManageModal">
+        <text class="action-icon">📊</text>
+        <text class="action-text">系统管理</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近操作记录 -->
+  <view class="card">
+    <text class="title">最近操作</text>
+    <view wx:if="{{records.length > 0}}">
+      <view class="record-item" wx:for="{{records}}" wx:key="index">
+        <view class="record-info">
+          <text class="record-action">{{item.action}}</text>
+          <text class="record-time">{{item.time}}</text>
+        </view>
+        <text class="record-status">{{item.status}}</text>
+      </view>
+    </view>
+    <view class="empty" wx:else>
+      <text>暂无操作记录</text>
+    </view>
+  </view>
+
+
+
+  <!-- 申请药品弹窗 -->
+  <view class="modal" wx:if="{{showApplyModal}}" bindtap="closeApplyModal">
+    <view class="modal-content" bindtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">申请药品</text>
+        <text class="close-btn" bindtap="closeApplyModal">×</text>
+      </view>
+      <view class="modal-body">
+        <text>申请药品功能开发中</text>
+      </view>
+      <view class="modal-footer">
+        <button class="btn btn-primary" bindtap="closeApplyModal">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 借药弹窗 -->
+  <view class="modal" wx:if="{{showBorrowModal}}" bindtap="closeBorrowModal">
+    <view class="modal-content" bindtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">借药</text>
+        <text class="close-btn" bindtap="closeBorrowModal">×</text>
+      </view>
+      <view class="modal-body">
+        <text>借药功能开发中</text>
+      </view>
+      <view class="modal-footer">
+        <button class="btn btn-primary" bindtap="closeBorrowModal">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 还药弹窗 -->
+  <view class="modal" wx:if="{{showReturnModal}}" bindtap="closeReturnModal">
+    <view class="modal-content" bindtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">还药</text>
+        <text class="close-btn" bindtap="closeReturnModal">×</text>
+      </view>
+      <view class="modal-body">
+        <text>还药功能开发中</text>
+      </view>
+      <view class="modal-footer">
+        <button class="btn btn-primary" bindtap="closeReturnModal">确定</button>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 药瓶悬浮按钮 -->
+  <view class="cart-float-button" bindtap="navigateToPendingDrugs">
+    <text class="cart-icon">💊</text>
+  </view>
+</view>

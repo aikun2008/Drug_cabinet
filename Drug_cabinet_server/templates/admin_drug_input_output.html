@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>入库/出库 - 实验室药品智能管理终端</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="/admin_dashboard.html" class="nav-link" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link" data-target="medicine-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link active" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <!-- 内容区域 -->
+            <div class="content">
+                <!-- 入库/出库页面 -->
+                <div id="inventory-check-content" class="page-content">
+                    <div class="page-title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <h1>入库/出库</h1>
+                                <div class="page-breadcrumb">
+                                    <span class="breadcrumb-item">Home</span>
+                                    <span class="icon-arrow-right"></span>
+                                    <span class="breadcrumb-item active">入库/出库</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="search-container">
+                                    <span class="search-icon icon-search"></span>
+                                    <input type="text" class="search-input" placeholder="搜索...">
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-avatar">管</div>
+                                    <div class="user-details">
+                                        <div class="user-name">管理员</div>
+                                        <div class="user-role">系统管理员</div>
+                                    </div>
+                                    <!-- 下拉菜单 -->
+                                    <div class="user-dropdown">
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" class="dropdown-item">个人资料</a></li>
+                                            <li><a href="#" class="dropdown-item">修改密码</a></li>
+                                            <li class="dropdown-divider"></li>
+                                            <li><a href="{{ url_for('logout') }}" class="dropdown-item">退出登录</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 内容区域 -->
+                    <div class="stats-grid">
+                        <!-- 入库框 -->
+                        <div class="stat-card fade-in import-card" onclick="openImportModal()">
+                            <div class="stat-icon">📥</div>
+                            <div class="stat-title">批量入库</div>
+                            <div class="stat-value">上传Excel文件批量导入药品</div>
+                            <button class="btn btn-primary" onclick="openImportModal()">开始入库</button>
+                        </div>
+                        
+                        <!-- 出库框 -->
+                        <div class="stat-card fade-in export-card" onclick="openExportModal()">
+                            <div class="stat-icon">📤</div>
+                            <div class="stat-title">批量出库</div>
+                            <div class="stat-value">选择药品批量出库</div>
+                            <button class="btn btn-primary" onclick="openExportModal()">开始出库</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 导入历史 -->
+                    <div class="stat-card fade-in">
+                        <h3>导入历史</h3>
+                        <div id="import-history" class="user-table-container">
+                            <table class="user-table">
+                                <thead>
+                                    <tr>
+                                        <th>导入时间</th>
+                                        <th>文件名</th>
+                                        <th>总记录数</th>
+                                        <th>成功数</th>
+                                        <th>失败数</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="import-history-body">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- 入库模态框 -->
+                    <div id="importModal" class="modal">
+                        <div class="modal-content" style="max-width: 800px;">
+                            <div class="modal-header">
+                                <h2 class="modal-title">批量药品入库</h2>
+                                <span class="close" onclick="closeImportModal()">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <p style="color: var(--text-muted); margin-bottom: 20px;">上传Excel文件批量导入药品信息，同时在现实中向药柜放入对应药品。</p>
+                                
+                                <form id="import-form" enctype="multipart/form-data">
+                                    <div class="form-group" style="margin-bottom: 20px;">
+                                        <label class="form-label" for="file-upload">选择Excel文件</label>
+                                        <input type="file" id="file-upload" name="file" accept=".xlsx, .xls" class="form-control" style="padding: 8px;">
+                                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">支持 .xlsx 和 .xls 格式</p>
+                                    </div>
+                                    
+                                    <div class="form-group" style="margin-bottom: 20px;">
+                                        <label class="form-label">文件格式要求</label>
+                                        <div style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 6px; font-size: 14px;">
+                                            <p style="margin-bottom: 10px;">Excel文件应包含以下列（顺序不限）：</p>
+                                            <ul style="list-style-type: none; padding-left: 0;">
+                                                <li>• <strong>medicine_code</strong> (必填): 药品编码(RFID)</li>
+                                                <li>• <strong>name</strong> (必填): 药品名称</li>
+                                                <li>• <strong>type</strong>: 药品类型 (0-普通药品, 1-危化品, 2-管制药品)</li>
+                                                <li>• <strong>specification</strong>: 规格</li>
+                                                <li>• <strong>manufacturer</strong>: 生产厂商</li>
+                                                <li>• <strong>batch_number</strong>: 批号</li>
+                                                <li>• <strong>production_date</strong>: 生产日期 (YYYY-MM-DD)</li>
+                                                <li>• <strong>expiry_date</strong>: 有效期 (YYYY-MM-DD)</li>
+                                                <li>• <strong>storage_condition</strong>: 存储条件</li>
+                                                <li>• <strong>location</strong>: 所在柜子</li>
+                                                <li>• <strong>unit</strong>: 单位</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" onclick="closeImportModal()">取消</button>
+                                <button class="btn btn-primary" id="import-btn" style="padding: 10px 30px;">开始导入</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 出库模态框 -->
+                    <div id="exportModal" class="modal">
+                        <div class="modal-content" style="max-width: 1000px;">
+                            <div class="modal-header">
+                                <h2 class="modal-title">批量药品出库</h2>
+                                <span class="close" onclick="closeExportModal()">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <!-- 筛选条件 -->
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                                    <div class="form-group">
+                                        <label class="form-label" for="location-filter">药柜</label>
+                                        <select id="location-filter" class="form-control">
+                                            <option value="">全部药柜</option>
+                                            <!-- 药柜选项将通过JavaScript动态添加 -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="expiry-filter">有效期</label>
+                                        <select id="expiry-filter" class="form-control">
+                                            <option value="">全部</option>
+                                            <option value="expired">已过期</option>
+                                            <option value="expiring_30">30天内过期</option>
+                                            <option value="expiring_60">60天内过期</option>
+                                            <option value="expiring_90">90天内过期</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="align-self: flex-end;">
+                                        <button class="btn btn-primary" onclick="filterDrugs()" style="width: 100%;">筛选</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- 药品列表 -->
+                                <div style="margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <h4>药品列表</h4>
+                                        <label style="display: flex; align-items: center; gap: 5px;">
+                                            <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                                            全选
+                                        </label>
+                                    </div>
+                                    <div style="max-height: 400px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <thead style="position: sticky; top: 0; background-color: var(--card-bg);">
+                                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                                    <th style="padding: 10px; text-align: left;">选择</th>
+                                                    <th style="padding: 10px; text-align: left;">药品编码</th>
+                                                    <th style="padding: 10px; text-align: left;">药品名称</th>
+                                                    <th style="padding: 10px; text-align: left;">有效期</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="drug-list-body">
+                                                <tr>
+                                                    <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">加载中...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" onclick="closeExportModal()">取消</button>
+                                <button class="btn btn-primary" id="export-btn" onclick="exportDrugs()" style="padding: 10px 30px;">一键出库</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 全局函数定义
+        function openImportModal() {
+            document.getElementById('importModal').style.display = 'block';
+        }
+        
+        function closeImportModal() {
+            document.getElementById('importModal').style.display = 'none';
+        }
+        
+        function openExportModal() {
+            document.getElementById('exportModal').style.display = 'block';
+            loadDrugs();
+            loadLocations();
+        }
+        
+        function closeExportModal() {
+            document.getElementById('exportModal').style.display = 'none';
+        }
+        
+        // 加载药柜列表
+        function loadLocations() {
+            fetch('/api/drugs/locations')
+                .then(response => response.json())
+                .then(data => {
+                    const locationSelect = document.getElementById('location-filter');
+                    if (locationSelect && data.success) {
+                        // 清空现有选项（保留第一个"全部药柜"选项）
+                        while (locationSelect.options.length > 1) {
+                            locationSelect.remove(1);
+                        }
+                        
+                        // 添加药柜选项
+                        data.data.forEach(location => {
+                            const option = document.createElement('option');
+                            option.value = location;
+                            option.textContent = location;
+                            locationSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('加载药柜列表失败:', error);
+                });
+        }
+        
+        // 加载药品列表
+        function loadDrugs() {
+            const drugListBody = document.getElementById('drug-list-body');
+            if (drugListBody) {
+                drugListBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">加载中...</td>
+                    </tr>
+                `;
+            }
+            
+            fetch('/api/drugs/export')
+                .then(response => response.json())
+                .then(data => {
+                    const drugListBody = document.getElementById('drug-list-body');
+                    if (drugListBody) {
+                        if (data.success && data.data && data.data.length > 0) {
+                            let html = '';
+                            data.data.forEach(drug => {
+                                const expiryDate = drug.expiry_date ? new Date(drug.expiry_date).toLocaleDateString() : '未知';
+                                html += `
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 10px;">
+                                            <input type="checkbox" class="drug-checkbox" value="${drug.medicine_code}">
+                                        </td>
+                                        <td style="padding: 10px;">${drug.medicine_code}</td>
+                                        <td style="padding: 10px;">${drug.name}</td>
+                                        <td style="padding: 10px;">${expiryDate}</td>
+                                    </tr>
+                                `;
+                            });
+                            drugListBody.innerHTML = html;
+                        } else {
+                            drugListBody.innerHTML = `
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">暂无药品</td>
+                                </tr>
+                            `;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('加载药品列表失败:', error);
+                    const drugListBody = document.getElementById('drug-list-body');
+                    if (drugListBody) {
+                        drugListBody.innerHTML = `
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #F44336; padding: 30px;">加载失败，请刷新页面重试</td>
+                            </tr>
+                        `;
+                    }
+                });
+        }
+        
+        // 筛选药品
+        function filterDrugs() {
+            const location = document.getElementById('location-filter').value;
+            const expiry = document.getElementById('expiry-filter').value;
+            
+            const drugListBody = document.getElementById('drug-list-body');
+            if (drugListBody) {
+                drugListBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">筛选中...</td>
+                    </tr>
+                `;
+            }
+            
+            fetch(`/api/drugs/export?location=${encodeURIComponent(location)}&expiry=${encodeURIComponent(expiry)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const drugListBody = document.getElementById('drug-list-body');
+                    if (drugListBody) {
+                        if (data.success && data.data && data.data.length > 0) {
+                            let html = '';
+                            data.data.forEach(drug => {
+                                const expiryDate = drug.expiry_date ? new Date(drug.expiry_date).toLocaleDateString() : '未知';
+                                html += `
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 10px;">
+                                            <input type="checkbox" class="drug-checkbox" value="${drug.medicine_code}">
+                                        </td>
+                                        <td style="padding: 10px;">${drug.medicine_code}</td>
+                                        <td style="padding: 10px;">${drug.name}</td>
+                                        <td style="padding: 10px;">${expiryDate}</td>
+                                    </tr>
+                                `;
+                            });
+                            drugListBody.innerHTML = html;
+                        } else {
+                            drugListBody.innerHTML = `
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">暂无符合条件的药品</td>
+                                </tr>
+                            `;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('筛选药品失败:', error);
+                    const drugListBody = document.getElementById('drug-list-body');
+                    if (drugListBody) {
+                        drugListBody.innerHTML = `
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #F44336; padding: 30px;">筛选失败，请刷新页面重试</td>
+                            </tr>
+                        `;
+                    }
+                });
+        }
+        
+        // 全选功能
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('select-all');
+            const checkboxes = document.querySelectorAll('.drug-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+        }
+        
+        // 一键出库
+        function exportDrugs() {
+            const checkboxes = document.querySelectorAll('.drug-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('请选择要出库的药品');
+                return;
+            }
+            
+            const medicineCodes = Array.from(checkboxes).map(checkbox => checkbox.value);
+            
+            if (confirm(`确定要出库 ${medicineCodes.length} 个药品吗？`)) {
+                fetch('/api/drugs/export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ medicine_codes: medicineCodes })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`出库成功，共出库 ${data.success_count} 个药品`);
+                        // 重新加载药品列表
+                        loadDrugs();
+                    } else {
+                        alert(`出库失败: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    alert(`出库失败: ${error.message}`);
+                });
+            }
+        }
+        
+        // 加载导入历史
+        function loadImportHistory() {
+            fetch('/api/drugs/import/history')
+                .then(response => response.json())
+                .then(data => {
+                    const historyBody = document.getElementById('import-history-body');
+                    if (historyBody) {
+                        if (data.success && data.data && data.data.length > 0) {
+                            let html = '';
+                            data.data.forEach(record => {
+                                const importTime = new Date(record.import_time).toLocaleString();
+                                const errorCount = record.error_count || 0;
+                                
+                                html += `
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 10px;">${importTime}</td>
+                                        <td style="padding: 10px;">${record.file_name}</td>
+                                        <td style="padding: 10px;">${record.total_count}</td>
+                                        <td style="padding: 10px; color: #4CAF50;">${record.success_count}</td>
+                                        <td style="padding: 10px; color: ${errorCount > 0 ? '#F44336' : '#4CAF50'};">${errorCount}</td>
+                                        <td style="padding: 10px;">
+                                            ${errorCount > 0 ? `<button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="showErrorDetails(${JSON.stringify(record.error_details)})">查看错误</button>` : ''}
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                            historyBody.innerHTML = html;
+                        } else {
+                            historyBody.innerHTML = `
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">暂无导入记录</td>
+                                </tr>
+                            `;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('加载导入历史失败:', error);
+                    const historyBody = document.getElementById('import-history-body');
+                    if (historyBody) {
+                        historyBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #F44336; padding: 30px;">加载失败，请刷新页面重试</td>
+                            </tr>
+                        `;
+                    }
+                });
+        }
+        
+        // 显示错误详情
+        function showErrorDetails(errorDetails) {
+            if (errorDetails && errorDetails.length > 0) {
+                let message = '错误详情：\n\n';
+                errorDetails.forEach(error => {
+                    message += `- ${error}\n`;
+                });
+                alert(message);
+            }
+        }
+        
+        // 更新导入历史（重新加载）
+        function updateImportHistory() {
+            loadImportHistory();
+        }
+        
+        // 侧边栏切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 侧边栏切换按钮
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    if (sidebar.classList.contains('active')) {
+                        mainContent.style.marginLeft = 'var(--sidebar-width)';
+                    } else {
+                        mainContent.style.marginLeft = '0';
+                    }
+                });
+            }
+            
+            // 窗口大小改变时的处理
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.add('active');
+                    mainContent.style.marginLeft = 'var(--sidebar-width)';
+                } else {
+                    sidebar.classList.remove('active');
+                    mainContent.style.marginLeft = '0';
+                }
+            });
+            
+            // 加载导入历史
+            loadImportHistory();
+            
+            // 文件导入功能
+            const importBtn = document.getElementById('import-btn');
+            const fileUpload = document.getElementById('file-upload');
+            
+            if (importBtn) {
+                importBtn.addEventListener('click', function() {
+                    if (!fileUpload.files || fileUpload.files.length === 0) {
+                        alert('请选择要上传的Excel文件');
+                        return;
+                    }
+                    
+                    const file = fileUpload.files[0];
+                    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+                        alert('只支持 .xlsx 和 .xls 格式的文件');
+                        return;
+                    }
+                    
+                    // 显示加载状态
+                    importBtn.innerHTML = '导入中...';
+                    importBtn.disabled = true;
+                    
+                    // 创建FormData对象
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    // 发送请求
+                    fetch('/api/drugs/import', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // 恢复按钮状态
+                        importBtn.innerHTML = '开始导入';
+                        importBtn.disabled = false;
+                        
+                        if (data.success) {
+                            // 显示成功信息
+                            let message = `导入完成！\n`;
+                            message += `总记录数: ${data.total}\n`;
+                            message += `成功: ${data.success_count}\n`;
+                            message += `失败: ${data.error_count}\n`;
+                            
+                            if (data.error_count > 0) {
+                                message += `\n失败原因:\n`;
+                                data.errors.forEach(error => {
+                                    message += `- ${error}\n`;
+                                });
+                            }
+                            
+                            alert(message);
+                            
+                            // 关闭模态框
+                            closeImportModal();
+                            
+                            // 更新导入历史
+                            updateImportHistory();
+                        } else {
+                            alert(`导入失败: ${data.message}`);
+                        }
+                    })
+                    .catch(error => {
+                        // 恢复按钮状态
+                        importBtn.innerHTML = '开始导入';
+                        importBtn.disabled = false;
+                        
+                        alert(`导入失败: ${error.message}`);
+                    });
+                });
+            }
+        });
+    </script>
+
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

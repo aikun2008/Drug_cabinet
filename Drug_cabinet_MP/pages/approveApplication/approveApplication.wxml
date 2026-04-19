@@ -1,0 +1,48 @@
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <text class="title">审批申请</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 申请记录列表 -->
+  <view wx:else>
+    <view wx:if="{{applications.length > 0}}" class="application-list">
+      <view class="application-item" wx:for="{{applications}}" wx:key="id">
+        <view class="application-header">
+          <text class="drug-name">{{item.name}}</text>
+          <text class="student-name">学生：{{item.student_name}}</text>
+        </view>
+        <view class="application-body">
+          <view class="info-item">
+            <text class="label">规格：</text>
+            <text class="value">{{item.specification}}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">位置：</text>
+            <text class="value">{{item.location}}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">有效期：</text>
+            <text class="value">{{item.expiry_date}}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">药品编码：</text>
+            <text class="value">{{item.medicine_code}}</text>
+          </view>
+        </view>
+        <view class="application-footer">
+          <button class="btn btn-primary" bindtap="approveApplication" data-drug-id="{{item.id}}">通过</button>
+          <button class="btn btn-danger" bindtap="rejectApplication" data-drug-id="{{item.id}}">拒绝</button>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="empty">
+      <text>暂无待审核的申请</text>
+    </view>
+  </view>
+</view>

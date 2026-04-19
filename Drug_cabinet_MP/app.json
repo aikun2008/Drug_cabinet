@@ -1,0 +1,60 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/drugInfo/drugInfo",
+    "pages/drugRecords/drugRecords",
+    "pages/profile/profile"
+  ],
+  "subPackages": [
+    {
+      "root": "pages/record",
+      "pages": ["record"]
+    },
+    {
+      "root": "pages/pendingDrugs",
+      "pages": ["pendingDrugs"]
+    },
+    {
+      "root": "pages/applicationQuery",
+      "pages": ["applicationQuery"]
+    },
+    {
+      "root": "pages/approveApplication",
+      "pages": ["approveApplication"]
+    }
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#1976D2",
+    "navigationBarTitleText": "药品柜系统",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#1976D2",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/drugInfo/drugInfo",
+        "text": "药品信息"
+      },
+      {
+        "pagePath": "pages/drugRecords/drugRecords",
+        "text": "使用记录"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "个人中心"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "componentFramework": "glass-easel",
+  "lazyCodeLoading": "requiredComponents"
+}

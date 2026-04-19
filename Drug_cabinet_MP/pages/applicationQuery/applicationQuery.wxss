@@ -1,0 +1,114 @@
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 20rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 标签栏样式 */
+.tab-bar {
+  display: flex;
+  background-color: #fff;
+  border-radius: 10rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  border-bottom: 3rpx solid transparent;
+}
+
+.tab-item.active {
+  color: #1976D2;
+  border-bottom-color: #1976D2;
+  font-weight: bold;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+}
+
+.application-list {
+  background-color: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.application-item {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.application-item:last-child {
+  border-bottom: none;
+}
+
+.application-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.drug-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.status {
+  font-size: 28rpx;
+  font-weight: bold;
+  padding: 5rpx 15rpx;
+  border-radius: 15rpx;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.application-body {
+  margin-top: 10rpx;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 10rpx;
+}
+
+.label {
+  font-size: 26rpx;
+  color: #666;
+  width: 150rpx;
+}
+
+.value {
+  font-size: 26rpx;
+  color: #333;
+  flex: 1;
+}
+
+.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  background-color: #fff;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+  color: #999;
+}

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室药品智能管理终端 - 用户操作日志</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+    <style>
+        /* 用户操作日志专用样式 */
+        .user-log-container {
+            padding: 20px;
+            background-color: #2c3e50;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .user-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        /* 筛选控件样式 */
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #2c3e50;
+            border-radius: 6px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            color: #ecf0f1;
+            font-weight: 500;
+        }
+        
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #34495e;
+            border-radius: 4px;
+            background: #34495e;
+            color: #ecf0f1;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        
+        .refresh-btn {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background: #2980b9;
+        }
+        
+        /* 表格样式 */
+        .user-log-table {
+            background: #2c3e50;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .log-table-header {
+            padding: 16px 20px;
+            background: #34495e;
+            color: #ecf0f1;
+            font-size: 18px;
+            font-weight: 600;
+            border-bottom: 2px solid #3d566e;
+        }
+        
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .log-table th {
+            background: #34495e;
+            color: #ecf0f1;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #3d566e;
+        }
+        
+        .log-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #3d566e;
+            color: #ecf0f1;
+        }
+        
+        .log-table tbody tr:hover {
+            background: #3d566e;
+        }
+        
+        .log-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* 加载更多样式 */
+        .load-more-container {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #2c3e50;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+        
+        .load-more-btn {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .load-more-btn:hover {
+            background: #2980b9;
+        }
+        
+        .load-more-btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #3498db;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            display: flex;
+            align-items: center;
+            color: #ecf0f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="/admin_dashboard.html#dashboard" class="nav-link" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link" data-target="medicine-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link active" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <div class="content">
+                <div id="user-log-content" class="page-content">
+                    <div class="page-title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <h1>用户操作日志</h1>
+                                <div class="page-breadcrumb">
+                                    <span class="breadcrumb-item">Home</span>
+                                    <span class="icon-arrow-right"></span>
+                                    <span class="breadcrumb-item active">用户操作日志</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 筛选控件 -->
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label class="filter-label">开始时间</label>
+                            <input type="date" id="start-date" class="filter-input">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">结束时间</label>
+                            <input type="date" id="end-date" class="filter-input">
+                        </div>
+                        <div class="filter-group" style="flex: 1;">
+                            <label class="filter-label">人员RFID</label>
+                            <input type="text" id="rfid-search" class="filter-input" placeholder="请输入人员RFID卡号">
+                        </div>
+                        <div class="button-group">
+                            <button class="refresh-btn" onclick="refreshPage()">
+                                <span id="refresh-icon" style="display: inline-block;">刷新</span>
+                            </button>
+                            <button class="refresh-btn" onclick="queryUserOperations()">
+                                <span id="search-icon" style="display: inline-block;">查询</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 用户操作日志表格 -->
+                    <div class="user-log-table">
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th>操作时间</th>
+                                    <th>人员RFID</th>
+                                    <th>操作描述</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-operations-tbody">
+                                <!-- 初始加载数据将通过JavaScript动态填充 -->
+                            </tbody>
+                        </table>
+                        <!-- 加载更多区域 -->
+                        <div class="load-more-container">
+                            <div id="loading-indicator" style="display: none;" class="loading-text">
+                                <div class="loading-spinner"></div>
+                                <span>加载中...</span>
+                            </div>
+                            <button id="load-more-btn" class="load-more-btn" onclick="loadMore()" style="display: none;">
+                                加载更多
+                            </button>
+                            <div id="no-more-data" style="display: none; color: #ecf0f1;">
+                                没有更多数据了
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // 用户操作日志相关功能
+        let currentPage = 1;
+        let totalRecords = 0;
+        let isLoading = false;
+        let hasMoreData = true;
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化日期范围（最近7天）
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+            
+            // 使用本地日期格式化，避免UTC时间问题
+            document.getElementById('start-date').value = formatDateLocal(startDate);
+            document.getElementById('end-date').value = formatDateLocal(endDate);
+            
+            // 初始加载数据
+            loadUserOperations();
+            
+            // 初始化无限滚动
+            initInfiniteScroll();
+        });
+        
+        // 本地日期格式化函数，解决toISOString()返回UTC时间导致的日期错误
+        function formatDateLocal(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 加载用户操作日志
+        async function loadUserOperations(reset = false) {
+            if (isLoading) return;
+            
+            isLoading = true;
+            
+            // 重置分页
+            if (reset) {
+                currentPage = 1;
+                totalRecords = 0;
+                hasMoreData = true;
+                document.getElementById('user-operations-tbody').innerHTML = '';
+            }
+            
+            // 显示加载指示器
+            document.getElementById('loading-indicator').style.display = 'flex';
+            document.getElementById('load-more-btn').style.display = 'none';
+            document.getElementById('no-more-data').style.display = 'none';
+            
+            try {
+                // 构建查询参数
+                const params = new URLSearchParams();
+                params.append('page', currentPage);
+                params.append('limit', 10);
+                
+                // 添加日期范围参数
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                if (startDate) params.append('start_date', startDate);
+                if (endDate) params.append('end_date', endDate);
+                
+                // 添加RFID搜索参数
+                const rfidCardId = document.getElementById('rfid-search').value.trim();
+                if (rfidCardId) params.append('rfid_card_id', rfidCardId);
+                
+                // 调用API获取用户操作数据
+                const response = await fetch(`/api/user-operations?${params}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 更新总记录数
+                    totalRecords = result.total;
+                    
+                    // 渲染数据
+                    renderUserOperations(result.data);
+                    
+                    // 检查是否还有更多数据
+                    hasMoreData = (currentPage * 10) < totalRecords;
+                    
+                    // 更新分页
+                    if (hasMoreData) {
+                        currentPage++;
+                    }
+                } else {
+                    console.error('获取用户操作日志失败:', result.message);
+                    alert('获取用户操作日志失败: ' + result.message);
+                }
+            } catch (error) {
+                console.error('获取用户操作日志失败:', error);
+                alert('获取用户操作日志失败，请查看控制台了解详情');
+            } finally {
+                // 隐藏加载指示器
+                document.getElementById('loading-indicator').style.display = 'none';
+                
+                // 显示加载更多按钮或没有更多数据提示
+                if (hasMoreData) {
+                    document.getElementById('load-more-btn').style.display = 'block';
+                } else {
+                    document.getElementById('no-more-data').style.display = 'block';
+                }
+                
+                isLoading = false;
+            }
+        }
+        
+        // 渲染用户操作日志数据
+        function renderUserOperations(data) {
+            const tbody = document.getElementById('user-operations-tbody');
+            
+            if (data.length === 0 && currentPage === 1) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #7f8c8d;">没有找到匹配的用户操作记录</td></tr>';
+                return;
+            }
+            
+            data.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.operation_time}</td>
+                    <td>${record.rfid_card_id}</td>
+                    <td>${record.description}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // 查询用户操作日志（重新加载）
+        function queryUserOperations() {
+            loadUserOperations(true);
+        }
+        
+        // 加载更多数据
+        function loadMore() {
+            if (!hasMoreData || isLoading) return;
+            loadUserOperations(false);
+        }
+        
+        // 刷新页面
+        function refreshPage() {
+            // 清空搜索输入框
+            document.getElementById('rfid-search').value = '';
+            
+            // 重置日期范围为默认值（最近7天）
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+            
+            // 使用本地日期格式化
+            document.getElementById('start-date').value = formatDateLocal(startDate);
+            document.getElementById('end-date').value = formatDateLocal(endDate);
+            
+            // 重新加载数据
+            loadUserOperations(true);
+        }
+        
+        // 初始化无限滚动
+        function initInfiniteScroll() {
+            const observerOptions = {
+                root: null, // 使用视口作为根元素
+                rootMargin: '0px',
+                threshold: 1.0 // 当元素完全可见时触发
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                const target = entries[0];
+                if (target.isIntersecting && hasMoreData && !isLoading) {
+                    loadMore();
+                }
+            }, observerOptions);
+            
+            // 观察加载更多按钮或没有更多数据提示
+            const loadMoreContainer = document.querySelector('.load-more-container');
+            if (loadMoreContainer) {
+                observer.observe(loadMoreContainer);
+            }
+        }
+    </script>
+
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

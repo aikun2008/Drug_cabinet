@@ -1,0 +1,108 @@
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.header {
+  margin-bottom: 20rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100rpx 0;
+  color: #666;
+}
+
+.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100rpx 0;
+  color: #999;
+}
+
+.application-list {
+  margin-top: 20rpx;
+}
+
+.application-item {
+  background-color: #fff;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.application-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.drug-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.student-name {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.application-body {
+  margin-bottom: 20rpx;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 10rpx;
+}
+
+.label {
+  width: 120rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.value {
+  flex: 1;
+  font-size: 24rpx;
+  color: #333;
+}
+
+.application-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20rpx;
+}
+
+.btn {
+  padding: 15rpx 30rpx;
+  border-radius: 5rpx;
+  font-size: 24rpx;
+  min-width: 120rpx;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: #1976D2;
+  color: #fff;
+  border: none;
+}
+
+.btn-danger {
+  background-color: #F44336;
+  color: #fff;
+  border: none;
+}

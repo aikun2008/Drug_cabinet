@@ -1,0 +1,392 @@
+/* drugInfo.wxss */
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 搜索框 */
+.search-box {
+  display: flex;
+  margin-bottom: 20rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 80rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 10rpx 0 0 10rpx;
+  padding: 0 20rpx;
+  box-sizing: border-box;
+  font-size: 32rpx;
+}
+
+.search-btn {
+  width: 120rpx;
+  height: 80rpx;
+  background-color: #1976D2;
+  color: white;
+  border: none;
+  border-radius: 0 10rpx 10rpx 0;
+  font-size: 32rpx;
+  margin: 0;
+}
+
+/* 药品列表 */
+.drug-list {
+  margin-top: 20rpx;
+}
+
+.drug-item {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+}
+
+.drug-item:active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+.drug-image {
+  width: 120rpx;
+  height: 120rpx;
+  margin-right: 20rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.drug-image image {
+  width: 100%;
+  height: 100%;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+  border: 1rpx dashed #ddd;
+}
+
+.placeholder-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.drug-info {
+  flex: 1;
+  margin-right: 20rpx;
+}
+
+.drug-header {
+  margin-bottom: 10rpx;
+}
+
+.drug-name {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5rpx;
+  display: block;
+}
+
+.drug-category {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.drug-details {
+  display: flex;
+  gap: 30rpx;
+  margin-bottom: 10rpx;
+}
+
+.drug-property {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.drug-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-tag {
+  padding: 4rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  color: white;
+}
+
+.status-available {
+  background-color: #4CAF50;
+}
+
+.status-unavailable {
+  background-color: #f44336;
+}
+
+.drug-expiry {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.arrow {
+  font-size: 36rpx;
+  color: #999;
+  margin-left: 20rpx;
+}
+
+/* 药品详情弹窗 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  width: 90%;
+  max-width: 600rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.close-btn {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+}
+
+.modal-body {
+  padding: 30rpx;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 32rpx;
+  color: #666;
+}
+
+.detail-value {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.modal-footer {
+  padding: 20rpx 30rpx 30rpx;
+  text-align: center;
+}
+
+.btn-primary {
+  width: 100%;
+  height: 80rpx;
+  background-color: #1976D2;
+  color: white;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  margin: 0;
+}
+
+/* 加载更多 */
+.loading-more {
+  text-align: center;
+  padding: 40rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 没有更多数据 */
+.no-more {
+  text-align: center;
+  padding: 40rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 详情部分样式 */
+.detail-section {
+  margin-top: 30rpx;
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.item-list {
+  margin-top: 10rpx;
+  max-height: 400rpx;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.item-row {
+  background-color: #f9f9f9;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 15rpx;
+}
+
+.item-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.item-code {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.item-status {
+  padding: 4rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+}
+
+.status-in-stock {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.status-out-stock {
+  background-color: #f44336;
+  color: white;
+}
+
+.item-details {
+  margin-top: 10rpx;
+}
+
+.item-property {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 5rpx;
+  display: block;
+}
+
+/* 药品操作按钮 */
+.item-actions {
+  display: flex;
+  gap: 10rpx;
+  margin-top: 15rpx;
+  padding-top: 15rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.action-btn {
+  flex: 1;
+  font-size: 26rpx;
+  padding: 10rpx 15rpx;
+  border-radius: 6rpx;
+  border: none;
+  color: white;
+  font-weight: 500;
+  margin: 0;
+}
+
+.reserve-btn {
+  background-color: #2196F3;
+}
+
+.borrow-btn {
+  background-color: #4CAF50;
+}
+
+.cancel-btn {
+  background-color: #FF9800;
+}
+
+.return-btn {
+  background-color: #9C27B0;
+}
+
+.disabled-btn {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+.action-btn:active {
+  opacity: 0.8;
+}
+
+.action-btn[disabled] {
+  opacity: 0.6;
+}
+
+/* 购物车悬浮按钮 */
+.cart-float-button {
+  position: fixed;
+  bottom: 30rpx;
+  right: 30rpx;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-color: #1976D2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.cart-icon {
+  font-size: 40rpx;
+  color: white;
+}
+
+.cart-float-button:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}

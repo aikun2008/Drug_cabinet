@@ -1,0 +1,27 @@
+<view class="container">
+  <view class="header">
+    <text class="title">待借药品</text>
+  </view>
+
+  <view class="content">
+    <view wx:if="{{pendingDrugs.length > 0}}" class="drug-list">
+      <view wx:for="{{pendingDrugs}}" wx:key="id" class="drug-item">
+        <view class="drug-info">
+          <text class="drug-name">{{item.name}}</text>
+          <text class="drug-spec">{{item.specification}}</text>
+          <text class="drug-location">位置: {{item.location}}</text>
+          <text class="drug-expiry">有效期: {{item.expiry_date || '未知'}}</text>
+        </view>
+        <button class="remove-btn" bindtap="removeDrug" data-drug-id="{{item.id}}">移除</button>
+      </view>
+    </view>
+    <view wx:else class="empty">
+      <text>暂无待借药品</text>
+    </view>
+  </view>
+  
+  <!-- 确定预定按钮 -->
+  <view class="bottom-button" wx:if="{{pendingDrugs.length > 0}}">
+    <button class="borrow-btn" bindtap="confirmBorrow">确定预定</button>
+  </view>
+</view>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室药品智能管理终端 - 登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        /* 左侧动画区域 */
+        .left-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+        }
+        
+        /* 浮动动画元素 */
+        .floating-icons {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .floating-icons .icon {
+            position: absolute;
+            font-size: 30px;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-icons .icon:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; }
+        .floating-icons .icon:nth-child(2) { left: 20%; top: 60%; animation-delay: 1s; }
+        .floating-icons .icon:nth-child(3) { left: 30%; top: 30%; animation-delay: 2s; }
+        .floating-icons .icon:nth-child(4) { left: 15%; top: 80%; animation-delay: 3s; }
+        .floating-icons .icon:nth-child(5) { left: 40%; top: 50%; animation-delay: 4s; }
+        .floating-icons .icon:nth-child(6) { left: 5%; top: 40%; animation-delay: 5s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        
+        /* 主标题区域 */
+        .brand-section {
+            text-align: center;
+            z-index: 1;
+        }
+        
+        .brand-logo {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .brand-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 150, 255, 0.5);
+        }
+        
+        .brand-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 3px;
+        }
+        
+        /* 右侧登录区域 */
+        .right-section {
+            width: 550px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 40px;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 380px;
+            padding: 40px;
+            animation: slideIn 0.8s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h2 {
+            color: #fff;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 15px;
+            color: #fff;
+            transition: all 0.3s;
+        }
+        
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+        }
+        
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            color: #ff6b6b;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        /* 装饰线条 */
+        .decoration-line {
+            position: absolute;
+            width: 2px;
+            height: 200px;
+            background: linear-gradient(to bottom, transparent, #00d4ff, transparent);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.5;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .left-section {
+                display: none;
+            }
+            .right-section {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧区域 -->
+    <div class="left-section">
+        <div class="floating-icons">
+            <div class="icon">💊</div>
+            <div class="icon">🔬</div>
+            <div class="icon">⚗️</div>
+            <div class="icon">🧪</div>
+            <div class="icon">💉</div>
+            <div class="icon">🔍</div>
+        </div>
+        
+        <div class="brand-section">
+            <div class="brand-logo">🏥</div>
+            <h1 class="brand-title">实验室药品智能管理终端</h1>
+            <p class="brand-subtitle">INTELLIGENT MANAGEMENT SYSTEM</p>
+        </div>
+    </div>
+    
+    <!-- 右侧登录区域 -->
+    <div class="right-section">
+        <div class="login-container">
+            <div class="login-header">
+                <h2>欢迎登录</h2>
+                <p>请使用您的账号密码登录系统</p>
+            </div>
+            
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form action="/login" method="post">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" placeholder="请输入用户名" value="admin" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" placeholder="请输入密码" value="admin" required>
+                </div>
+
+                <button type="submit" class="btn-login">登 录</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- 备案号信息 -->
+    <footer style="position: absolute; bottom: 0; width: 100%; background-color: rgba(26, 26, 46, 0.8); color: #888; text-align: center; padding: 15px; border-top: 1px solid rgba(51, 51, 51, 0.5);">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 15px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 14px; height: 14px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

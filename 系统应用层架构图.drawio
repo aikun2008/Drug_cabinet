@@ -1,0 +1,217 @@
+<mxfile host="65bd71144e">
+    <diagram id="fviiYLagK6DT6ABPZvsj" name="第 1 页">
+        <mxGraphModel dx="932" dy="922" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3300" pageHeight="4681" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="37" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="13" y="615" width="434" height="264" as="geometry"/>
+                </mxCell>
+                <mxCell id="53" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="178" y="650" width="130" height="94" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="55" y="367" width="553" height="185" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="78" y="403" width="509" height="131" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="55" y="94" width="552" height="215" as="geometry"/>
+                </mxCell>
+                <mxCell id="42" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="79" y="125" width="208" height="176" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="应用层" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=19;" vertex="1" parent="1">
+                    <mxGeometry x="285" y="92" width="75" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="310" y="127" width="279" height="169" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="微信小程序" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="396" y="124" width="93" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="登录" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="130" y="150" width="95" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="登录" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="402" y="150" width="95" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="首页" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="318" y="184" width="265" height="105" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="药品信息" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="328" y="209" width="82" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="申请查询" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="328" y="239" width="82" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="药品记录" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="417" y="209" width="82" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="审批" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="417" y="239" width="82" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="借药/还药" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="503" y="209" width="75" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="个人记录" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="503" y="239" width="75" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="后台层" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=19;" vertex="1" parent="1">
+                    <mxGeometry x="291" y="367" width="75" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="" style="shape=flexArrow;endArrow=classic;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="303" y="358" as="sourcePoint"/>
+                        <mxPoint x="303" y="315" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="28" value="" style="shape=flexArrow;endArrow=classic;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="349" y="315" as="sourcePoint"/>
+                        <mxPoint x="349" y="361" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="30" value="Flask后端服务" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="272" y="406" width="114" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="用户认证服务" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="103" y="441" width="132" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="药品管理服务" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="262.5" y="441" width="132" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="使用记录服务" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="424" y="441" width="132" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" value="设备管理服务" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="103" y="480" width="132" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" value="环境监测服务" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="263" y="480" width="132" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" value="申请审批服务" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="424" y="480" width="132" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="业务层" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=19;" vertex="1" parent="1">
+                    <mxGeometry x="190" y="612" width="75" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="40" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="24" y="650" width="146" height="93" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="Web管理界面" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="123" y="124" width="109" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="设备状态监控" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="113" y="184" width="132" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="用户权限管理" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="113" y="213" width="132" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="环境数据查看" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="113" y="242" width="132" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="系统设置" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="113" y="271" width="132" height="23" as="geometry"/>
+                </mxCell>
+                <mxCell id="44" value="用户管理" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="53" y="652" width="78" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="45" value="1.用户认证与授权&lt;div&gt;&lt;span style=&quot;color: rgb(63, 63, 63); background-color: transparent;&quot;&gt;2.角色权限控制&lt;/span&gt;&lt;div style=&quot;&quot;&gt;3.用户操作记录&lt;/div&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="41" y="675" width="112" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="46" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="24" y="752" width="147" height="111" as="geometry"/>
+                </mxCell>
+                <mxCell id="47" value="环境监测" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="204" y="652" width="78" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="48" value="1.环境数据采集与存储&lt;div&gt;&lt;span style=&quot;color: rgb(63, 63, 63); background-color: transparent;&quot;&gt;2.环境数据异常报警&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="182" y="682" width="136" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="49" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="484" y="602" width="157" height="282" as="geometry"/>
+                </mxCell>
+                <mxCell id="50" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="179" y="752" width="127" height="109" as="geometry"/>
+                </mxCell>
+                <mxCell id="51" value="申请审批" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="204" y="758" width="78" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="52" value="1.药品申请流程&lt;div&gt;&lt;span style=&quot;color: rgb(63, 63, 63); background-color: transparent;&quot;&gt;2.药品审批处理&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;color: rgb(63, 63, 63); background-color: transparent;&quot;&gt;3.申请状态跟踪&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="192.5" y="785" width="100" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="54" value="设备控制" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="56" y="758" width="78" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="55" value="1.门锁状态管理&lt;div&gt;&lt;span style=&quot;color: rgb(63, 63, 63); background-color: transparent;&quot;&gt;2.执行器控制&lt;br&gt;3.设备健康状态评估&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="41" y="785" width="124" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="56" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="314" y="650" width="128" height="97" as="geometry"/>
+                </mxCell>
+                <mxCell id="57" value="药品管理" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="339" y="654" width="78" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="58" value="1.药品查询与搜索&lt;div&gt;&lt;span style=&quot;color: rgb(63, 63, 63); background-color: transparent;&quot;&gt;2.药品信息修改&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;color: rgb(63, 63, 63); background-color: transparent;&quot;&gt;3.药品使用记录&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="327" y="682" width="112" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="59" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="314" y="755" width="125" height="106" as="geometry"/>
+                </mxCell>
+                <mxCell id="60" value="数据储存与分析" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="318" y="760" width="123" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="61" value="1.历史记录储存&lt;div&gt;&lt;span style=&quot;color: rgb(63, 63, 63); background-color: transparent;&quot;&gt;2.数据统计与分析&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;color: rgb(63, 63, 63); background-color: transparent;&quot;&gt;3.报表生成&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="324" y="788" width="112" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="62" value="数据层" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=19;" vertex="1" parent="1">
+                    <mxGeometry x="524.5" y="598" width="75" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="63" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="500.75" y="633" width="122.5" height="111" as="geometry"/>
+                </mxCell>
+                <mxCell id="64" value="MySQL数据库" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="505.5" y="633" width="113" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="65" value="用户信息&lt;div&gt;药品信息&lt;/div&gt;&lt;div&gt;设备信息&lt;/div&gt;&lt;div&gt;操作记录信息&lt;/div&gt;&lt;div&gt;环境历史信息&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="519" y="656.5" width="90" height="84" as="geometry"/>
+                </mxCell>
+                <mxCell id="66" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="500.75" y="754.5" width="122" height="104" as="geometry"/>
+                </mxCell>
+                <mxCell id="67" value="Redis缓存" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;" vertex="1" parent="1">
+                    <mxGeometry x="521" y="755" width="86" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="68" value="药品列表缓存&lt;div&gt;用户信息缓存&lt;/div&gt;&lt;div&gt;搜索结果缓存&lt;/div&gt;&lt;div&gt;环境数据缓存&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="513" y="780.5" width="90" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="70" value="" style="shape=flexArrow;endArrow=classic;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="214.07" y="602" as="sourcePoint"/>
+                        <mxPoint x="214.07" y="559" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="71" value="" style="shape=flexArrow;endArrow=classic;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="253" y="561" as="sourcePoint"/>
+                        <mxPoint x="253" y="607" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="72" value="" style="shape=flexArrow;endArrow=classic;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="541.8499999999999" y="597" as="sourcePoint"/>
+                        <mxPoint x="541.8499999999999" y="554" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="73" value="" style="shape=flexArrow;endArrow=classic;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="580.78" y="556" as="sourcePoint"/>
+                        <mxPoint x="580.78" y="602" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

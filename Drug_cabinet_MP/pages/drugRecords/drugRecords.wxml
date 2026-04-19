@@ -1,0 +1,36 @@
+<view class="container">
+  <view class="header">
+    <text class="title">药品记录</text>
+  </view>
+
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 'reserved' ? 'active' : ''}}" bindtap="switchTab" data-tab="reserved">
+      <text class="tab-text">已预定</text>
+    </view>
+    <view class="tab-item {{activeTab === 'lent' ? 'active' : ''}}" bindtap="switchTab" data-tab="lent">
+      <text class="tab-text">借出中</text>
+    </view>
+    <view class="tab-item {{activeTab === 'returned' ? 'active' : ''}}" bindtap="switchTab" data-tab="returned">
+      <text class="tab-text">已归还</text>
+    </view>
+  </view>
+
+  <view class="content">
+    <view wx:if="{{filteredRecords.length > 0}}" class="record-list">
+      <view wx:for="{{filteredRecords}}" wx:key="id" class="record-item">
+        <view class="record-info">
+          <text class="record-name">{{item.medicine_name || item.name}}</text>
+          <text class="record-spec">{{item.specification}}</text>
+          <text class="record-time">{{item.operation_time}}</text>
+        </view>
+        <view class="record-actions">
+          <text class="record-status">{{item.operation_type || item.status_name}}</text>
+          <button wx:if="{{item.status === 'reserved'}}" class="cancel-btn" bindtap="cancelReserve" data-drug-id="{{item.id}}">取消预定</button>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="empty">
+      <text>暂无记录</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,137 @@
+/* record.wxss */
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 筛选标签 */
+.filter-section {
+  margin-bottom: 20rpx;
+}
+
+.filter-tabs {
+  display: flex;
+  background-color: white;
+  border-radius: 12rpx;
+  padding: 8rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.filter-tab {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 32rpx;
+  color: #666;
+  border-radius: 8rpx;
+  transition: all 0.3s;
+}
+
+.filter-tab.active {
+  background-color: #1976D2;
+  color: white;
+}
+
+/* 记录列表 */
+.record-list {
+  margin-top: 20rpx;
+}
+
+.record-item {
+  background-color: white;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.record-drug-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.record-status {
+  padding: 4rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  color: white;
+}
+
+.status-success {
+  background-color: #4CAF50;
+}
+
+.status-failed {
+  background-color: #f44336;
+}
+
+.record-content {
+  margin-left: 10rpx;
+}
+
+.record-info {
+  display: flex;
+  margin-bottom: 10rpx;
+  align-items: center;
+}
+
+.record-info:last-child {
+  margin-bottom: 0;
+}
+
+.record-label {
+  font-size: 30rpx;
+  color: #666;
+  min-width: 120rpx;
+}
+
+.record-value {
+  font-size: 30rpx;
+  color: #333;
+  flex: 1;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 32rpx;
+}
+
+/* 购物车悬浮按钮 */
+.cart-float-button {
+  position: fixed;
+  bottom: 30rpx;
+  right: 30rpx;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-color: #1976D2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.cart-icon {
+  font-size: 40rpx;
+  color: white;
+}
+
+.cart-float-button:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}

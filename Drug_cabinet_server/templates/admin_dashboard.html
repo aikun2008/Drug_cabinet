@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室药品智能管理终端 - 管理员界面</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="#dashboard" class="nav-link active" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link" data-target="medicine-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <!-- 内容区域 -->
+            <div class="content">
+                <!-- 总览/驾驶舱 -->
+                <div id="dashboard-content" class="page-content">
+                    <div class="page-title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <h1>DASHBOARD</h1>
+                                <div class="page-breadcrumb">
+                                    <span class="breadcrumb-item">Home</span>
+                                    <span class="icon-arrow-right"></span>
+                                    <span class="breadcrumb-item active">Dashboard</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="search-container">
+                                    <span class="search-icon icon-search"></span>
+                                    <input type="text" class="search-input" placeholder="搜索...">
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-avatar">管</div>
+                                    <div class="user-details">
+                                        <div class="user-name">管理员</div>
+                                        <div class="user-role">系统管理员</div>
+                                    </div>
+                                    <!-- 下拉菜单 -->
+                                    <div class="user-dropdown">
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" class="dropdown-item">个人资料</a></li>
+                                            <li><a href="#" class="dropdown-item">修改密码</a></li>
+                                            <li class="dropdown-divider"></li>
+                                            <li><a href="{{ url_for('logout') }}" class="dropdown-item">退出登录</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 统计卡片 -->
+                    <div class="stats-grid">
+                        <a href="/admin_equip_montior.html" class="stat-card-link">
+                            <div class="stat-card fade-in">
+                                <span class="stat-icon">📦</span>
+                                <div class="stat-title">设备在线</div>
+                                <div class="stat-value" id="equipment-stat">加载中...</div>
+                                <div class="stat-change positive" id="equipment-change">- <span class="icon-arrow-right"></span></div>
+                            </div>
+                        </a>
+                        <a href="/admin_drug_catalogue.html" class="stat-card-link">
+                            <div class="stat-card fade-in">
+                                <span class="stat-icon">💊</span>
+                                <div class="stat-title">药品总数</div>
+                                <div class="stat-value" id="drugs-stat">加载中...</div>
+                                <div class="stat-change positive" id="drugs-change">- <span class="icon-arrow-right"></span></div>
+                            </div>
+                        </a>
+                        <a href="/admin_alarm_log.html" class="stat-card-link">
+                            <div class="stat-card fade-in">
+                                <span class="stat-icon">⚠️</span>
+                                <div class="stat-title">当前报警</div>
+                                <div class="stat-value" id="alarms-stat">加载中...</div>
+                                <div class="stat-change" id="alarms-change">- <span class="icon-arrow-right"></span></div>
+                            </div>
+                        </a>
+                        <a href="/admin_user_profile.html" class="stat-card-link">
+                            <div class="stat-card fade-in">
+                                <span class="stat-icon">👥</span>
+                                <div class="stat-title">用户总数</div>
+                                <div class="stat-value" id="users-stat">加载中...</div>
+                                <div class="stat-change positive" id="users-change">- <span class="icon-arrow-right"></span></div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- 图表区域 -->
+                    <div class="charts-grid">
+                        <div class="chart-card fade-in">
+                            <div class="chart-header">
+                                <h3 class="chart-title">设备状态分布</h3>
+                            </div>
+                            <div class="chart-container" style="display: flex; align-items: center; justify-content: space-around; background-color: rgba(52, 73, 94, 0.3); border-radius: 4px; height: 390px; padding: 20px;">
+                                <!-- 双层环形图 -->
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                    <div style="position: relative; width: 140px; height: 140px;" id="double-ring-chart">
+                                        <!-- 外环 - 健康状态 -->
+                                        <div id="health-status-chart" style="position: absolute; top: 0; left: 0; width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(#4CAF50 0% 0%, #FF9800 0% 0%, #F44336 0% 100%); cursor: pointer;" title="健康状态分布"></div>
+                                        <!-- 内环 - 连接状态 -->
+                                        <div id="connection-status-chart" style="position: absolute; top: 20px; left: 20px; width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#2196F3 0% 0%, #9E9E9E 0% 100%); cursor: pointer;" title="连接状态分布"></div>
+                                        <!-- 中心 -->
+                                        <div style="position: absolute; top: 35px; left: 35px; width: 70px; height: 70px; border-radius: 50%; background-color: var(--card-bg); display: flex; align-items: center; justify-content: center;">
+                                            <span id="total-count" style="font-weight: 600; font-size: 20px;">0</span>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">设备总数</div>
+                                </div>
+                                
+                                <!-- 图例 -->
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">连接状态</div>
+                                    <div style="display: flex; align-items: center;">
+                                        <div style="width: 14px; height: 14px; background-color: #2196F3; margin-right: 8px; border-radius: 3px;"></div>
+                                        <span id="online-percentage" style="font-size: 13px;">在线 (0%)</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                        <div style="width: 14px; height: 14px; background-color: #9E9E9E; margin-right: 8px; border-radius: 3px;"></div>
+                                        <span id="offline-percentage" style="font-size: 13px;">离线 (0%)</span>
+                                    </div>
+                                    
+                                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">健康状态</div>
+                                    <div style="display: flex; align-items: center;">
+                                        <div style="width: 14px; height: 14px; background-color: #4CAF50; margin-right: 8px; border-radius: 3px;"></div>
+                                        <span id="normal-percentage" style="font-size: 13px;">正常 (0%)</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center;">
+                                        <div style="width: 14px; height: 14px; background-color: #FF9800; margin-right: 8px; border-radius: 3px;"></div>
+                                        <span id="warning-percentage" style="font-size: 13px;">异常 (0%)</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center;">
+                                        <div style="width: 14px; height: 14px; background-color: #F44336; margin-right: 8px; border-radius: 3px;"></div>
+                                        <span id="alarm-percentage" style="font-size: 13px;">报警 (0%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-card fade-in">
+                            <div class="chart-header">
+                                <h3 class="chart-title">最新活动</h3>
+                            </div>
+                            <div class="chart-container" style="overflow-y: auto; height: 390px; scrollbar-width: thin; scrollbar-color: var(--card-bg-light) transparent;">
+                                <style>
+                                    .chart-container::-webkit-scrollbar {
+                                        width: 4px;
+                                    }
+                                    .chart-container::-webkit-scrollbar-track {
+                                        background: transparent;
+                                    }
+                                    .chart-container::-webkit-scrollbar-thumb {
+                                        background: var(--card-bg-light);
+                                        border-radius: 2px;
+                                    }
+                                    .chart-container::-webkit-scrollbar-thumb:hover {
+                                        background: var(--primary-color);
+                                    }
+                                </style>
+                                <div id="recent-activities-list" style="background-color: var(--card-bg); border-radius: var(--border-radius); padding-right: 8px;">
+                                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">加载中...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+   
+                <div id="remote-ota-content" class="page-content" style="display: none;">
+                    <h1>远程升级</h1>
+                    <p>远程升级内容...</p>
+                </div>
+                
+                <div id="device-config-content" class="page-content" style="display: none;">
+                    <h1>设备配置</h1>
+                    <p>设备配置内容...</p>
+                </div>
+                
+                <div id="user-list-content" class="page-content" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h1>用户档案</h1>
+                        <div style="display: flex; align-items: center;">
+                            <input type="text" id="search-input" placeholder="查找姓名/用户名/ID" style="margin-right: 10px; padding: 5px 10px; border: 1px solid #444; border-radius: 4px; background-color: #1a1a2e; color: white; width: 200px;">
+                            <button class="btn btn-primary" style="min-width: 80px; margin-right: 10px;" onclick="refreshUserList()" id="refresh-btn">
+                                <span id="refresh-icon" style="display: inline-block;">刷新</span>
+                            </button>
+                            <button class="btn btn-success" style="min-width: 80px;" onclick="showAddUserModal()">新增</button>
+                        </div>
+                    </div>
+                    <style>
+                        /* 刷新按钮旋转动画 */
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                        .spin-animation {
+                            animation: spin 1s linear infinite;
+                        }
+                        /* 下拉菜单项悬停效果 */
+                        #role-dropdown > div:hover, #status-dropdown > div:hover {
+                            background-color: #2c3e50;
+                        }
+                    </style>
+                    <script>
+                        // 全局变量存储当前筛选值
+                        let currentRoleFilter = '';
+                        let currentStatusFilter = '';
+                        let currentSearchText = '';
+                        
+                        // 初始化筛选按钮事件监听
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // 查找输入框事件监听
+                            const searchInput = document.getElementById('search-input');
+                            if (searchInput) {
+                                searchInput.addEventListener('input', function() {
+                                    currentSearchText = this.value.toLowerCase().trim();
+                                    filterUsers();
+                                });
+                            }
+                            
+                            // 身份筛选按钮 - 先检查元素是否存在
+                            const roleFilterBtn = document.getElementById('role-filter-btn');
+                            const roleDropdown = document.getElementById('role-dropdown');
+                            
+                            if (roleFilterBtn && roleDropdown) {
+                                roleFilterBtn.addEventListener('click', function(event) {
+                                    event.stopPropagation();
+                                    roleDropdown.style.display = roleDropdown.style.display === 'none' ? 'block' : 'none';
+                                    // 关闭另一个下拉菜单
+                                    const statusDropdown = document.getElementById('status-dropdown');
+                                    if (statusDropdown) {
+                                        statusDropdown.style.display = 'none';
+                                    }
+                                });
+                            }
+                            
+                            // 状态筛选按钮 - 先检查元素是否存在
+                            const statusFilterBtn = document.getElementById('status-filter-btn');
+                            const statusDropdown = document.getElementById('status-dropdown');
+                            
+                            if (statusFilterBtn && statusDropdown) {
+                                statusFilterBtn.addEventListener('click', function(event) {
+                                    event.stopPropagation();
+                                    statusDropdown.style.display = statusDropdown.style.display === 'none' ? 'block' : 'none';
+                                    // 关闭另一个下拉菜单
+                                    const roleDropdown = document.getElementById('role-dropdown');
+                                    if (roleDropdown) {
+                                        roleDropdown.style.display = 'none';
+                                    }
+                                });
+                            }
+                            
+                            // 点击页面其他地方关闭下拉菜单
+                            document.addEventListener('click', function() {
+                                // 先检查变量是否存在
+                                const roleDropdown = document.getElementById('role-dropdown');
+                                const statusDropdown = document.getElementById('status-dropdown');
+                                if (roleDropdown) {
+                                    roleDropdown.style.display = 'none';
+                                }
+                                if (statusDropdown) {
+                                    statusDropdown.style.display = 'none';
+                                }
+                            });
+                        });
+                        
+                        // 应用身份筛选
+                        function applyRoleFilter(role) {
+                            currentRoleFilter = role;
+                            document.getElementById('role-dropdown').style.display = 'none';
+                            filterUsers();
+                        }
+                        
+                        // 应用状态筛选
+                        function applyStatusFilter(status) {
+                            currentStatusFilter = status;
+                            document.getElementById('status-dropdown').style.display = 'none';
+                            filterUsers();
+                        }
+                        
+                        // 筛选用户函数
+                        function filterUsers() {
+                            const rows = document.querySelectorAll('#user-table-body tr');
+                            
+                            rows.forEach(row => {
+                                const cells = row.querySelectorAll('td');
+                                if (cells.length >= 6) {
+                                    const nameCell = cells[0]; // 姓名列（第1列）
+                                    const usernameCell = cells[1]; // 用户名列（第2列）
+                                    const idCell = cells[2]; // ID列（第3列）
+                                    const roleCell = cells[3]; // 身份列（第4列）
+                                    const statusCell = cells[5]; // 状态列（第6列）
+                                    
+                                    // 身份和状态筛选
+                                    const matchesRole = !currentRoleFilter || roleCell.textContent.trim() === currentRoleFilter;
+                                    const matchesStatus = !currentStatusFilter || statusCell.textContent.trim() === currentStatusFilter;
+                                    
+                                    // 搜索筛选（作用于姓名、用户名和ID）
+                                    const matchesSearch = !currentSearchText || 
+                                                        nameCell.textContent.toLowerCase().includes(currentSearchText) ||
+                                                        usernameCell.textContent.toLowerCase().includes(currentSearchText) ||
+                                                        idCell.textContent.toLowerCase().includes(currentSearchText);
+                                    
+                                    row.style.display = (matchesRole && matchesStatus && matchesSearch) ? '' : 'none';
+                                    
+                                    // 确保状态文本颜色与原始样式一致
+                                    const statusText = statusCell.textContent.trim();
+                                    statusCell.style.color = statusText === '启用' ? '#4CAF50' : statusText === '禁用' ? '#F44336' : '';
+                                }
+                            });
+                        }
+                    </script>
+                </div>
+                
+                <div id="permissions-content" class="page-content" style="display: none;">
+                    <h1>权限组配置</h1>
+                    <p>权限组配置内容...</p>
+                </div>
+                
+                <div id="medicine-catalog-content" class="page-content" style="display: none;">
+                    <h1>药品目录</h1>
+                    <p>药品目录内容...</p>
+                </div>
+                
+
+                
+                <div id="inventory-check-content" class="page-content" style="display: none;">
+                    <h1>入库/出库</h1>
+                    <p>入库/出库内容...</p>
+                </div>
+                
+                <div id="environment-records-content" class="page-content" style="display: none;">
+                    <h1>环境数据日志</h1>
+                    <p>环境数据日志内容...</p>
+                </div>
+                
+                <div id="borrow-records-content" class="page-content" style="display: none;">
+                    <h1>药品追溯日志</h1>
+                    <p>药品追溯日志内容...</p>
+                </div>
+                
+                <div id="alarm-records-content" class="page-content" style="display: none;">
+                    <h1>系统报警日志</h1>
+                    <p>系统报警日志内容...</p>
+                </div>
+                
+                <div id="operation-logs-content" class="page-content" style="display: none;">
+                    <h1>用户操作日志</h1>
+                    <p>用户操作日志内容...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 侧边栏切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 侧边栏切换按钮
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    if (sidebar.classList.contains('active')) {
+                        mainContent.style.marginLeft = 'var(--sidebar-width)';
+                    } else {
+                        mainContent.style.marginLeft = '0';
+                    }
+                });
+            }
+            
+            // 窗口大小改变时的处理
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.add('active');
+                    mainContent.style.marginLeft = 'var(--sidebar-width)';
+                } else {
+                    sidebar.classList.remove('active');
+                    mainContent.style.marginLeft = '0';
+                }
+            });
+            
+            // 加载仪表盘统计数据
+            loadDashboardStats();
+            
+            // 加载最新活动
+            loadRecentActivities();
+            
+            // 加载设备健康状态分布
+            loadEquipmentHealthStatus();
+            
+            // 每30秒刷新一次数据
+            setInterval(loadDashboardStats, 30000);
+            
+            // 每30秒刷新一次最新活动
+            setInterval(loadRecentActivities, 30000);
+            
+            // 每30秒刷新一次设备健康状态
+            setInterval(loadEquipmentHealthStatus, 30000);
+        });
+        
+        // 加载仪表盘统计数据
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/dashboard/stats');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const stats = result.data;
+                    
+                    // 更新设备在线数量
+                    if (stats.equipment) {
+                        document.getElementById('equipment-stat').textContent = 
+                            `${stats.equipment.online}/${stats.equipment.total}`;
+                    }
+                    
+                    // 更新药品总数
+                    if (stats.drugs) {
+                        document.getElementById('drugs-stat').textContent = stats.drugs.total;
+                    }
+                    
+                    // 更新当前报警数量
+                    if (stats.alarms) {
+                        const alarmElement = document.getElementById('alarms-stat');
+                        const alarmChangeElement = document.getElementById('alarms-change');
+                        alarmElement.textContent = stats.alarms.total;
+                        
+                        // 根据报警数量设置样式
+                        if (stats.alarms.total > 0) {
+                            alarmElement.style.color = '#F44336'; // 红色
+                            alarmChangeElement.className = 'stat-change negative';
+                            alarmChangeElement.innerHTML = '需处理 <span class="icon-arrow-right"></span>';
+                        } else {
+                            alarmElement.style.color = '#4CAF50'; // 绿色
+                            alarmChangeElement.className = 'stat-change positive';
+                            alarmChangeElement.innerHTML = '正常 <span class="icon-arrow-right"></span>';
+                        }
+                    }
+                    
+                    // 更新用户总数
+                    if (stats.users) {
+                        document.getElementById('users-stat').textContent = stats.users.total;
+                    }
+                } else {
+                    console.error('获取统计数据失败:', result.message);
+                }
+            } catch (error) {
+                console.error('加载仪表盘数据失败:', error);
+            }
+        }
+        
+        // 加载最新活动
+        async function loadRecentActivities() {
+            try {
+                const response = await fetch('/api/recent-activities?limit=6');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    renderRecentActivities(result.data);
+                } else {
+                    console.error('获取最新活动失败:', result.message);
+                }
+            } catch (error) {
+                console.error('加载最新活动失败:', error);
+            }
+        }
+        
+        // 渲染最新活动
+        function renderRecentActivities(activities) {
+            const container = document.getElementById('recent-activities-list');
+            
+            if (!activities || activities.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">暂无活动记录</div>';
+                return;
+            }
+            
+            container.innerHTML = activities.map(activity => {
+                const timeText = formatTimeAgo(activity.timestamp);
+                return `
+                    <div style="display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
+                            <span style="font-size: 14px;">${activity.icon}</span>
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 500; font-size: 14px;">${activity.title}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">${activity.description}</div>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap;">${timeText}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // 格式化时间为"多久前"
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return '-';
+            
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000); // 秒
+            
+            if (diff < 60) {
+                return '刚刚';
+            } else if (diff < 3600) {
+                return Math.floor(diff / 60) + '分钟前';
+            } else if (diff < 86400) {
+                return Math.floor(diff / 3600) + '小时前';
+            } else if (diff < 604800) {
+                return Math.floor(diff / 86400) + '天前';
+            } else {
+                return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
+            }
+        }
+        
+        // 加载设备健康状态分布
+        async function loadEquipmentHealthStatus() {
+            try {
+                const response = await fetch('/api/equipment');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    updateHealthStatusChart(result.data);
+                }
+            } catch (error) {
+                console.error('加载设备健康状态失败:', error);
+            }
+        }
+        
+        // 更新设备状态图表
+        function updateHealthStatusChart(equipmentList) {
+            const totalCount = equipmentList.length;
+            let onlineCount = 0;
+            let offlineCount = 0;
+            let normalCount = 0;
+            let warningCount = 0;
+            let alarmCount = 0;
+            
+            equipmentList.forEach(equipment => {
+                // 统计连接状态
+                if (equipment.connection_status === 0) {
+                    onlineCount++;
+                } else {
+                    offlineCount++;
+                }
+                
+                // 统计健康状态
+                if (equipment.health_status === 0) {
+                    normalCount++;
+                } else if (equipment.health_status === 1) {
+                    warningCount++;
+                } else if (equipment.health_status === 2) {
+                    alarmCount++;
+                }
+            });
+            
+            // 更新总数显示
+            document.getElementById('total-count').textContent = totalCount;
+            
+            // 计算连接状态百分比
+            const onlinePercentage = totalCount > 0 ? (onlineCount / totalCount * 100).toFixed(1) : 0;
+            const offlinePercentage = totalCount > 0 ? (offlineCount / totalCount * 100).toFixed(1) : 0;
+            
+            // 计算健康状态百分比
+            const normalPercentage = totalCount > 0 ? (normalCount / totalCount * 100).toFixed(1) : 0;
+            const warningPercentage = totalCount > 0 ? (warningCount / totalCount * 100).toFixed(1) : 0;
+            const alarmPercentage = totalCount > 0 ? (alarmCount / totalCount * 100).toFixed(1) : 0;
+            
+            // 更新连接状态百分比显示
+            document.getElementById('online-percentage').textContent = `在线 (${onlinePercentage}%)`;
+            document.getElementById('offline-percentage').textContent = `离线 (${offlinePercentage}%)`;
+            
+            // 更新健康状态百分比显示
+            document.getElementById('normal-percentage').textContent = `正常 (${normalPercentage}%)`;
+            document.getElementById('warning-percentage').textContent = `异常 (${warningPercentage}%)`;
+            document.getElementById('alarm-percentage').textContent = `报警 (${alarmPercentage}%)`;
+            
+            // 更新内环 - 连接状态
+            const connectionChart = document.getElementById('connection-status-chart');
+            connectionChart.style.background = `conic-gradient(
+                #2196F3 0% ${onlinePercentage}%,
+                #9E9E9E ${onlinePercentage}% 100%
+            )`;
+            
+            // 更新外环 - 健康状态
+            const healthChart = document.getElementById('health-status-chart');
+            const normalEnd = normalPercentage;
+            const warningEnd = parseFloat(normalPercentage) + parseFloat(warningPercentage);
+            
+            healthChart.style.background = `conic-gradient(
+                #4CAF50 0% ${normalEnd}%,
+                #FF9800 ${normalEnd}% ${warningEnd}%,
+                #F44336 ${warningEnd}% 100%
+            )`;
+        }
+        
+        // 全局变量存储当前设备统计数据
+        let currentEquipmentStats = null;
+        let chartTooltip = null;
+        
+        // 创建提示框元素
+        function createChartTooltip() {
+            if (chartTooltip) return;
+            chartTooltip = document.createElement('div');
+            chartTooltip.id = 'chart-tooltip';
+            chartTooltip.style.cssText = 'display: none; position: fixed; background: rgba(0, 0, 0, 0.85); color: white; padding: 10px 15px; border-radius: 6px; font-size: 13px; pointer-events: none; z-index: 9999; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);';
+            document.body.appendChild(chartTooltip);
+        }
+        
+        // 初始化图表鼠标悬停事件
+        function initChartHoverEvents() {
+            createChartTooltip();
+            
+            const chartContainer = document.getElementById('double-ring-chart');
+            const connectionChart = document.getElementById('connection-status-chart');
+            const healthChart = document.getElementById('health-status-chart');
+            
+            if (!chartContainer || !chartTooltip) return;
+            
+            // 内环 - 连接状态悬停
+            connectionChart.addEventListener('mousemove', function(e) {
+                if (!currentEquipmentStats) return;
+                
+                const rect = connectionChart.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const mouseX = e.clientX - centerX;
+                const mouseY = e.clientY - centerY;
+                
+                // 计算角度
+                let angle = Math.atan2(mouseY, mouseX) * (180 / Math.PI);
+                angle = (angle + 90 + 360) % 360; // 调整为0-360度，从顶部开始
+                
+                // 判断在哪个区域
+                const onlinePercent = parseFloat(currentEquipmentStats.onlinePercentage);
+                const isOnline = angle <= (onlinePercent / 100 * 360);
+                
+                chartTooltip.innerHTML = isOnline 
+                    ? `<strong style="color: #2196F3;">在线</strong><br>数量: ${currentEquipmentStats.onlineCount}<br>占比: ${currentEquipmentStats.onlinePercentage}%`
+                    : `<strong style="color: #9E9E9E;">离线</strong><br>数量: ${currentEquipmentStats.offlineCount}<br>占比: ${currentEquipmentStats.offlinePercentage}%`;
+                
+                chartTooltip.style.display = 'block';
+                chartTooltip.style.left = (e.clientX + 15) + 'px';
+                chartTooltip.style.top = (e.clientY - 15) + 'px';
+            });
+            
+            connectionChart.addEventListener('mouseleave', function() {
+                chartTooltip.style.display = 'none';
+            });
+            
+            // 外环 - 健康状态悬停
+            healthChart.addEventListener('mousemove', function(e) {
+                if (!currentEquipmentStats) return;
+                
+                const rect = healthChart.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const mouseX = e.clientX - centerX;
+                const mouseY = e.clientY - centerY;
+                
+                // 计算角度
+                let angle = Math.atan2(mouseY, mouseX) * (180 / Math.PI);
+                angle = (angle + 90 + 360) % 360; // 调整为0-360度，从顶部开始
+                
+                // 判断在哪个区域
+                const normalPercent = parseFloat(currentEquipmentStats.normalPercentage);
+                const warningPercent = parseFloat(currentEquipmentStats.warningPercentage);
+                const normalEndAngle = (normalPercent / 100 * 360);
+                const warningEndAngle = normalEndAngle + (warningPercent / 100 * 360);
+                
+                let statusText = '';
+                let count = 0;
+                let percent = '';
+                let color = '';
+                
+                if (angle <= normalEndAngle) {
+                    statusText = '正常';
+                    count = currentEquipmentStats.normalCount;
+                    percent = currentEquipmentStats.normalPercentage;
+                    color = '#4CAF50';
+                } else if (angle <= warningEndAngle) {
+                    statusText = '异常';
+                    count = currentEquipmentStats.warningCount;
+                    percent = currentEquipmentStats.warningPercentage;
+                    color = '#FF9800';
+                } else {
+                    statusText = '报警';
+                    count = currentEquipmentStats.alarmCount;
+                    percent = currentEquipmentStats.alarmPercentage;
+                    color = '#F44336';
+                }
+                
+                chartTooltip.innerHTML = `<strong style="color: ${color}">${statusText}</strong><br>数量: ${count}<br>占比: ${percent}%`;
+                
+                chartTooltip.style.display = 'block';
+                chartTooltip.style.left = (e.clientX + 15) + 'px';
+                chartTooltip.style.top = (e.clientY - 15) + 'px';
+            });
+            
+            healthChart.addEventListener('mouseleave', function() {
+                chartTooltip.style.display = 'none';
+            });
+        }
+        
+        // 更新设备状态图表
+        function updateHealthStatusChart(equipmentList) {
+            const totalCount = equipmentList.length;
+            let onlineCount = 0;
+            let offlineCount = 0;
+            let normalCount = 0;
+            let warningCount = 0;
+            let alarmCount = 0;
+            
+            equipmentList.forEach(equipment => {
+                // 统计连接状态
+                if (equipment.connection_status === 0) {
+                    onlineCount++;
+                } else {
+                    offlineCount++;
+                }
+                
+                // 统计健康状态
+                if (equipment.health_status === 0) {
+                    normalCount++;
+                } else if (equipment.health_status === 1) {
+                    warningCount++;
+                } else if (equipment.health_status === 2) {
+                    alarmCount++;
+                }
+            });
+            
+            // 更新总数显示
+            document.getElementById('total-count').textContent = totalCount;
+            
+            // 计算连接状态百分比
+            const onlinePercentage = totalCount > 0 ? (onlineCount / totalCount * 100).toFixed(1) : 0;
+            const offlinePercentage = totalCount > 0 ? (offlineCount / totalCount * 100).toFixed(1) : 0;
+            
+            // 计算健康状态百分比
+            const normalPercentage = totalCount > 0 ? (normalCount / totalCount * 100).toFixed(1) : 0;
+            const warningPercentage = totalCount > 0 ? (warningCount / totalCount * 100).toFixed(1) : 0;
+            const alarmPercentage = totalCount > 0 ? (alarmCount / totalCount * 100).toFixed(1) : 0;
+            
+            // 更新连接状态百分比显示
+            document.getElementById('online-percentage').textContent = `在线 (${onlinePercentage}%)`;
+            document.getElementById('offline-percentage').textContent = `离线 (${offlinePercentage}%)`;
+            
+            // 更新健康状态百分比显示
+            document.getElementById('normal-percentage').textContent = `正常 (${normalPercentage}%)`;
+            document.getElementById('warning-percentage').textContent = `异常 (${warningPercentage}%)`;
+            document.getElementById('alarm-percentage').textContent = `报警 (${alarmPercentage}%)`;
+            
+            // 更新内环 - 连接状态
+            const connectionChart = document.getElementById('connection-status-chart');
+            connectionChart.style.background = `conic-gradient(
+                #2196F3 0% ${onlinePercentage}%,
+                #9E9E9E ${onlinePercentage}% 100%
+            )`;
+            
+            // 更新外环 - 健康状态
+            const healthChart = document.getElementById('health-status-chart');
+            const normalEnd = normalPercentage;
+            const warningEnd = parseFloat(normalPercentage) + parseFloat(warningPercentage);
+            
+            healthChart.style.background = `conic-gradient(
+                #4CAF50 0% ${normalEnd}%,
+                #FF9800 ${normalEnd}% ${warningEnd}%,
+                #F44336 ${warningEnd}% 100%
+            )`;
+            
+            // 保存当前统计数据供悬停提示使用
+            currentEquipmentStats = {
+                totalCount,
+                onlineCount,
+                offlineCount,
+                normalCount,
+                warningCount,
+                alarmCount,
+                onlinePercentage,
+                offlinePercentage,
+                normalPercentage,
+                warningPercentage,
+                alarmPercentage
+            };
+        }
+        
+        // 页面加载完成后初始化悬停事件
+        document.addEventListener('DOMContentLoaded', function() {
+            initChartHoverEvents();
+        });
+    </script>
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

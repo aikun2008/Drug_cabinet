@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室药品智能管理终端 - 药品目录管理</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="/admin_dashboard.html#dashboard" class="nav-link" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link active" data-target="drug-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <!-- 内容区域 -->
+            <div class="content">
+                <!-- 药品目录页面 -->
+                <div id="drug-catalog-content" class="page-content">
+                    <div class="page-title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <h1>药品目录</h1>
+                                <div class="page-breadcrumb">
+                                    <span class="breadcrumb-item">Home</span>
+                                    <span class="icon-arrow-right"></span>
+                                    <span class="breadcrumb-item active">药品目录</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="search-container">
+                                    <span class="search-icon icon-search"></span>
+                                    <input type="text" id="search-input" class="search-input" placeholder="搜索药品编码/名称">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <button class="btn btn-primary" style="min-width: 80px;" onclick="refreshDrugList()" id="refresh-btn">
+                                        <span id="refresh-icon" style="display: inline-block;">刷新</span>
+                                    </button>
+                                    <button class="btn btn-success" style="min-width: 80px;" onclick="showAddDrugModal()">新增</button>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-avatar">管</div>
+                                    <div class="user-details">
+                                        <div class="user-name">管理员</div>
+                                        <div class="user-role">系统管理员</div>
+                                    </div>
+                                    <!-- 下拉菜单 -->
+                                    <div class="user-dropdown">
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" class="dropdown-item">个人资料</a></li>
+                                            <li><a href="#" class="dropdown-item">修改密码</a></li>
+                                            <li class="dropdown-divider"></li>
+                                            <li><a href="{{ url_for('logout') }}" class="dropdown-item">退出登录</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <style>
+                        /* 刷新按钮旋转动画 */
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                        .spin-animation {
+                            animation: spin 1s linear infinite;
+                        }
+                        /* 下拉菜单项悬停效果 */
+                        #type-dropdown > div:hover, #status-dropdown > div:hover,
+                        #cabinet-dropdown > div:hover, #expiry-dropdown > div:hover {
+                            background-color: #2c3e50;
+                        }
+                        /* 紧凑布局优化 */
+                        .page-content {
+                            padding: 15px !important;
+                        }
+                        .page-title {
+                            margin-bottom: 15px !important;
+                        }
+                        .page-title h1 {
+                            margin-bottom: 8px !important;
+                            font-size: 28px !important;
+                        }
+                        .page-breadcrumb {
+                            margin-bottom: 0 !important;
+                        }
+                        /* 搜索和筛选区域紧凑化 */
+                        .search-container {
+                            margin-right: 10px;
+                            position: relative;
+                            display: flex;
+                            align-items: center;
+                        }
+                        .search-icon {
+                            position: absolute;
+                            left: 10px;
+                            z-index: 1;
+                            color: #7f8c8d;
+                        }
+                        .search-input {
+                            padding: 8px 12px 8px 35px !important;
+                            font-size: 15px;
+                            margin-left: 0;
+                        }
+                        .btn {
+                            padding: 8px 16px !important;
+                            font-size: 15px;
+                            margin: 0 2px;
+                        }
+                        /* 表格样式优化 - 紧凑化 */
+                        .drug-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 15px;
+                            background: #34495e;
+                            border-radius: 6px;
+                            overflow: hidden;
+                            font-size: 15px;
+                        }
+                        .drug-table th {
+                            background: #2c3e50;
+                            color: #ecf0f1;
+                            padding: 10px 8px;
+                            text-align: left;
+                            font-weight: 600;
+                            border-bottom: 2px solid #4a6741;
+                            font-size: 14px;
+                        }
+                        .drug-table td {
+                            padding: 10px 8px;
+                            border-bottom: 1px solid #3d566e;
+                            color: #ecf0f1;
+                            line-height: 1.5;
+                        }
+                        .drug-table tr:hover {
+                            background: rgba(74, 103, 65, 0.1);
+                        }
+                        /* 状态标签样式 */
+                        .status-badge {
+                            padding: 4px 8px;
+                            border-radius: 12px;
+                            font-size: 13px;
+                            font-weight: 500;
+                        }
+                        .status-badge.success {
+                            background: #27ae60;
+                            color: white;
+                        }
+                        .status-badge.warning {
+                            background: #f39c12;
+                            color: white;
+                        }
+                        .status-badge.danger {
+                            background: #e74c3c;
+                            color: white;
+                        }
+                        .status-badge.secondary {
+                            background: #95a5a6;
+                            color: white;
+                        }
+                        /* 有效期状态样式 */
+                        .expiry-normal {
+                            background: #27ae60 !important;
+                            color: white !important;
+                        }
+                        .expiry-warning {
+                            background: #f39c12 !important;
+                            color: white !important;
+                        }
+                        .expiry-urgent {
+                            background: #b05f14 !important;
+                            color: #ffffff !important;
+                        }
+                        .expiry-critical {
+                            background: #a31808 !important;
+                            color: white !important;
+                        }
+                        .expiry-expired {
+                            background: #2c3e50 !important;
+                            color: white !important;
+                        }
+                        .expiry-secondary {
+                            background: #95a5a6 !important;
+                            color: white !important;
+                        }
+                        /* 操作按钮样式 */
+                        .action-btn {
+                            padding: 6px 12px;
+                            margin: 2px;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 13px;
+                            transition: all 0.3s;
+                        }
+                        .action-btn.edit {
+                            background: #3498db;
+                            color: white;
+                        }
+                        .action-btn.edit:hover {
+                            background: #2980b9;
+                        }
+                        .action-btn.delete {
+                            background: #e74c3c;
+                            color: white;
+                        }
+                        .action-btn.delete:hover {
+                            background: #c0392b;
+                        }
+                        /* 优化的模态框样式 */
+                        .modal {
+                            display: none;
+                            position: fixed;
+                            z-index: 1000;
+                            left: 0;
+                            top: 0;
+                            width: 100%;
+                            height: 100%;
+                            background-color: rgba(0,0,0,0.6);
+                            backdrop-filter: blur(3px);
+                        }
+                        .modal-content {
+                            background: linear-gradient(145deg, #34495e, #2c3e50);
+                            margin: 3% auto;
+                            padding: 0;
+                            border: 2px solid #4a6741;
+                            border-radius: 12px;
+                            width: 85%;
+                            max-width: 700px;
+                            max-height: 90vh;
+                            overflow-y: auto;
+                            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+                        }
+                        .modal-header {
+                            padding: 20px 25px;
+                            border-bottom: 2px solid #4a6741;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            background: rgba(0,0,0,0.1);
+                        }
+                        .modal-title {
+                            color: #ecf0f1;
+                            font-size: 22px;
+                            font-weight: 600;
+                            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                        }
+                        .close {
+                            color: #bdc3c7;
+                            font-size: 30px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            padding: 5px;
+                            border-radius: 50%;
+                            transition: all 0.3s ease;
+                        }
+                        .close:hover {
+                            color: #ecf0f1;
+                            background: rgba(255,255,255,0.1);
+                            transform: scale(1.1);
+                        }
+                        .modal-body {
+                            padding: 25px;
+                        }
+                        .form-group {
+                            margin-bottom: 20px;
+                            position: relative;
+                        }
+                        .form-label {
+                            display: block;
+                            margin-bottom: 8px;
+                            color: #ecf0f1;
+                            font-weight: 600;
+                            font-size: 14px;
+                            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                        }
+                        .form-control {
+                            width: 100%;
+                            padding: 12px 16px;
+                            border: 2px solid #5d6d7e;
+                            border-radius: 8px;
+                            background: rgba(44, 62, 80, 0.8);
+                            color: #ecf0f1;
+                            font-size: 15px;
+                            transition: all 0.3s ease;
+                            backdrop-filter: blur(5px);
+                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+                        }
+                        .form-control::placeholder {
+                            color: #95a5a6;
+                            font-style: italic;
+                        }
+                        .form-control:focus {
+                            outline: none;
+                            border-color: #3498db;
+                            background: rgba(44, 62, 80, 0.95);
+                            box-shadow: 
+                                0 0 0 3px rgba(52, 152, 219, 0.3),
+                                inset 0 2px 4px rgba(0,0,0,0.3);
+                            transform: translateY(-1px);
+                        }
+                        .form-control:hover {
+                            border-color: #7fb3d5;
+                            background: rgba(44, 62, 80, 0.9);
+                        }
+                        /* 选择框特殊样式 */
+                        select.form-control {
+                            cursor: pointer;
+                        }
+                        .modal-footer {
+                            padding: 20px 25px;
+                            border-top: 2px solid #4a6741;
+                            display: flex;
+                            justify-content: flex-end;
+                            gap: 15px;
+                            background: rgba(0,0,0,0.1);
+                        }
+                        /* 按钮样式优化 */
+                        .modal-footer .btn {
+                            padding: 12px 24px !important;
+                            font-size: 14px !important;
+                            font-weight: 600 !important;
+                            border-radius: 6px !important;
+                            transition: all 0.3s ease !important;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+                        .modal-footer .btn-primary {
+                            background: linear-gradient(145deg, #3498db, #2980b9) !important;
+                            border: none !important;
+                            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+                        }
+                        .modal-footer .btn-primary:hover {
+                            transform: translateY(-2px) !important;
+                            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+                        }
+                        .modal-footer .btn-secondary {
+                            background: linear-gradient(145deg, #95a5a6, #7f8c8d) !important;
+                            border: none !important;
+                            box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3) !important;
+                        }
+                        .modal-footer .btn-secondary:hover {
+                            transform: translateY(-2px) !important;
+                            box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4) !important;
+                        }
+                    </style>
+                    <script>
+                        // 全局变量存储当前筛选值
+                        let currentTypeFilter = '';
+                        let currentStatusFilter = '';
+                        let currentCabinetFilter = '';
+                        let currentExpiryFilter = '';
+                        let currentSearchText = '';
+                        
+                        // 初始化筛选按钮事件监听
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // 查找输入框事件监听
+                            const searchInput = document.getElementById('search-input');
+                            searchInput.addEventListener('input', function() {
+                                currentSearchText = this.value.toLowerCase().trim();
+                                filterDrugs();
+                            });
+                            
+                            // 类型筛选按钮
+                            const typeFilterBtn = document.getElementById('type-filter-btn');
+                            const typeDropdown = document.getElementById('type-dropdown');
+                            
+                            typeFilterBtn.addEventListener('click', function(event) {
+                                event.stopPropagation();
+                                typeDropdown.style.display = typeDropdown.style.display === 'none' ? 'block' : 'none';
+                                // 关闭另一个下拉菜单
+                                document.getElementById('status-dropdown').style.display = 'none';
+                            });
+                            
+                            // 状态筛选按钮
+                            const statusFilterBtn = document.getElementById('status-filter-btn');
+                            const statusDropdown = document.getElementById('status-dropdown');
+                            
+                            statusFilterBtn.addEventListener('click', function(event) {
+                                event.stopPropagation();
+                                statusDropdown.style.display = statusDropdown.style.display === 'none' ? 'block' : 'none';
+                                // 关闭其他下拉菜单
+                                document.getElementById('type-dropdown').style.display = 'none';
+                                document.getElementById('cabinet-dropdown').style.display = 'none';
+                                document.getElementById('expiry-dropdown').style.display = 'none';
+                            });
+
+                            // 所在柜子筛选按钮
+                            const cabinetFilterBtn = document.getElementById('cabinet-filter-btn');
+                            const cabinetDropdown = document.getElementById('cabinet-dropdown');
+                            
+                            cabinetFilterBtn.addEventListener('click', function(event) {
+                                event.stopPropagation();
+                                cabinetDropdown.style.display = cabinetDropdown.style.display === 'none' ? 'block' : 'none';
+                                // 关闭其他下拉菜单
+                                document.getElementById('type-dropdown').style.display = 'none';
+                                document.getElementById('status-dropdown').style.display = 'none';
+                                document.getElementById('expiry-dropdown').style.display = 'none';
+                            });
+
+                            // 有效期状态筛选按钮
+                            const expiryFilterBtn = document.getElementById('expiry-filter-btn');
+                            const expiryDropdown = document.getElementById('expiry-dropdown');
+                            
+                            expiryFilterBtn.addEventListener('click', function(event) {
+                                event.stopPropagation();
+                                expiryDropdown.style.display = expiryDropdown.style.display === 'none' ? 'block' : 'none';
+                                // 关闭其他下拉菜单
+                                document.getElementById('type-dropdown').style.display = 'none';
+                                document.getElementById('status-dropdown').style.display = 'none';
+                                document.getElementById('cabinet-dropdown').style.display = 'none';
+                            });
+                            
+                            // 点击其他地方关闭所有下拉菜单
+                            document.addEventListener('click', function() {
+                                document.getElementById('type-dropdown').style.display = 'none';
+                                document.getElementById('status-dropdown').style.display = 'none';
+                                document.getElementById('cabinet-dropdown').style.display = 'none';
+                                document.getElementById('expiry-dropdown').style.display = 'none';
+                            });
+                            
+                            // 初始化加载药品列表
+                            loadDrugs();
+                        });
+                        
+                        // 加载药品列表
+                        async function loadDrugs() {
+                            try {
+                                const response = await fetch('/api/drugs');
+                                const result = await response.json();
+                                
+                                if (result.success) {
+                                    renderDrugs(result.data);
+                                } else {
+                                    alert('加载药品列表失败: ' + result.message);
+                                }
+                            } catch (error) {
+                                console.error('加载药品列表错误:', error);
+                                alert('加载药品列表失败，请检查网络连接');
+                            }
+                        }
+                        
+                        // 渲染药品列表
+                        function renderDrugs(drugs) {
+                            const tbody = document.querySelector('.drug-table tbody');
+                            if (!tbody) return;
+                            
+                            // 应用筛选
+                            let filteredDrugs = drugs;
+                            
+                            // 搜索筛选 - 只搜索药品编码和药品名称
+                            if (currentSearchText) {
+                                filteredDrugs = filteredDrugs.filter(drug => 
+                                    (drug.drug_name && drug.drug_name.toLowerCase().includes(currentSearchText)) ||
+                                    (drug.medicine_code && drug.medicine_code.toLowerCase().includes(currentSearchText))
+                                );
+                            }
+                            
+                            // 类型筛选
+                            if (currentTypeFilter) {
+                                filteredDrugs = filteredDrugs.filter(drug => 
+                                    drug.type_name === currentTypeFilter
+                                );
+                            }
+                            
+                            // 状态筛选
+                            if (currentStatusFilter) {
+                                filteredDrugs = filteredDrugs.filter(drug => 
+                                    drug.status_name === currentStatusFilter
+                                );
+                            }
+
+                            // 所在柜子筛选
+                            if (currentCabinetFilter) {
+                                filteredDrugs = filteredDrugs.filter(drug => {
+                                    const location = drug.location || '';
+                                    // 支持多种格式的柜子标识匹配
+                                    if (currentCabinetFilter === 'A柜') {
+                                        return location.includes('A') || location.includes('cabinet_001') || location === 'A';
+                                    } else if (currentCabinetFilter === 'B柜') {
+                                        return location.includes('B') || location.includes('cabinet_002') || location === 'B';
+                                    } else if (currentCabinetFilter === 'C柜') {
+                                        return location.includes('C') || location.includes('cabinet_003') || location === 'C';
+                                    } else if (currentCabinetFilter === 'D柜') {
+                                        return location.includes('D') || location.includes('cabinet_004') || location === 'D';
+                                    } else if (currentCabinetFilter === 'E柜') {
+                                        return location.includes('E') || location.includes('cabinet_005') || location === 'E';
+                                    } else if (currentCabinetFilter === 'F柜') {
+                                        return location.includes('F') || location.includes('cabinet_006') || location === 'F';
+                                    } else if (currentCabinetFilter === 'G柜') {
+                                        return location.includes('G') || location.includes('cabinet_007') || location === 'G';
+                                    } else if (currentCabinetFilter === 'H柜') {
+                                        return location.includes('H') || location.includes('cabinet_008') || location === 'H';
+                                    } else if (currentCabinetFilter === 'I柜') {
+                                        return location.includes('I') || location.includes('cabinet_009') || location === 'I';
+                                    } else if (currentCabinetFilter === 'J柜') {
+                                        return location.includes('J') || location.includes('cabinet_010') || location === 'J';
+                                    }
+                                    // 默认精确匹配
+                                    return location === currentCabinetFilter;
+                                });
+                            }
+
+                            // 有效期状态筛选
+                            if (currentExpiryFilter) {
+                                filteredDrugs = filteredDrugs.filter(drug => 
+                                    drug.expiry_status === currentExpiryFilter
+                                );
+                            }
+                            
+                            // 清空表格
+                            tbody.innerHTML = '';
+                            
+                            // 渲染药品行
+                            filteredDrugs.forEach(drug => {
+                                const row = document.createElement('tr');
+                                
+                                // 格式化最后操作时间
+                                let lastOperationDisplay = '';
+                                if (drug.last_operation_time) {
+                                    try {
+                                        const date = new Date(drug.last_operation_time);
+                                        lastOperationDisplay = date.toLocaleString('zh-CN', {
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        });
+                                    } catch (e) {
+                                        lastOperationDisplay = drug.last_operation_time;
+                                    }
+                                }
+                                
+                                row.innerHTML = `
+                                    <td>${drug.medicine_code || ''}</td>
+                                    <td>${drug.drug_name || ''}</td>
+                                    <td>${drug.type_name || ''}</td>
+                                    <td><span class="status-badge ${drug.status === 'in_stock' || drug.status === 'reserved' ? 'success' : drug.status === 'lent_out' ? 'warning' : 'secondary'}">${drug.status_name || ''}</span></td>
+                                    <td>${drug.location || ''}</td>
+                                    <td>${drug.current_holder_id || ''}</td>
+                                    <td><span class="status-badge expiry-${drug.expiry_status_class}" style="background-color: ${drug.expiry_status_class === 'normal' ? '#27ae60' : drug.expiry_status_class === 'warning' ? '#f39c12' : drug.expiry_status_class === 'urgent' ? '#ff6b35' : drug.expiry_status_class === 'critical' ? '#e74c3c' : drug.expiry_status_class === 'expired' ? '#2c3e50' : '#95a5a6'}">${drug.expiry_status_class === 'critical' ? '⚠️' : drug.expiry_status_icon || ''} ${drug.expiry_status || ''}</span></td>
+                                    <td>${lastOperationDisplay}</td>
+                                    <td>
+                                        <button class="action-btn edit" onclick="editDrug(${drug.id})">编辑</button>
+                                        <button class="action-btn delete" onclick="deleteDrug(${drug.id})">删除</button>
+                                    </td>
+                                `;
+                                tbody.appendChild(row);
+                            });
+                        }
+                        
+                        // 筛选功能
+                        function filterDrugs() {
+                            loadDrugs(); // 重新加载并筛选
+                        }
+                        
+                        // 类型筛选
+                        function filterByType(type) {
+                            currentTypeFilter = type;
+                            document.getElementById('type-dropdown').style.display = 'none';
+                            filterDrugs();
+                        }
+                        
+                        // 状态筛选
+                        function filterByStatus(status) {
+                            currentStatusFilter = status;
+                            document.getElementById('status-dropdown').style.display = 'none';
+                            filterDrugs();
+                        }
+
+                        // 所在柜子筛选
+                        function filterByCabinet(cabinet) {
+                            currentCabinetFilter = cabinet;
+                            document.getElementById('cabinet-dropdown').style.display = 'none';
+                            filterDrugs();
+                        }
+
+                        // 有效期状态筛选
+                        function filterByExpiry(expiry) {
+                            currentExpiryFilter = expiry;
+                            document.getElementById('expiry-dropdown').style.display = 'none';
+                            filterDrugs();
+                        }
+
+                        // 表头筛选按钮函数 (适配 admin_user_profile.html 格式)
+                        function applyTypeFilter(filterValue) {
+                            filterByType(filterValue);
+                        }
+
+                        function applyStatusFilter(filterValue) {
+                            filterByStatus(filterValue);
+                        }
+
+                        function applyCabinetFilter(filterValue) {
+                            filterByCabinet(filterValue);
+                        }
+
+                        function applyExpiryFilter(filterValue) {
+                            filterByExpiry(filterValue);
+                        }
+                        
+                        // 刷新列表
+                        function refreshDrugList() {
+                            // 显示旋转动画
+                            const refreshIcon = document.getElementById('refresh-icon');
+                            if (refreshIcon) {
+                                refreshIcon.textContent = '⟳';
+                                refreshIcon.classList.add('spin-animation');
+                            }
+                            
+                            // 调用加载药品数据函数
+                            loadDrugs().finally(() => {
+                                // 数据加载完成后停止动画
+                                setTimeout(() => {
+                                    if (refreshIcon) {
+                                        refreshIcon.classList.remove('spin-animation');
+                                        refreshIcon.textContent = '刷新';
+                                    }
+                                }, 500);
+                            });
+                        }
+                        
+                        // 日期格式转换函数 - 将数据库日期转换为HTML5日期输入格式
+                        function formatDateForInput(dateValue) {
+                            if (!dateValue) return '';
+                            
+                            try {
+                                let date;
+                                
+                                // 处理字符串格式
+                                if (typeof dateValue === 'string') {
+                                    // 尝试解析不同格式的日期字符串
+                                    if (dateValue.includes('/')) {
+                                        // 格式: YYYY/MM/DD
+                                        date = new Date(dateValue.replace(/\//g, '-'));
+                                    } else if (dateValue.includes('-')) {
+                                        // 格式: YYYY-MM-DD
+                                        date = new Date(dateValue);
+                                    } else {
+                                        // 尝试直接解析
+                                        date = new Date(dateValue);
+                                    }
+                                } else if (dateValue instanceof Date) {
+                                    // 已经是Date对象
+                                    date = dateValue;
+                                } else {
+                                    // 其他情况，尝试转换为Date
+                                    date = new Date(dateValue);
+                                }
+                                
+                                // 检查日期是否有效
+                                if (isNaN(date.getTime())) {
+                                    console.warn('无效的日期格式:', dateValue);
+                                    return '';
+                                }
+                                
+                                // 转换为YYYY-MM-DD格式
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                
+                                return `${year}-${month}-${day}`;
+                            } catch (error) {
+                                console.error('日期格式转换错误:', error, '原始值:', dateValue);
+                                return '';
+                            }
+                        }
+                        
+                        // 显示新增药品模态框
+                        function showAddDrugModal() {
+                            showDrugModal();
+                        }
+                        
+                        // 显示编辑药品模态框
+                        function editDrug(drugId) {
+                            showDrugModal(drugId);
+                        }
+                        
+                        // 显示药品模态框（新增/编辑）
+                        async function showDrugModal(drugId = null) {
+                            const modal = document.getElementById('drugModal');
+                            const title = document.getElementById('drugModalTitle');
+                            const form = document.getElementById('drugForm');
+                            
+                            // 重置表单
+                            form.reset();
+                            
+                            if (drugId) {
+                                // 编辑模式
+                                title.textContent = '编辑药品';
+                                
+                                try {
+                                    const response = await fetch(`/api/drugs/${drugId}`);
+                                    const result = await response.json();
+                                    
+                                    if (result.success) {
+                                        const drug = result.data;
+                                        // 填充表单 - 使用数据库字段名
+                                        document.getElementById('medicine_code').value = drug.medicine_code || '';
+                                        document.getElementById('name').value = drug.name || '';
+                                        document.getElementById('type').value = drug.type || '0';
+                                        document.getElementById('specification').value = drug.specification || '';
+                                        document.getElementById('manufacturer').value = drug.manufacturer || '';
+                                        document.getElementById('batch_number').value = drug.batch_number || '';
+                                        // 处理日期格式，确保转换为YYYY-MM-DD格式
+                                        document.getElementById('production_date').value = drug.production_date ? formatDateForInput(drug.production_date) : '';
+                                        document.getElementById('expiry_date').value = drug.expiry_date ? formatDateForInput(drug.expiry_date) : '';
+                                        document.getElementById('storage_condition').value = drug.storage_condition || '室温保存';
+                                        document.getElementById('location').value = drug.location || '';
+                                        document.getElementById('current_holder_id').value = drug.current_holder_id || '';
+                                        document.getElementById('unit').value = drug.unit || '';
+                                        document.getElementById('status').value = drug.status || 'in_stock';
+                                        
+                                        form.dataset.drugId = drugId;
+                                    } else {
+                                        alert('获取药品信息失败: ' + result.message);
+                                        return;
+                                    }
+                                } catch (error) {
+                                    console.error('获取药品信息错误:', error);
+                                    alert('获取药品信息失败');
+                                    return;
+                                }
+                            } else {
+                                // 新增模式
+                                title.textContent = '新增药品';
+                                form.dataset.drugId = '';
+                            }
+                            
+                            modal.style.display = 'block';
+                        }
+                        
+                        // 关闭模态框
+                        function closeDrugModal() {
+                            const modal = document.getElementById('drugModal');
+                            modal.style.display = 'none';
+                        }
+                        
+                        // 保存药品
+                        async function saveDrug() {
+                            const form = document.getElementById('drugForm');
+                            const formData = new FormData(form);
+                            const data = {};
+                            
+                            // 获取表单数据，使用正确的数据库字段名
+                            for (let [key, value] of formData.entries()) {
+                                if (value.trim() !== '') {
+                                    data[key] = value;
+                                }
+                            }
+                            
+                            // 确保type字段为字符串（因为数据库是enum类型）
+                            if (data.type) {
+                                data.type = data.type.toString();
+                            }
+                            
+                            // 确保status字段为字符串（因为数据库是enum类型）
+                            if (data.status) {
+                                data.status = data.status.toString();
+                            }
+                            
+                            const drugId = form.dataset.drugId;
+                            const isEdit = drugId && drugId !== '';
+                            
+                            // 新增药品时自动设置created_at
+                            if (!isEdit) {
+                                data.created_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                            }
+                            
+                            try {
+                                const url = isEdit ? `/api/drugs/${drugId}` : '/api/drugs';
+                                const method = isEdit ? 'PUT' : 'POST';
+                                
+                                const response = await fetch(url, {
+                                    method: method,
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify(data)
+                                });
+                                
+                                const result = await response.json();
+                                
+                                if (result.success) {
+                                    alert(isEdit ? '药品更新成功' : '药品添加成功');
+                                    closeDrugModal();
+                                    loadDrugs(); // 重新加载列表
+                                } else {
+                                    alert((isEdit ? '更新' : '添加') + '药品失败: ' + result.message);
+                                }
+                            } catch (error) {
+                                console.error((isEdit ? '更新' : '添加') + '药品错误:', error);
+                                alert((isEdit ? '更新' : '添加') + '药品失败，请检查网络连接');
+                            }
+                        }
+                        
+                        // 删除药品
+                        function deleteDrug(drugId) {
+                            if (!confirm('确定要删除这个药品吗？此操作不可恢复。')) {
+                                return;
+                            }
+                            
+                            fetch(`/api/drugs/${drugId}`, {
+                                method: 'DELETE'
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    alert('药品删除成功');
+                                    loadDrugs(); // 重新加载列表
+                                } else {
+                                    alert('删除药品失败: ' + result.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('删除药品错误:', error);
+                                alert('删除药品失败，请检查网络连接');
+                            });
+                        }
+                        
+                        // 模态框关闭事件
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // 关闭模态框事件
+                            const modal = document.getElementById('drugModal');
+                            const span = document.getElementsByClassName('close')[0];
+                            
+                            span.onclick = closeDrugModal;
+                            
+                            window.onclick = function(event) {
+                                if (event.target === modal) {
+                                    closeDrugModal();
+                                }
+                            }
+                        });
+                    </script>
+                    
+                    <!-- 药品列表表格 -->
+                    <div class="drug-table-container" style="background: #2c3e50; border-radius: 2px; padding: 2px; margin-top: 2px;">
+                        <table class="drug-table">
+                            <thead>
+                                <tr>
+                                    <th>药品编码</th>
+                                    <th>药品名称</th>
+                                    <th style="position: relative;">
+                                        类型
+                                        <button id="type-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
+                                        ▼
+                                        </button>
+                                        <div id="type-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 120px; background-color: #34495e; border: 1px solid #555; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyTypeFilter('')">全部类型</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyTypeFilter('普通药品')">普通药品</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyTypeFilter('管制药品')">管制药品</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyTypeFilter('危化品')">危化品</div>
+                                        </div>
+                                    </th>
+                                    <th style="position: relative;">
+                                        状态
+                                        <button id="status-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
+                                        ▼
+                                        </button>
+                                        <div id="status-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100px; background-color: #34495e; border: 1px solid #555; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyStatusFilter('')">全部状态</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyStatusFilter('库存中')">库存中</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyStatusFilter('已借出')">已借出</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyStatusFilter('已废弃')">已废弃</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyStatusFilter('已预定')">已预定</div>
+                                        </div>
+                                    </th>
+                                    <th style="position: relative;">
+                                        所在柜子
+                                        <button id="cabinet-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
+                                        ▼
+                                        </button>
+                                        <div id="cabinet-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 120px; background-color: #34495e; border: 1px solid #555; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('')">全部柜子</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('A柜')">cabinet_001</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('B柜')">cabinet_002</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('C柜')">cabinet_003</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('D柜')">cabinet_004</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('E柜')">cabinet_005</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('F柜')">cabinet_006</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('G柜')">cabinet_007</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('H柜')">cabinet_008</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('I柜')">cabinet_009</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('J柜')">cabinet_010</div>
+
+                                        </div>
+                                    </th>
+                                    <th>持有人</th>
+                                    <th style="position: relative;">
+                                        有效期状态
+                                        <button id="expiry-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
+                                        ▼
+                                        </button>
+                                        <div id="expiry-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 140px; background-color: #34495e; border: 1px solid #555; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyExpiryFilter('')">全部状态</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyExpiryFilter('正常')">正常</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyExpiryFilter('预警')">预警</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyExpiryFilter('紧急')">紧急</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyExpiryFilter('临界')">临界</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyExpiryFilter('过期')">过期</div>
+                                            <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyExpiryFilter('未知')">未知</div>
+                                        </div>
+                                    </th>
+                                    <th>最后操作</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="drug-table-body">
+                                <!-- 药品数据将在这里动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 药品模态框 -->
+    <div id="drugModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="drugModalTitle">新增药品</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="drugForm">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label class="form-label">药品编码 *</label>
+                            <input type="text" id="medicine_code" name="medicine_code" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">药品名称 *</label>
+                            <input type="text" id="name" name="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">药品类型</label>
+                            <select id="type" name="type" class="form-control">
+                                <option value="0">普通药品</option>
+                                <option value="1">管制药品</option>
+                                <option value="2">危化品</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">规格</label>
+                            <input type="text" id="specification" name="specification" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">生产厂商</label>
+                            <input type="text" id="manufacturer" name="manufacturer" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">批号</label>
+                            <input type="text" id="batch_number" name="batch_number" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">生产日期</label>
+                            <input type="date" id="production_date" name="production_date" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">有效期</label>
+                            <input type="date" id="expiry_date" name="expiry_date" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">存储条件</label>
+                            <select id="storage_condition" name="storage_condition" class="form-control">
+                                <option value="室温保存">室温保存</option>
+                                <option value="2-8°C保存">2-8°C保存</option>
+                                <option value="-20°C保存">-20°C保存</option>
+                                <option value="-80°C保存">-80°C保存</option>
+                                <option value="避光保存">避光保存</option>
+                                <option value="干燥保存">干燥保存</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">所在柜子</label>
+                            <input type="text" id="location" name="location" class="form-control" placeholder="如：A柜、B柜、C柜">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">当前持有人ID</label>
+                            <input type="text" id="current_holder_id" name="current_holder_id" class="form-control" placeholder="可选">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">单位</label>
+                            <input type="text" id="unit" name="unit" class="form-control" placeholder="如：瓶、盒、g、ml">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">状态</label>
+                            <select id="status" name="status" class="form-control">
+                                <option value="in_stock">库存中</option>
+                                <option value="lent_out">已借出</option>
+                                <option value="discarded">已废弃</option>
+                                <option value="reserved">已预定</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDrugModal()">取消</button>
+                <button type="button" class="btn btn-success" onclick="saveDrug()">保存</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

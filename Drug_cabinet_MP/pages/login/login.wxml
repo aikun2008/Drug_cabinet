@@ -1,0 +1,39 @@
+<view class="container">
+  <view class="login-form">
+    <view class="logo">
+      <text class="logo-text">药品柜系统</text>
+    </view>
+    
+    <view class="form-item">
+      <text class="label">用户名</text>
+      <input class="input" placeholder="请输入用户名" bindinput="onUsernameInput" value="{{username}}" />
+    </view>
+    
+    <view class="form-item">
+      <text class="label">密码</text>
+      <input class="input" placeholder="请输入密码" password bindinput="onPasswordInput" value="{{password}}" />
+    </view>
+    
+    <view class="error" wx:if="{{error}}">{{error}}</view>
+    
+    <button class="btn" type="primary" bindtap="onLogin" loading="{{loading}}">登录</button>
+    
+    <view class="role-info">
+      <text class="role-info-text">角色说明：</text>
+      <view class="role-list">
+        <view class="role-item">
+          <text class="role-icon">👨‍🎓</text>
+          <text class="role-name">学生</text>
+        </view>
+        <view class="role-item">
+          <text class="role-icon">👨‍🏫</text>
+          <text class="role-name">教师</text>
+        </view>
+        <view class="role-item">
+          <text class="role-icon">👑</text>
+          <text class="role-name">管理员</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室药品智能管理终端 - 设备配置</title>
+    <link rel="stylesheet" href="/static/css/admin_dashboard.css">
+    <style>
+        /* 确保页面背景正确显示 */
+        body {
+            background-color: #1a252f;
+            color: #ecf0f1;
+        }
+    </style>
+    <style>
+        /* 添加一些额外的样式以确保模态框正确显示 */
+        #equipment-details-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        /* 刷新按钮旋转动画 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spin-animation {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 - 从设备总览页面复制 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>实验室药品管理系统</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-title">主导航</li>
+                <li class="nav-item">
+                    <a href="/admin_dashboard.html#dashboard" class="nav-link" data-target="dashboard">
+                        <span class="nav-icon icon-dashboard"></span>
+                        系统总览
+                    </a>
+                </li>
+                
+                <li class="nav-title">设备运维</li>
+                <li class="nav-item">
+                    <a href="/admin_equip_montior.html" class="nav-link" data-target="device-list">
+                        <span class="nav-icon icon-devices"></span>
+                        设备监控
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_config.html" class="nav-link active" data-target="device-config">
+                        <span class="nav-icon icon-settings"></span>
+                        设备配置
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_equip_ota.html" class="nav-link" data-target="remote-ota">
+                        <span class="nav-icon icon-refresh"></span>
+                        远程升级
+                    </a>
+                </li>
+                
+                <li class="nav-title">权限与用户</li>
+                <li class="nav-item">
+                    <a href="/admin_user_profile.html" class="nav-link" data-target="user-list">
+                        <span class="nav-icon icon-users"></span>
+                        用户档案
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_config.html" class="nav-link" data-target="permissions">
+                        <span class="nav-icon icon-permissions"></span>
+                        权限组配置
+                    </a>
+                </li>
+                
+                <li class="nav-title">药品库存</li>
+                <li class="nav-item">
+                    <a href="/admin_drug_catalogue.html" class="nav-link" data-target="medicine-catalog">
+                        <span class="nav-icon icon-medicine"></span>
+                        药品目录
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin_drug_input_output.html" class="nav-link" data-target="inventory-check">
+                        <span class="nav-icon icon-inventory"></span>
+                        入库/出库
+                    </a>
+                </li>
+                
+                <li class="nav-title">审计追踪</li>
+                <li class="nav-item">
+                    <a href="/admin_env_log.html" class="nav-link" data-target="environment-records">
+                        <span class="nav-icon icon-records"></span>
+                        环境数据日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_drug_log.html" class="nav-link" data-target="borrow-records">
+                        <span class="nav-icon icon-records"></span>
+                        药品追溯日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_alarm_log.html" class="nav-link" data-target="alarm-records">
+                        <span class="nav-icon icon-alarm"></span>
+                        系统报警日志
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin_user_log.html" class="nav-link" data-target="user-logs">
+                        <span class="nav-icon icon-logs"></span>
+                        用户操作日志
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="main-content" style="margin-left: var(--sidebar-width);">
+            <!-- 内容区域 -->
+            <div class="content">
+                <div id="device-config-content" class="page-content">
+                    <!-- 上方导航栏 - 从设备监控页面复制 -->
+                    <div class="page-title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <h1>设备配置</h1>
+                                <div class="page-breadcrumb">
+                                    <span class="breadcrumb-item">Home</span>
+                                    <span class="icon-arrow-right"></span>
+                                    <span class="breadcrumb-item active">设备配置</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="search-container">
+                                    <span class="search-icon icon-search"></span>
+                                    <input type="text" id="search-input" class="search-input" placeholder="查找设备名称/设备ID">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <button class="btn btn-primary" style="min-width: 80px;" onclick="refreshDeviceList()" id="refresh-btn">
+                                        <span id="device-refresh-icon" style="display: inline-block;">刷新</span>
+                                    </button>
+                                    <button class="btn btn-success" style="min-width: 80px;" onclick="showAddEquipmentModal()">新增</button>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-avatar">管</div>
+                                    <div class="user-details">
+                                        <div class="user-name">管理员</div>
+                                        <div class="user-role">系统管理员</div>
+                                    </div>
+                                    <!-- 下拉菜单 -->
+                                    <div class="user-dropdown">
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" class="dropdown-item">个人资料</a></li>
+                                            <li><a href="#" class="dropdown-item">修改密码</a></li>
+                                            <li class="dropdown-divider"></li>
+                                            <li><a href="{{ url_for('logout') }}" class="dropdown-item">退出登录</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 设备列表 -->
+                    <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; overflow: hidden;">
+                        <div style="padding: 15px;">
+                            <h3 style="font-size: 16px; margin-bottom: 0;">设备配置列表</h3>
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: rgba(255, 255, 255, 0.05);">
+                                    <th style="padding: 12px 15px; text-align: left; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">设备ID</th>
+                                    <th style="padding: 12px 15px; text-align: left; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">正常范围</th>
+                                    <th style="padding: 12px 15px; text-align: left; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">异常范围</th>
+                                    <th style="padding: 12px 15px; text-align: left; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="device-config-table-body">
+                                <!-- 设备配置列表将通过JavaScript动态生成 -->
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: 20px;">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 编辑设备配置模态框 -->
+    <div id="edit-config-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background-color: #2c3e50; border-radius: 8px; width: 600px; max-width: 90%; max-height: 90%; overflow-y: auto;">
+            <div style="padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <h3 style="margin: 0; color: #ecf0f1;">编辑设备配置</h3>
+            </div>
+            <div style="padding: 20px;">
+                <form id="edit-config-form">
+                    <input type="hidden" id="edit-config-id">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">设备ID:</label>
+                        <input type="text" id="edit-equipment-id" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;" readonly>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">温度正常最小值(°C):</label>
+                            <input type="number" id="edit-temp-nor-min" step="0.01" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">温度正常最大值(°C):</label>
+                            <input type="number" id="edit-temp-nor-max" step="0.01" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">温度异常最小值(°C):</label>
+                            <input type="number" id="edit-temp-abn-min" step="0.01" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">温度异常最大值(°C):</label>
+                            <input type="number" id="edit-temp-abn-max" step="0.01" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">湿度正常最小值(%):</label>
+                            <input type="number" id="edit-humi-nor-min" step="0.01" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">湿度正常最大值(%):</label>
+                            <input type="number" id="edit-humi-nor-max" step="0.01" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">湿度异常最小值(%):</label>
+                            <input type="number" id="edit-humi-abn-min" step="0.01" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">湿度异常最大值(%):</label>
+                            <input type="number" id="edit-humi-abn-max" step="0.01" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">AQI正常最大值:</label>
+                            <input type="number" id="edit-aqi-nor-max" step="0.01" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">AQI异常最大值:</label>
+                            <input type="number" id="edit-aqi-abn-max" step="0.01" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">正常超时时间(秒):</label>
+                            <input type="number" id="edit-timeout-nor" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #ecf0f1;">异常超时时间(秒):</label>
+                            <input type="number" id="edit-timeout-abn" style="width: 100%; padding: 10px; background-color: #34495e; border: 1px solid #455a64; border-radius: 4px; color: #ecf0f1;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                        <button type="button" onclick="closeEditConfigModal()" style="padding: 10px 20px; background-color: #7f8c8d; border: none; border-radius: 4px; color: #ecf0f1; cursor: pointer;">取消</button>
+                        <button type="submit" style="padding: 10px 20px; background-color: #3498db; border: none; border-radius: 4px; color: #ecf0f1; cursor: pointer;">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            sidebar.classList.toggle('collapsed');
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '60px';
+            } else {
+                mainContent.style.marginLeft = 'var(--sidebar-width)';
+            }
+        }
+        
+        // 窗口大小变化时的响应
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('collapsed');
+                mainContent.style.marginLeft = '60px';
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.style.marginLeft = 'var(--sidebar-width)';
+            }
+        });
+        
+        // 已在下方的DOMContentLoaded中统一处理
+        
+        // 刷新设备列表
+        function refreshDeviceList() {
+            const refreshIcon = document.getElementById('device-refresh-icon');
+            const refreshBtn = document.getElementById('refresh-btn');
+            
+            // 添加旋转动画
+            refreshIcon.classList.add('spin-animation');
+            refreshBtn.disabled = true;
+            
+            // 模拟刷新操作
+            setTimeout(() => {
+                // 移除旋转动画
+                refreshIcon.classList.remove('spin-animation');
+                refreshBtn.disabled = false;
+                
+                // 这里可以添加实际的刷新逻辑
+                console.log('设备列表已刷新');
+            }, 1000);
+        }
+        
+        // 显示添加设备模态框
+        function showAddEquipmentModal() {
+            console.log('显示添加设备模态框');
+            // 这里可以添加显示模态框的逻辑
+        }
+        
+        // 存储完整的设备配置数据
+        let allDeviceConfigs = [];
+        
+        // 获取设备配置列表数据
+        function fetchDeviceConfigList() {
+            const tableBody = document.getElementById('device-config-table-body');
+            tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">加载中...</td></tr>';
+            
+            // 从后端API获取设备配置数据
+            fetch('/api/equipment-config')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data.length > 0) {
+                        // 保存完整数据用于过滤
+                        allDeviceConfigs = data.data;
+                        // 渲染设备配置列表
+                        renderDeviceConfigList(allDeviceConfigs);
+                    } else {
+                        allDeviceConfigs = [];
+                        renderDeviceConfigList([]);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取设备配置数据失败:', error);
+                    tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #f44336;">加载数据失败</td></tr>';
+                });
+        }
+        
+        // 渲染设备配置列表
+        function renderDeviceConfigList(configList) {
+            const tableBody = document.getElementById('device-config-table-body');
+            tableBody.innerHTML = '';
+            
+            if (configList.length > 0) {
+                // 渲染设备配置列表
+                configList.forEach((config, index) => {
+                    const row = document.createElement('tr');
+                    if (index < configList.length - 1) {
+                        row.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                    }
+                    
+                    // 格式化正常范围和异常范围显示
+                    const normalRange = `温度: ${config.temp_NOR_min}-${config.temp_NOR_max}°C, 湿度: ${config.humi_NOR_min}-${config.humi_NOR_max}%, AQI: ≤${config.aqi_NOR_max}`;
+                    const abnormalRange = `温度: <${config.temp_ABN_min}°C或>${config.temp_ABN_max}°C, 湿度: <${config.humi_ABN_min}%或>${config.humi_ABN_max}%, AQI: >${config.aqi_ABN_max}`;
+                    
+                    row.innerHTML = `
+                        <td style="padding: 12px 15px;">${config.equipment_id}</td>
+                        <td style="padding: 12px 15px;">${normalRange}</td>
+                        <td style="padding: 12px 15px;">${abnormalRange}</td>
+                        <td style="padding: 12px 15px;">
+                            <button style="background: none; border: 1px solid #2196F3; border-radius: 4px; color: #2196F3; cursor: pointer; padding: 6px 12px; margin-right: 8px; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(33, 150, 243, 0.1)'" onmouseout="this.style.backgroundColor='none'" onclick="editDeviceConfig(${config.id})">编辑</button>
+                            <button style="background: none; border: 1px solid #F44336; border-radius: 4px; color: #F44336; cursor: pointer; padding: 6px 12px; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(244, 67, 54, 0.1)'" onmouseout="this.style.backgroundColor='none'" onclick="deleteDeviceConfig(${config.id})">删除</button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            } else {
+                // 显示无数据提示
+                const noDataRow = document.createElement('tr');
+                noDataRow.innerHTML = `
+                    <td colspan="4" style="text-align: center; padding: 20px; color: #999;">暂无设备配置数据</td>
+                `;
+                tableBody.appendChild(noDataRow);
+            }
+        }
+        
+        // 过滤设备配置列表
+        function filterDeviceConfigList() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            if (!searchTerm) {
+                // 如果搜索框为空，显示所有数据
+                renderDeviceConfigList(allDeviceConfigs);
+                return;
+            }
+            
+            // 根据设备ID过滤数据
+            const filteredConfigs = allDeviceConfigs.filter(config => 
+                config.equipment_id.toLowerCase().includes(searchTerm)
+            );
+            
+            // 渲染过滤后的数据
+            renderDeviceConfigList(filteredConfigs);
+        }
+        
+        // 显示新增设备配置模态框
+        function showAddEquipmentModal() {
+            // 清空表单数据
+            document.getElementById('add-config-form').reset();
+            // 显示模态框
+            document.getElementById('add-config-modal').style.display = 'flex';
+        }
+        
+        // 关闭新增配置模态框
+        function closeAddConfigModal() {
+            document.getElementById('add-config-modal').style.display = 'none';
+        }
+        
+        // 保存新增设备配置
+        function saveNewDeviceConfig(event) {
+            event.preventDefault();
+            
+            // 获取表单数据
+            const configData = {
+                equipment_id: document.getElementById('add-equipment-id').value,
+                temp_NOR_min: parseFloat(document.getElementById('add-temp-nor-min').value),
+                temp_NOR_max: parseFloat(document.getElementById('add-temp-nor-max').value),
+                temp_ABN_min: parseFloat(document.getElementById('add-temp-abn-min').value),
+                temp_ABN_max: parseFloat(document.getElementById('add-temp-abn-max').value),
+                humi_NOR_min: parseFloat(document.getElementById('add-humi-nor-min').value),
+                humi_NOR_max: parseFloat(document.getElementById('add-humi-nor-max').value),
+                humi_ABN_min: parseFloat(document.getElementById('add-humi-abn-min').value),
+                humi_ABN_max: parseFloat(document.getElementById('add-humi-abn-max').value),
+                aqi_NOR_max: parseFloat(document.getElementById('add-aqi-nor-max').value),
+                aqi_ABN_max: parseFloat(document.getElementById('add-aqi-abn-max').value)
+            };
+            
+            // 发送新增请求到后端API
+            fetch('/api/equipment-config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(configData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('设备配置新增成功');
+                    closeAddConfigModal();
+                    fetchDeviceConfigList(); // 重新加载列表
+                } else {
+                    alert(`新增失败: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                console.error('新增设备配置失败:', error);
+                alert('新增设备配置失败');
+            });
+        }
+        
+        // 编辑设备配置
+        function editDeviceConfig(configId) {
+            // 通过API获取设备配置的详细信息
+            fetch(`/api/equipment-config`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        // 查找匹配的配置
+                        const config = data.data.find(item => item.id === configId);
+                        if (config) {
+                            // 填充表单数据
+                            document.getElementById('edit-config-id').value = config.id;
+                            document.getElementById('edit-equipment-id').value = config.equipment_id;
+                            document.getElementById('edit-temp-nor-min').value = config.temp_NOR_min;
+                            document.getElementById('edit-temp-nor-max').value = config.temp_NOR_max;
+                            document.getElementById('edit-temp-abn-min').value = config.temp_ABN_min;
+                            document.getElementById('edit-temp-abn-max').value = config.temp_ABN_max;
+                            document.getElementById('edit-humi-nor-min').value = config.humi_NOR_min;
+                            document.getElementById('edit-humi-nor-max').value = config.humi_NOR_max;
+                            document.getElementById('edit-humi-abn-min').value = config.humi_ABN_min;
+                            document.getElementById('edit-humi-abn-max').value = config.humi_ABN_max;
+                            document.getElementById('edit-aqi-nor-max').value = config.aqi_NOR_max;
+                            document.getElementById('edit-aqi-abn-max').value = config.aqi_ABN_max;
+                            document.getElementById('edit-timeout-nor').value = config.timeout_NOR;
+                            document.getElementById('edit-timeout-abn').value = config.timeout_ABN;
+                            
+                            // 显示模态框
+                            document.getElementById('edit-config-modal').style.display = 'flex';
+                        } else {
+                            alert('未找到设备配置信息');
+                        }
+                    } else {
+                        alert('获取设备配置信息失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('获取设备配置信息失败:', error);
+                    alert('获取设备配置信息失败');
+                });
+        }
+        
+        // 关闭编辑配置模态框
+        function closeEditConfigModal() {
+            document.getElementById('edit-config-modal').style.display = 'none';
+        }
+        
+        // 保存设备配置
+        function saveDeviceConfig(event) {
+            event.preventDefault();
+            
+            // 获取表单数据
+            const configId = document.getElementById('edit-config-id').value;
+            const configData = {
+                temp_NOR_min: parseFloat(document.getElementById('edit-temp-nor-min').value),
+                temp_NOR_max: parseFloat(document.getElementById('edit-temp-nor-max').value),
+                temp_ABN_min: parseFloat(document.getElementById('edit-temp-abn-min').value),
+                temp_ABN_max: parseFloat(document.getElementById('edit-temp-abn-max').value),
+                humi_NOR_min: parseFloat(document.getElementById('edit-humi-nor-min').value),
+                humi_NOR_max: parseFloat(document.getElementById('edit-humi-nor-max').value),
+                humi_ABN_min: parseFloat(document.getElementById('edit-humi-abn-min').value),
+                humi_ABN_max: parseFloat(document.getElementById('edit-humi-abn-max').value),
+                aqi_NOR_max: parseFloat(document.getElementById('edit-aqi-nor-max').value),
+                aqi_ABN_max: parseFloat(document.getElementById('edit-aqi-abn-max').value),
+                timeout_NOR: parseInt(document.getElementById('edit-timeout-nor').value),
+                timeout_ABN: parseInt(document.getElementById('edit-timeout-abn').value)
+            };
+            
+            // 发送更新请求到后端API
+            fetch(`/api/equipment-config/${configId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(configData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('设备配置更新成功');
+                    closeEditConfigModal();
+                    fetchDeviceConfigList(); // 重新加载列表
+                } else {
+                    alert(`更新失败: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                console.error('更新设备配置失败:', error);
+                alert('更新设备配置失败');
+            });
+        }
+        
+        // 删除设备配置
+        function deleteDeviceConfig(configId) {
+            if (confirm(`确定要删除该设备配置吗？`)) {
+                // 调用后端API删除设备配置
+                fetch(`/api/equipment-config/${configId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('设备配置删除成功');
+                        fetchDeviceConfigList(); // 重新加载列表
+                    } else {
+                        alert(`删除失败: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('删除设备配置失败:', error);
+                    alert('删除设备配置失败');
+                });
+            }
+        }
+        
+        // 刷新设备配置列表
+        function refreshDeviceConfigList() {
+            const refreshIcon = document.getElementById('device-refresh-icon');
+            const refreshBtn = document.getElementById('refresh-btn');
+            
+            if (refreshIcon && refreshBtn) {
+                refreshIcon.classList.add('spin-animation');
+                refreshBtn.disabled = true;
+            }
+            
+            // 重新获取设备配置列表
+            fetchDeviceConfigList();
+            
+            // 保持动画效果
+            setTimeout(() => {
+                if (refreshIcon && refreshBtn) {
+                    refreshIcon.classList.remove('spin-animation');
+                    refreshBtn.disabled = false;
+                }
+            }, 1000);
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化时检查窗口大小
+            if (window.innerWidth < 768) {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.querySelector('.main-content');
+                sidebar.classList.add('collapsed');
+                mainContent.style.marginLeft = '60px';
+            }
+            
+            // 获取设备配置列表
+            fetchDeviceConfigList();
+            
+            // 绑定刷新按钮事件
+            const refreshBtn = document.getElementById('refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', refreshDeviceConfigList);
+            }
+            
+            // 绑定编辑表单提交事件
+            const editForm = document.getElementById('edit-config-form');
+            if (editForm) {
+                editForm.addEventListener('submit', saveDeviceConfig);
+            }
+            
+            // 绑定新增表单提交事件
+            const addForm = document.getElementById('add-config-form');
+            if (addForm) {
+                addForm.addEventListener('submit', saveNewDeviceConfig);
+            }
+            
+            // 绑定搜索框输入事件
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', filterDeviceConfigList);
+            }
+        });
+    </script>
+    
+    <!-- 新增设备配置模态框 -->
+    <div id="add-config-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4);">
+        <div style="background-color: #2c2c2c; margin: 5% auto; padding: 0; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); animation: modalopen 0.4s;">
+            <div style="padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; color: white;">新增设备配置</h3>
+                <span onclick="closeAddConfigModal()" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.3s ease;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">&times;</span>
+            </div>
+            <form id="add-config-form" style="padding: 20px;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #ddd;">设备ID</label>
+                    <input type="text" id="add-equipment-id" style="width: 100%; padding: 10px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                </div>
+                <!-- 正常范围设置 -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #ddd;">正常范围</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 3px; color: #999; font-size: 12px;">温度最小值(℃)</label>
+                            <input type="number" id="add-temp-nor-min" style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 3px; color: #999; font-size: 12px;">温度最大值(℃)</label>
+                            <input type="number" id="add-temp-nor-max" style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 3px; color: #999; font-size: 12px;">AQI最大值</label>
+                            <input type="number" id="add-aqi-nor-max" style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 3px; color: #999; font-size: 12px;">湿度最小值(%)</label>
+                            <input type="number" id="add-humi-nor-min" style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 3px; color: #999; font-size: 12px;">湿度最大值(%)</label>
+                            <input type="number" id="add-humi-nor-max" style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                        </div>
+                    </div>
+                </div>
+                <!-- 异常范围设置 -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #ddd;">异常范围</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 3px; color: #999; font-size: 12px;">温度最小值(℃)</label>
+                            <input type="number" id="add-temp-abn-min" style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 3px; color: #999; font-size: 12px;">温度最大值(℃)</label>
+                            <input type="number" id="add-temp-abn-max" style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 3px; color: #999; font-size: 12px;">AQI最大值</label>
+                            <input type="number" id="add-aqi-abn-max" style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 3px; color: #999; font-size: 12px;">湿度最小值(%)</label>
+                            <input type="number" id="add-humi-abn-min" style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 3px; color: #999; font-size: 12px;">湿度最大值(%)</label>
+                            <input type="number" id="add-humi-abn-max" style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background-color: #333; color: white;" required>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" onclick="closeAddConfigModal()" style="background-color: #555; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease;">取消</button>
+                    <button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease;">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!-- 备案号信息 -->
+    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
+                <span>工信部备案号：粤ICP备2026027512号-1</span>
+                <span style="color: #444;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

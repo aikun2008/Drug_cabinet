@@ -1,0 +1,149 @@
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="user-info-card" style="border-top: 8rpx solid {{roleColor}}">
+    <view class="user-avatar" style="background-color: {{roleColor}}">
+      <text class="role-icon">{{roleIcon}}</text>
+    </view>
+    <view class="user-details">
+      <text class="user-name">{{userInfo.real_name || userInfo.username}}</text>
+      <text class="user-role" style="color: {{roleColor}}">{{roleText}}</text>
+      <text class="user-department">{{userInfo.department || '未设置部门'}}</text>
+    </view>
+  </view>
+
+  <!-- 功能列表 -->
+  <view class="card">
+    <view class="menu-item" bindtap="navigateToChangePassword">
+      <text class="menu-icon">🔒</text>
+      <text class="menu-text">修改密码</text>
+      <text class="menu-arrow">></text>
+    </view>
+    <!-- 教师专属功能：管理学生 -->
+    <view wx:if="{{roleText === '教师'}}" class="menu-item" bindtap="showStudentsModal">
+      <text class="menu-icon">👥</text>
+      <text class="menu-text">管理学生</text>
+      <text class="menu-arrow">></text>
+    </view>
+    <view class="menu-item" bindtap="showAbout">
+      <text class="menu-icon">ℹ️</text>
+      <text class="menu-text">关于系统</text>
+      <text class="menu-arrow">></text>
+    </view>
+    <view class="menu-item" bindtap="onLogout">
+      <text class="menu-icon">🚪</text>
+      <text class="menu-text logout-text">退出登录</text>
+      <text class="menu-arrow">></text>
+    </view>
+  </view>
+
+  <!-- 学生管理模态框 -->
+  <view class="modal" wx:if="{{showStudentsModal}}" bindtap="closeStudentsModal">
+    <view class="modal-content" bindtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">管理学生</text>
+        <text class="close-btn" bindtap="closeStudentsModal">×</text>
+      </view>
+      <view class="modal-body">
+        <!-- 加载状态 -->
+        <view wx:if="{{loading}}" class="loading-container">
+          <text>加载中...</text>
+        </view>
+        
+        <!-- 错误信息 -->
+        <view wx:if="{{error}}" class="error-container">
+          <text class="error-text">{{error}}</text>
+          <button class="btn btn-primary" bindtap="loadStudents" style="margin-top: 20rpx;">重新加载</button>
+        </view>
+        
+        <!-- 学生列表 -->
+        <view wx:else>
+          <view wx:if="{{students.length === 0}}" class="empty-container">
+            <text>暂无绑定学生</text>
+          </view>
+          <view wx:else class="students-list">
+            <view wx:for="{{students}}" wx:key="id" class="student-item">
+              <view class="student-info">
+                <text class="student-name">{{item.real_name || item.username}}</text>
+                <text class="student-id">ID: {{item.id}}</text>
+              </view>
+              <view class="unbind-btn" catchtap="unbindStudent" data-id="{{item.id}}">解绑</view>
+            </view>
+          </view>
+          
+          <!-- 添加学生按钮 -->
+          <button class="btn btn-success" bindtap="bindStudent" style="margin-top: 30rpx;">添加学生</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 系统信息 -->
+  <view class="system-info">
+    <text class="version-text">版本号：1.0.0</text>
+    <text class="copyright-text">© 2025 药品柜管理系统</text>
+  </view>
+
+  <!-- 确认弹窗 -->
+  <view class="modal" wx:if="{{showLogoutModal}}" bindtap="closeLogoutModal">
+    <view class="modal-content" bindtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">确认退出</text>
+        <text class="close-btn" bindtap="closeLogoutModal">×</text>
+      </view>
+      <view class="modal-body">
+        <text>确定要退出登录吗？</text>
+      </view>
+      <view class="modal-footer">
+        <button class="btn btn-secondary" bindtap="closeLogoutModal">取消</button>
+        <button class="btn btn-primary" bindtap="confirmLogout">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学生选择模态框 -->
+  <view class="student-select-modal" wx:if="{{showStudentSelectModal}}" bindtap="closeStudentSelectModal">
+    <view class="student-select-content modal-content" bindtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">添加学生</text>
+        <text class="close-btn" bindtap="closeStudentSelectModal">×</text>
+      </view>
+      <view class="student-select-body">
+        <!-- 加载状态 -->
+        <view wx:if="{{loading}}" class="loading-container">
+          <text>加载中...</text>
+        </view>
+        
+        <!-- 错误信息 -->
+        <view wx:if="{{error}}" class="error-container">
+          <text class="error-text">{{error}}</text>
+          <button class="btn btn-primary" bindtap="loadAvailableStudents" style="margin-top: 20rpx;">重新加载</button>
+        </view>
+        
+        <!-- 可用学生列表 -->
+        <view wx:else>
+          <view wx:if="{{availableStudents.length === 0}}" class="empty-container">
+            <text>暂无可用学生</text>
+          </view>
+          <view wx:else class="students-list">
+            <view wx:for="{{availableStudents}}" wx:key="id" class="student-select-item" catchtap="selectStudent" data-id="{{item.id}}">
+              <view class="student-select-info">
+                <text class="student-select-name">{{item.real_name || item.username}}</text>
+                <text class="student-select-id">ID: {{item.id}}</text>
+              </view>
+              <view class="select-checkbox" wx:if="{{selectedStudentId === item.id}}">✓</view>
+              <view class="select-checkbox" wx:else></view>
+            </view>
+          </view>
+          
+          <!-- 确认绑定按钮 -->
+          <button class="add-student-btn" bindtap="confirmBindStudent" style="margin-top: 30rpx;">确认绑定</button>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 药瓶悬浮按钮 -->
+  <view class="cart-float-button" bindtap="navigateToPendingDrugs">
+    <text class="cart-icon">💊</text>
+  </view>
+</view>

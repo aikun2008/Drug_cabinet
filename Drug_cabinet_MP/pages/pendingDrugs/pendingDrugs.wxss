@@ -1,0 +1,113 @@
+/* pendingDrugs.wxss */
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333333;
+}
+
+.content {
+  background-color: white;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.drug-list {
+  margin-top: 10rpx;
+}
+
+.drug-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.drug-item:last-child {
+  border-bottom: none;
+}
+
+.drug-info {
+  flex: 1;
+  margin-right: 20rpx;
+}
+
+.drug-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.drug-spec {
+  font-size: 28rpx;
+  color: #666666;
+  margin-bottom: 5rpx;
+  display: block;
+}
+
+.drug-location {
+  font-size: 26rpx;
+  color: #999999;
+  margin-bottom: 5rpx;
+  display: block;
+}
+
+.drug-expiry {
+  font-size: 26rpx;
+  color: #999999;
+  display: block;
+}
+
+.remove-btn {
+  width: 120rpx;
+  height: 60rpx;
+  background-color: #f44336;
+  color: white;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  margin: 0;
+}
+
+.empty {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999999;
+  font-size: 30rpx;
+}
+
+/* 底部按钮 */
+.bottom-button {
+  position: fixed;
+  bottom: 30rpx;
+  left: 20rpx;
+  right: 20rpx;
+  z-index: 100;
+}
+
+.borrow-btn {
+  width: 100%;
+  height: 80rpx;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  margin: 0;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.borrow-btn:active {
+  opacity: 0.8;
+}

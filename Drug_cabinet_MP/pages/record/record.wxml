@@ -1,0 +1,49 @@
+<view class="container">
+  <view class="filter-section">
+    <view class="filter-tabs">
+      <view class="filter-tab {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+      <view class="filter-tab {{activeTab === 'borrow' ? 'active' : ''}}" bindtap="switchTab" data-tab="borrow">借出</view>
+      <view class="filter-tab {{activeTab === 'return' ? 'active' : ''}}" bindtap="switchTab" data-tab="return">归还</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="title">使用记录</text>
+    <view class="record-list">
+      <view wx:if="{{filteredRecords.length > 0}}">
+        <view class="record-item" wx:for="{{filteredRecords}}" wx:key="id">
+          <view class="record-header">
+            <text class="record-drug-name">{{item.drug_name}}</text>
+            <text class="record-status {{item.status === 'success' ? 'status-success' : 'status-failed'}}">{{item.status === 'success' ? '成功' : '失败'}}</text>
+          </view>
+          <view class="record-content">
+            <view class="record-info">
+              <text class="record-label">操作类型：</text>
+              <text class="record-value">{{item.type === 'borrow' ? '借出' : '归还'}}</text>
+            </view>
+            <view class="record-info">
+              <text class="record-label">数量：</text>
+              <text class="record-value">{{item.quantity}} {{item.unit}}</text>
+            </view>
+            <view class="record-info">
+              <text class="record-label">时间：</text>
+              <text class="record-value">{{item.operation_time}}</text>
+            </view>
+            <view class="record-info" wx:if="{{item.remark}}">
+              <text class="record-label">备注：</text>
+              <text class="record-value">{{item.remark}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="empty" wx:else>
+        <text>暂无使用记录</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 药瓶悬浮按钮 -->
+  <view class="cart-float-button" bindtap="navigateToPendingDrugs">
+    <text class="cart-icon">💊</text>
+  </view>
+</view>
