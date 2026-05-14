@@ -155,7 +155,9 @@
                         /* 下拉菜单项悬停效果 */
                         #type-dropdown > div:hover, #status-dropdown > div:hover,
                         #cabinet-dropdown > div:hover, #expiry-dropdown > div:hover {
-                            background-color: #2c3e50;
+                            background: var(--glass-bg);
+                            backdrop-filter: blur(var(--blur));
+                            -webkit-backdrop-filter: blur(var(--blur));
                         }
                         /* 紧凑布局优化 */
                         .page-content {
@@ -199,13 +201,17 @@
                             width: 100%;
                             border-collapse: collapse;
                             margin-top: 15px;
-                            background: #34495e;
+                            background: var(--glass-bg-light);
+                            backdrop-filter: blur(8px);
+                            -webkit-backdrop-filter: blur(8px);
                             border-radius: 6px;
                             overflow: hidden;
                             font-size: 15px;
                         }
                         .drug-table th {
-                            background: #2c3e50;
+                            background: var(--glass-bg);
+                            backdrop-filter: blur(var(--blur));
+                            -webkit-backdrop-filter: blur(var(--blur));
                             color: #ecf0f1;
                             padding: 10px 8px;
                             text-align: left;
@@ -263,7 +269,9 @@
                             color: white !important;
                         }
                         .expiry-expired {
-                            background: #2c3e50 !important;
+                            background: var(--glass-bg) !important;
+                            backdrop-filter: blur(var(--blur)) !important;
+                            -webkit-backdrop-filter: blur(var(--blur)) !important;
                             color: white !important;
                         }
                         .expiry-secondary {
@@ -307,7 +315,9 @@
                             backdrop-filter: blur(3px);
                         }
                         .modal-content {
-                            background: linear-gradient(145deg, #34495e, #2c3e50);
+                            background: var(--glass-bg-light);
+                            backdrop-filter: blur(12px);
+                            -webkit-backdrop-filter: blur(12px);
                             margin: 3% auto;
                             padding: 0;
                             border: 2px solid #4a6741;
@@ -366,11 +376,12 @@
                             padding: 12px 16px;
                             border: 2px solid #5d6d7e;
                             border-radius: 8px;
-                            background: rgba(44, 62, 80, 0.8);
+                            background: var(--glass-bg);
+                            backdrop-filter: blur(var(--blur));
+                            -webkit-backdrop-filter: blur(var(--blur));
                             color: #ecf0f1;
                             font-size: 15px;
                             transition: all 0.3s ease;
-                            backdrop-filter: blur(5px);
                             box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
                         }
                         .form-control::placeholder {
@@ -380,7 +391,9 @@
                         .form-control:focus {
                             outline: none;
                             border-color: #3498db;
-                            background: rgba(44, 62, 80, 0.95);
+                            background: var(--glass-bg);
+                            backdrop-filter: blur(var(--blur));
+                            -webkit-backdrop-filter: blur(var(--blur));
                             box-shadow: 
                                 0 0 0 3px rgba(52, 152, 219, 0.3),
                                 inset 0 2px 4px rgba(0,0,0,0.3);
@@ -388,7 +401,9 @@
                         }
                         .form-control:hover {
                             border-color: #7fb3d5;
-                            background: rgba(44, 62, 80, 0.9);
+                            background: var(--glass-bg);
+                            backdrop-filter: blur(var(--blur));
+                            -webkit-backdrop-filter: blur(var(--blur));
                         }
                         /* 选择框特殊样式 */
                         select.form-control {
@@ -626,7 +641,7 @@
                                     <td><span class="status-badge ${drug.status === 'in_stock' || drug.status === 'reserved' ? 'success' : drug.status === 'lent_out' ? 'warning' : 'secondary'}">${drug.status_name || ''}</span></td>
                                     <td>${drug.location || ''}</td>
                                     <td>${drug.current_holder_id || ''}</td>
-                                    <td><span class="status-badge expiry-${drug.expiry_status_class}" style="background-color: ${drug.expiry_status_class === 'normal' ? '#27ae60' : drug.expiry_status_class === 'warning' ? '#f39c12' : drug.expiry_status_class === 'urgent' ? '#ff6b35' : drug.expiry_status_class === 'critical' ? '#e74c3c' : drug.expiry_status_class === 'expired' ? '#2c3e50' : '#95a5a6'}">${drug.expiry_status_class === 'critical' ? '⚠️' : drug.expiry_status_icon || ''} ${drug.expiry_status || ''}</span></td>
+                                    <td><span class="status-badge expiry-${drug.expiry_status_class}" style="background-color: ${drug.expiry_status_class === 'normal' ? '#27ae60' : drug.expiry_status_class === 'warning' ? '#f39c12' : drug.expiry_status_class === 'urgent' ? '#ff6b35' : drug.expiry_status_class === 'critical' ? '#e74c3c' : drug.expiry_status_class === 'expired' ? 'var(--glass-bg)' : '#95a5a6'}">${drug.expiry_status_class === 'critical' ? '⚠️' : drug.expiry_status_icon || ''} ${drug.expiry_status || ''}</span></td>
                                     <td>${lastOperationDisplay}</td>
                                     <td>
                                         <button class="action-btn edit" onclick="editDrug(${drug.id})">编辑</button>
@@ -923,7 +938,7 @@
                     </script>
                     
                     <!-- 药品列表表格 -->
-                    <div class="drug-table-container" style="background: #2c3e50; border-radius: 2px; padding: 2px; margin-top: 2px;">
+                    <div class="drug-table-container" style="background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); border-radius: 2px; padding: 2px; margin-top: 2px;">
                         <table class="drug-table">
                             <thead>
                                 <tr>
@@ -934,7 +949,7 @@
                                         <button id="type-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
                                         ▼
                                         </button>
-                                        <div id="type-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 120px; background-color: #34495e; border: 1px solid #555; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                        <div id="type-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 120px; background: var(--glass-bg-light); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--glass-border); border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: var(--shadow);">
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyTypeFilter('')">全部类型</div>
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyTypeFilter('普通药品')">普通药品</div>
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyTypeFilter('管制药品')">管制药品</div>
@@ -946,7 +961,7 @@
                                         <button id="status-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
                                         ▼
                                         </button>
-                                        <div id="status-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100px; background-color: #34495e; border: 1px solid #555; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                        <div id="status-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100px; background: var(--glass-bg-light); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--glass-border); border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: var(--shadow);">
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyStatusFilter('')">全部状态</div>
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyStatusFilter('库存中')">库存中</div>
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyStatusFilter('已借出')">已借出</div>
@@ -959,7 +974,7 @@
                                         <button id="cabinet-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
                                         ▼
                                         </button>
-                                        <div id="cabinet-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 120px; background-color: #34495e; border: 1px solid #555; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                        <div id="cabinet-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 120px; background: var(--glass-bg-light); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--glass-border); border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: var(--shadow);">
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('')">全部柜子</div>
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('A柜')">cabinet_001</div>
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyCabinetFilter('B柜')">cabinet_002</div>
@@ -980,7 +995,7 @@
                                         <button id="expiry-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
                                         ▼
                                         </button>
-                                        <div id="expiry-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 140px; background-color: #34495e; border: 1px solid #555; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                        <div id="expiry-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 140px; background: var(--glass-bg-light); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--glass-border); border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: var(--shadow);">
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyExpiryFilter('')">全部状态</div>
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyExpiryFilter('正常')">正常</div>
                                             <div style="padding: 8px 12px; cursor: pointer; color: white;" onclick="applyExpiryFilter('预警')">预警</div>
@@ -1096,7 +1111,7 @@
 
 
     <!-- 备案号信息 -->
-    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+    <footer style="background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid var(--glass-border);">
         <div style="max-width: 1200px; margin: 0 auto;">
             <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
                 <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">

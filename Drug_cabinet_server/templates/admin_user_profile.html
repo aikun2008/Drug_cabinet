@@ -154,7 +154,7 @@
                         }
                         /* 下拉菜单项悬停效果 */
                         #role-dropdown > div:hover, #status-dropdown > div:hover {
-                            background-color: #2c3e50;
+                            background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
                         }
                     </style>
                     <script>
@@ -262,7 +262,7 @@
                                         <button id="role-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
                                         ▼
                                     </button>
-                                        <div id="role-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100px; background-color: #1a1a2e; border: 1px solid #444; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                        <div id="role-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100px; background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); border: 1px solid var(--glass-border); border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
                                             <div style="padding: 5px 10px; cursor: pointer;" onclick="applyRoleFilter('')">全部身份</div>
                                             <div style="padding: 5px 10px; cursor: pointer;" onclick="applyRoleFilter('管理员')">管理员</div>
                                             <div style="padding: 5px 10px; cursor: pointer;" onclick="applyRoleFilter('教师')">教师</div>
@@ -275,7 +275,7 @@
                                         <button id="status-filter-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0 3px; display: inline;">
                                         ▼
                                     </button>
-                                        <div id="status-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100px; background-color: #1a1a2e; border: 1px solid #444; border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                                        <div id="status-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100px; background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); border: 1px solid var(--glass-border); border-radius: 0 0 4px 4px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
                                             <div style="padding: 5px 10px; cursor: pointer;" onclick="applyStatusFilter('')">全部状态</div>
                                             <div style="padding: 5px 10px; cursor: pointer;" onclick="applyStatusFilter('启用')">启用</div>
                                             <div style="padding: 5px 10px; cursor: pointer;" onclick="applyStatusFilter('禁用')">禁用</div>
@@ -997,7 +997,7 @@
                                 studentItem.style.justifyContent = 'space-between';
                                 studentItem.style.marginBottom = '10px';
                                 studentItem.style.width = '100%';
-                                studentItem.style.backgroundColor = '#34495e'; // 添加背景色以提高对比度
+                                studentItem.style.background = 'var(--glass-bg-light)'; studentItem.style.backdropFilter = 'blur(8px)'; studentItem.style.webkitBackdropFilter = 'blur(8px)';
                                 studentItem.style.padding = '10px'; // 添加内边距
                                 studentItem.style.borderRadius = '4px'; // 添加圆角
                                 
@@ -1221,7 +1221,7 @@
 
 
     <!-- 备案号信息 -->
-    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+    <footer style="background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid var(--glass-border);">
         <div style="max-width: 1200px; margin: 0 auto;">
             <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
                 <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">

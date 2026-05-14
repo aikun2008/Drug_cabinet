@@ -5,13 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>实验室药品智能管理终端 - 设备监控</title>
     <link rel="stylesheet" href="/static/css/admin_dashboard.css">
-    <style>
-        /* 确保页面背景正确显示 */
-        body {
-            background-color: #1a252f;
-            color: #ecf0f1;
-        }
-    </style>
+    
     <style>
         /* 添加一些额外的样式以确保模态框正确显示 */
         #equipment-details-modal {
@@ -212,7 +206,7 @@
                             <div style="display: flex; justify-content: space-around; align-items: center; height: 150px;">
                                 <div style="display: flex; flex-direction: column; align-items: center;">
                                     <div id="connection-status-chart" style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#4CAF50 0% 0%, #9E9E9E 0% 100%); display: flex; align-items: center; justify-content: center;">
-                                        <div style="width: 60px; height: 60px; border-radius: 50%; background-color: #1a1a2e; display: flex; align-items: center; justify-content: center;">
+                                        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); display: flex; align-items: center; justify-content: center;">
                                             <span id="connection-total-count" style="font-weight: 600;">0</span>
                                         </div>
                                     </div>
@@ -238,7 +232,7 @@
                             <div style="display: flex; justify-content: space-around; align-items: center; height: 150px;">
                                 <div style="display: flex; flex-direction: column; align-items: center;">
                                     <div id="health-status-chart" style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#4CAF50 0% 0%, #FF9800 0% 0%, #F44336 0% 100%); display: flex; align-items: center; justify-content: center;">
-                                        <div style="width: 60px; height: 60px; border-radius: 50%; background-color: #1a1a2e; display: flex; align-items: center; justify-content: center;">
+                                        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); display: flex; align-items: center; justify-content: center;">
                                             <span id="health-total-count" style="font-weight: 600;">0</span>
                                         </div>
                                     </div>
@@ -832,7 +826,7 @@
             // 创建模态框HTML
             const modalHTML = `
                 <div id="equipment-details-modal">
-                    <div style="background-color: #1a1a2e; border-radius: 12px; padding: 20px; width: 850px; max-width: 95%; border: 1px solid #333; overflow: visible;">
+                    <div style="background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); border-radius: 12px; padding: 20px; width: 850px; max-width: 95%; border: 1px solid #333; overflow: visible;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <h3 style="margin: 0; color: white;">设备详情 - ${deviceDetails.equipment_name}</h3>
                             <div style="display: flex; gap: 10px;">
@@ -1192,7 +1186,7 @@
 
 
     <!-- 备案号信息 -->
-    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+    <footer style="background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
         <div style="max-width: 1200px; margin: 0 auto;">
             <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
                 <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">

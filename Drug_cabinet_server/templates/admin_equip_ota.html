@@ -620,12 +620,6 @@
                     </script>
 
                     <style>
-                        /* 确保页面背景与系统一致 */
-                        body {
-                            background-color: #1a252f;
-                            color: #ecf0f1;
-                        }
-                        
                         /* MQTT OTA 信息横幅 */
                         .ota-info-banner {
                             background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
@@ -675,12 +669,12 @@
                         
                         /* 卡片样式 */
                         .ota-card {
-                            background: #2c3e50;
+                            background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
                             border-radius: 8px;
                             padding: 20px;
                             margin-bottom: 20px;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                            border: 1px solid #34495e;
+                            box-shadow: var(--shadow);
+                            border: 1px solid var(--glass-border);
                         }
                         
                         /* 日志卡片高度自适应 */
@@ -698,7 +692,7 @@
                             margin: 0;
                             color: #ecf0f1;
                             font-size: 18px;
-                            border-bottom: 1px solid #34495e;
+                            border-bottom: 1px solid var(--glass-border);
                             padding-bottom: 10px;
                         }
                         
@@ -717,10 +711,10 @@
                         .form-control-file {
                             width: 100%;
                             padding: 10px;
-                            border: 1px solid #34495e;
+                            border: 1px solid var(--glass-border);
                             border-radius: 4px;
                             font-size: 14px;
-                            background-color: #34495e;
+                            background: var(--glass-bg-light); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
                             color: #ecf0f1;
                             transition: border-color 0.3s;
                         }
@@ -825,9 +819,9 @@
                         }
                         
                         .progress-wrapper {
-                            background-color: #34495e;
+                            background: var(--glass-bg-light); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
                             border-radius: 4px;
-                            border: 1px solid #2c3e50;
+                            border: 1px solid var(--glass-border);
                             overflow: hidden;
                         }
                         
@@ -859,11 +853,11 @@
                         
                         /* 传输统计 */
                         .transfer-stats {
-                            background-color: #34495e;
+                            background: var(--glass-bg-light); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
                             border-radius: 4px;
                             padding: 10px 15px;
                             margin-top: 15px;
-                            border: 1px solid #2c3e50;
+                            border: 1px solid var(--glass-border);
                         }
                         
                         .stat-item {
@@ -889,7 +883,7 @@
                         
                         /* 升级日志 */
                         .upgrade-log {
-                            background-color: #34495e;
+                            background: var(--glass-bg-light); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
                             border-radius: 4px;
                             padding: 15px;
                             height: 350px;
@@ -933,8 +927,8 @@
                         .file-upload-label {
                             display: block;
                             padding: 10px;
-                            background-color: #34495e;
-                            border: 1px solid #34495e;
+                            background: var(--glass-bg-light); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+                            border: 1px solid var(--glass-border);
                             border-radius: 4px;
                             cursor: pointer;
                             transition: all 0.3s;
@@ -943,7 +937,7 @@
                         
                         .file-upload-label:hover {
                             border-color: #3498db;
-                            background-color: #2c3e50;
+                            background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
                         }
                         
                         .file-upload-icon {
@@ -994,7 +988,7 @@
 
 
     <!-- 备案号信息 -->
-    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+    <footer style="background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid var(--glass-border);">
         <div style="max-width: 1200px; margin: 0 auto;">
             <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
                 <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">

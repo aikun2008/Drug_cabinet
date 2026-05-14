@@ -182,7 +182,7 @@
                             <div class="chart-header">
                                 <h3 class="chart-title">设备状态分布</h3>
                             </div>
-                            <div class="chart-container" style="display: flex; align-items: center; justify-content: space-around; background-color: rgba(52, 73, 94, 0.3); border-radius: 4px; height: 390px; padding: 20px;">
+                            <div class="chart-container" style="display: flex; align-items: center; justify-content: space-around; background: var(--glass-bg-light); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border-radius: 4px; height: 390px; padding: 20px;">
                                 <!-- 双层环形图 -->
                                 <div style="display: flex; flex-direction: column; align-items: center;">
                                     <div style="position: relative; width: 140px; height: 140px;" id="double-ring-chart">
@@ -246,7 +246,7 @@
                                         background: var(--primary-color);
                                     }
                                 </style>
-                                <div id="recent-activities-list" style="background-color: var(--card-bg); border-radius: var(--border-radius); padding-right: 8px;">
+                                <div id="recent-activities-list" style="background: var(--glass-bg-light); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border-radius: var(--border-radius); padding-right: 8px;">
                                     <div style="text-align: center; padding: 40px; color: var(--text-muted);">加载中...</div>
                                 </div>
                             </div>
@@ -269,7 +269,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <h1>用户档案</h1>
                         <div style="display: flex; align-items: center;">
-                            <input type="text" id="search-input" placeholder="查找姓名/用户名/ID" style="margin-right: 10px; padding: 5px 10px; border: 1px solid #444; border-radius: 4px; background-color: #1a1a2e; color: white; width: 200px;">
+                            <input type="text" id="search-input" placeholder="查找姓名/用户名/ID" style="margin-right: 10px; padding: 5px 10px; border: 1px solid var(--glass-border); border-radius: 6px; background: var(--glass-bg-light); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: var(--text-color); width: 200px;">
                             <button class="btn btn-primary" style="min-width: 80px; margin-right: 10px;" onclick="refreshUserList()" id="refresh-btn">
                                 <span id="refresh-icon" style="display: inline-block;">刷新</span>
                             </button>
@@ -287,7 +287,9 @@
                         }
                         /* 下拉菜单项悬停效果 */
                         #role-dropdown > div:hover, #status-dropdown > div:hover {
-                            background-color: #2c3e50;
+                            background: var(--glass-bg);
+                            backdrop-filter: blur(var(--blur));
+                            -webkit-backdrop-filter: blur(var(--blur));
                         }
                     </style>
                     <script>
@@ -882,13 +884,13 @@
 
 
     <!-- 备案号信息 -->
-    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+    <footer style="background: var(--glass-bg-heavy); backdrop-filter: blur(var(--blur-heavy)); -webkit-backdrop-filter: blur(var(--blur-heavy)); color: var(--text-muted); text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid var(--glass-border);">
         <div style="max-width: 1200px; margin: 0 auto;">
             <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
                 <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">
                 <span>工信部备案号：粤ICP备2026027512号-1</span>
-                <span style="color: #444;">|</span>
-                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: #888; text-decoration: none;">粤公网安备44195802000130号</a></span>
+                <span style="color: var(--text-muted); opacity: 0.4;">|</span>
+                <span>公安备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195802000130" rel="noreferrer" target="_blank" style="color: var(--text-muted); text-decoration: none;">粤公网安备44195802000130号</a></span>
             </p>
         </div>
     </footer>

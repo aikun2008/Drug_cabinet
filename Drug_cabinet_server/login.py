@@ -102,100 +102,83 @@ def init_login_routes(app):
             username = request.form['username']
             password = request.form['password']
             
+            conn = None
+            cursor = None
             try:
                 conn = get_db_connection()
-                with conn.cursor() as cursor:
-                    # 检查用户是否存在
-                    sql = f"SELECT * FROM {MYSQL_TABLE_USER_1} WHERE username = %s"
-                    cursor.execute(sql, (username,))
-                    user = cursor.fetchone()
+                cursor = conn.cursor()
+                
+                sql = f"SELECT * FROM {MYSQL_TABLE_USER_1} WHERE username = %s"
+                cursor.execute(sql, (username,))
+                user = cursor.fetchone()
+                
+                if not user:
+                    return render_template('login.html', error='用户名或密码错误')
+                
+                if user['status'] != 1:
+                    return render_template('login.html', error='用户名或密码错误')
+                
+                if user['role'] != 0:
+                    return render_template('login.html', error='您没有权限登录管理后台')
+                
+                permissions = get_permission_settings(user['role'])
+                if permissions and not permissions.get('can_login', True):
+                    return render_template('login.html', error='您所在的用户组暂不允许登录')
+                
+                if permissions:
+                    time_range = permissions.get('login_time_range', '00:00-23:59')
+                    if not check_login_time(time_range):
+                        return render_template('login.html', error=f'当前时间不允许登录，允许时间: {time_range}')
+                
+                if user['locked_until'] and user['locked_until'] > datetime.now():
+                    lock_time = user['locked_until'] - datetime.now()
+                    minutes = lock_time.total_seconds() // 60
+                    return render_template('login.html', error=f'账户已被锁定，请{int(minutes)}分钟后再试')
+                
+                if password != user['password']:
+                    new_attempts = user['login_attempts'] + 1
+                    locked_until = datetime.now() + timedelta(minutes=LOCK_DURATION_MINUTES) if new_attempts >= MAX_LOGIN_ATTEMPTS else None
                     
-                    if not user:
-                        # 用户不存在，仍然显示通用错误
-                        return render_template('login.html', error='用户名或密码错误')
-                    
-                    # 检查账户状态
-                    if user['status'] != 1:
-                        return render_template('login.html', error='用户名或密码错误')
-                    
-                    # 检查用户角色，只有管理员(role=0)可以登录后台
-                    if user['role'] != 0:
-                        return render_template('login.html', error='您没有权限登录管理后台')
-                    
-                    # 检查登录权限
-                    permissions = get_permission_settings(user['role'])
-                    if permissions and not permissions.get('can_login', True):
-                        return render_template('login.html', error='您所在的用户组暂不允许登录')
-                    
-                    # 检查登录时间范围
-                    if permissions:
-                        time_range = permissions.get('login_time_range', '00:00-23:59')
-                        if not check_login_time(time_range):
-                            return render_template('login.html', error=f'当前时间不允许登录，允许时间: {time_range}')
-                    
-                    # 检查是否被锁定
-                    if user['locked_until'] and user['locked_until'] > datetime.now():
-                        lock_time = user['locked_until'] - datetime.now()
-                        minutes = lock_time.total_seconds() // 60
-                        return render_template('login.html', error=f'账户已被锁定，请{int(minutes)}分钟后再试')
-                    
-                    # 只支持明文密码验证
-                    password_match = (password == user['password'])
-                    
-                    if not password_match:
-                        # 密码错误，更新失败次数
-                        new_attempts = user['login_attempts'] + 1
-                        locked_until = None
-                        
-                        # 检查是否需要锁定
-                        if new_attempts >= MAX_LOGIN_ATTEMPTS:
-                            locked_until = datetime.now() + timedelta(minutes=LOCK_DURATION_MINUTES)
-                            
-                        sql = f"UPDATE {MYSQL_TABLE_USER_1} SET login_attempts = %s, locked_until = %s WHERE id = %s"
-                        cursor.execute(sql, (new_attempts, locked_until, user['id']))
-                        conn.commit()
-                        
-                        return render_template('login.html', error='用户名或密码错误')
-                    
-                    # 登录成功，重置失败次数和锁定状态
-                    sql = f"UPDATE {MYSQL_TABLE_USER_1} SET login_attempts = 0, locked_until = NULL, last_login = %s WHERE id = %s"
-                    cursor.execute(sql, (datetime.now(), user['id']))
+                    sql = f"UPDATE {MYSQL_TABLE_USER_1} SET login_attempts = %s, locked_until = %s WHERE id = %s"
+                    cursor.execute(sql, (new_attempts, locked_until, user['id']))
                     conn.commit()
                     
-                    # 存储用户信息到session
-                    session['user_id'] = user['id']
-                    session['username'] = user['username']
-                    session['role'] = user['role']
-                    
-                    # 构建返回数据
-                    user_data = {
-                        'id': user['id'],
-                        'username': user['username'],
-                        'real_name': user.get('real_name', ''),
-                        'role': user['role'],
-                        'department': user.get('department', ''),
-                        'permissions': []  # 根据实际情况获取权限列表
-                    }
-                    
-                    # 记录登录成功的用户数据到session（可选）
-                    session['user_data'] = user_data
-                    
-                    # 不再创建新的EMQX连接，而是使用系统级的连接管理器
-                    from emqx_manager import get_emqx_manager
-                    emqx_manager = get_emqx_manager()
-                    if emqx_manager.is_connected:
-                        print(f"用户 {username} 已成功登录，复用系统级EMQX连接")
-                    else:
-                        print(f"用户 {username} 已成功登录，但系统EMQX连接不可用")
-                    
-                    # 管理员跳转到dashboard
-                    return redirect(url_for('dashboard'))
+                    return render_template('login.html', error='用户名或密码错误')
+                
+                sql = f"UPDATE {MYSQL_TABLE_USER_1} SET login_attempts = 0, locked_until = NULL, last_login = %s WHERE id = %s"
+                cursor.execute(sql, (datetime.now(), user['id']))
+                conn.commit()
+                
+                session['user_id'] = user['id']
+                session['username'] = user['username']
+                session['role'] = user['role']
+                
+                user_data = {
+                    'id': user['id'],
+                    'username': user['username'],
+                    'real_name': user.get('real_name', ''),
+                    'role': user['role'],
+                    'department': user.get('department', ''),
+                    'permissions': []
+                }
+                session['user_data'] = user_data
+                
+                from emqx_manager import get_emqx_manager
+                emqx_manager = get_emqx_manager()
+                if emqx_manager.is_connected:
+                    print(f"用户 {username} 已成功登录，复用系统级EMQX连接")
+                else:
+                    print(f"用户 {username} 已成功登录，但系统EMQX连接不可用")
+                
+                return redirect(url_for('dashboard'))
                     
             except Exception as e:
                 print(f"登录错误: {str(e)}")
                 return render_template('login.html', error='用户名或密码错误')
             finally:
-                if 'conn' in locals():
+                if cursor:
+                    cursor.close()
+                if conn:
                     conn.close()
         
         return render_template('login.html')
@@ -209,107 +192,87 @@ def init_login_routes(app):
         username = data.get('username')
         password = data.get('password')
         
-        # 判断请求来源：Web端还是小程序端
-        # 通过User-Agent或自定义header判断
         user_agent = request.headers.get('User-Agent', '').lower()
-        # 小程序的User-Agent通常包含 'micromessenger' 或自定义header 'X-Client-Type': 'miniapp'
         is_miniapp = 'micromessenger' in user_agent or request.headers.get('X-Client-Type') == 'miniapp'
         
+        conn = None
+        cursor = None
         try:
             conn = get_db_connection()
-            with conn.cursor() as cursor:
-                # 检查用户是否存在
-                sql = f"SELECT * FROM {MYSQL_TABLE_USER_1} WHERE username = %s"
-                cursor.execute(sql, (username,))
-                user = cursor.fetchone()
+            cursor = conn.cursor()
+            
+            sql = f"SELECT * FROM {MYSQL_TABLE_USER_1} WHERE username = %s"
+            cursor.execute(sql, (username,))
+            user = cursor.fetchone()
+            
+            if not user:
+                return jsonify({'success': False, 'message': '用户名或密码错误'})
+            
+            if user['status'] != 1:
+                return jsonify({'success': False, 'message': '用户名或密码错误'})
+            
+            if not is_miniapp and user['role'] != 0:
+                return jsonify({'success': False, 'message': '您没有权限登录管理后台'})
+            
+            permissions = get_permission_settings(user['role'])
+            if permissions and not permissions.get('can_login', True):
+                return jsonify({'success': False, 'message': '您所在的用户组暂不允许登录'})
+            
+            if permissions:
+                time_range = permissions.get('login_time_range', '00:00-23:59')
+                if not check_login_time(time_range):
+                    return jsonify({'success': False, 'message': f'当前时间不允许登录，允许时间: {time_range}'})
+            
+            if user['locked_until'] and user['locked_until'] > datetime.now():
+                lock_time = user['locked_until'] - datetime.now()
+                minutes = lock_time.total_seconds() // 60
+                return jsonify({'success': False, 'message': f'账户已被锁定，请{int(minutes)}分钟后再试'})
+            
+            if password != user['password']:
+                new_attempts = user['login_attempts'] + 1
+                locked_until = datetime.now() + timedelta(minutes=LOCK_DURATION_MINUTES) if new_attempts >= MAX_LOGIN_ATTEMPTS else None
                 
-                if not user:
-                    return jsonify({'success': False, 'message': '用户名或密码错误'})
-                
-                # 检查账户状态
-                if user['status'] != 1:
-                    return jsonify({'success': False, 'message': '用户名或密码错误'})
-                
-                # 检查用户角色
-                # Web端：只有管理员(role=0)可以登录后台
-                # 小程序端：所有角色都可以登录
-                if not is_miniapp and user['role'] != 0:
-                    # Web端非管理员拒绝登录
-                    return jsonify({'success': False, 'message': '您没有权限登录管理后台'})
-                
-                # 检查登录权限
-                permissions = get_permission_settings(user['role'])
-                if permissions and not permissions.get('can_login', True):
-                    return jsonify({'success': False, 'message': '您所在的用户组暂不允许登录'})
-                
-                # 检查登录时间范围
-                if permissions:
-                    time_range = permissions.get('login_time_range', '00:00-23:59')
-                    if not check_login_time(time_range):
-                        return jsonify({'success': False, 'message': f'当前时间不允许登录，允许时间: {time_range}'})
-                
-                # 检查是否被锁定
-                if user['locked_until'] and user['locked_until'] > datetime.now():
-                    lock_time = user['locked_until'] - datetime.now()
-                    minutes = lock_time.total_seconds() // 60
-                    return jsonify({'success': False, 'message': f'账户已被锁定，请{int(minutes)}分钟后再试'})
-                
-                # 只支持明文密码验证
-                password_match = (password == user['password'])
-                
-                if not password_match:
-                    # 密码错误，更新失败次数
-                    new_attempts = user['login_attempts'] + 1
-                    locked_until = None
-                    
-                    # 检查是否需要锁定
-                    if new_attempts >= MAX_LOGIN_ATTEMPTS:
-                        locked_until = datetime.now() + timedelta(minutes=LOCK_DURATION_MINUTES)
-                        
-                    sql = f"UPDATE {MYSQL_TABLE_USER_1} SET login_attempts = %s, locked_until = %s WHERE id = %s"
-                    cursor.execute(sql, (new_attempts, locked_until, user['id']))
-                    conn.commit()
-                    
-                    return jsonify({'success': False, 'message': '用户名或密码错误'})
-                
-                # 登录成功，重置失败次数和锁定状态
-                sql = f"UPDATE {MYSQL_TABLE_USER_1} SET login_attempts = 0, locked_until = NULL, last_login = %s WHERE id = %s"
-                cursor.execute(sql, (datetime.now(), user['id']))
+                sql = f"UPDATE {MYSQL_TABLE_USER_1} SET login_attempts = %s, locked_until = %s WHERE id = %s"
+                cursor.execute(sql, (new_attempts, locked_until, user['id']))
                 conn.commit()
                 
-                # 存储用户信息到session
-                session['user_id'] = user['id']
-                session['username'] = user['username']
-                session['role'] = user['role']
-                
-                # 构建返回数据
-                user_data = {
-                    'id': user['id'],
-                    'username': user['username'],
-                    'real_name': user.get('real_name', ''),
-                    'role': user['role'],
-                    'department': user.get('department', ''),
-                    'permissions': []  # 根据实际情况获取权限列表
-                }
-                
-                # 不再创建新的EMQX连接，而是使用系统级的连接管理器
-                from emqx_manager import get_emqx_manager
-                emqx_manager = get_emqx_manager()
-                if emqx_manager.is_connected:
-                    client_type = '小程序' if is_miniapp else 'Web端'
-                    print(f"用户 {username} 已通过{client_type}API成功登录，复用系统级EMQX连接")
-                else:
-                    print(f"用户 {username} 已通过API成功登录，但系统EMQX连接不可用")
-                
-                # 生成JWT Token
-                token = generate_jwt_token(user['id'], user['username'], user['role'])
-                return jsonify({'success': True, 'data': user_data, 'token': token})
+                return jsonify({'success': False, 'message': '用户名或密码错误'})
+            
+            sql = f"UPDATE {MYSQL_TABLE_USER_1} SET login_attempts = 0, locked_until = NULL, last_login = %s WHERE id = %s"
+            cursor.execute(sql, (datetime.now(), user['id']))
+            conn.commit()
+            
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            session['role'] = user['role']
+            
+            user_data = {
+                'id': user['id'],
+                'username': user['username'],
+                'real_name': user.get('real_name', ''),
+                'role': user['role'],
+                'department': user.get('department', ''),
+                'permissions': []
+            }
+            
+            from emqx_manager import get_emqx_manager
+            emqx_manager = get_emqx_manager()
+            if emqx_manager.is_connected:
+                client_type = '小程序' if is_miniapp else 'Web端'
+                print(f"用户 {username} 已通过{client_type}API成功登录，复用系统级EMQX连接")
+            else:
+                print(f"用户 {username} 已通过API成功登录，但系统EMQX连接不可用")
+            
+            token = generate_jwt_token(user['id'], user['username'], user['role'])
+            return jsonify({'success': True, 'data': user_data, 'token': token})
                 
         except Exception as e:
             print(f"API登录错误: {str(e)}")
             return jsonify({'success': False, 'message': '用户名或密码错误'})
         finally:
-            if 'conn' in locals():
+            if cursor:
+                cursor.close()
+            if conn:
                 conn.close()
 
     # 登出路由

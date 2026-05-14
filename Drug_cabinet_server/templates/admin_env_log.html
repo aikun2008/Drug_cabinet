@@ -9,7 +9,9 @@
         /* 环境数据日志专用样式 */
         .env-log-container {
             padding: 20px;
-            background-color: #f8f9fa;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             border-radius: 8px;
             margin: 20px 0;
         }
@@ -20,7 +22,7 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #e9ecef;
+            border-bottom: 2px solid var(--glass-border);
         }
         
         .env-log-stats {
@@ -31,19 +33,21 @@
         }
         
         .stat-card {
-            background: #2c3e50;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             padding: 12px;
             border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
             text-align: center;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--glass-border);
         }
         
-        .stat-card.temperature { border-left-color: #e74c3c; }
-        .stat-card.humidity { border-left-color: #3498db; }
-        .stat-card.pressure { border-left-color: #27ae60; }
-        .stat-card.light { border-left-color: #f39c12; }
-        .stat-card.total { border-left-color: #9b59b6; }
+        .stat-card.temperature { border-left-color: var(--glass-border); }
+        .stat-card.humidity { border-left-color: var(--glass-border); }
+        .stat-card.pressure { border-left-color: var(--glass-border); }
+        .stat-card.light { border-left-color: var(--glass-border); }
+        .stat-card.total { border-left-color: var(--glass-border); }
         
         .stat-value {
             font-size: 1.5rem;
@@ -58,10 +62,12 @@
         }
         
         .env-chart-container {
-            background: #2c3e50;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
             margin-bottom: 20px;
             position: relative;
             min-height: 400px;
@@ -69,8 +75,9 @@
         
         .chart-placeholder {
             height: 300px;
-            background: linear-gradient(45deg, #34495e 25%, #2c3e50 25%, #2c3e50 50%, #34495e 50%, #34495e 75%, #2c3e50 75%, #2c3e50);
-            background-size: 20px 20px;
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -80,11 +87,13 @@
         }
 
         .env-chart-container {
-            background: #2c3e50;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
         }
 
         .chart-time-selector {
@@ -94,8 +103,10 @@
 
         .time-btn {
             padding: 8px 16px;
-            border: 1px solid #34495e;
-            background: #34495e;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: #ecf0f1;
             border-radius: 4px;
             cursor: pointer;
@@ -103,13 +114,17 @@
         }
 
         .time-btn:hover {
-            background: #3498db;
-            border-color: #3498db;
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-color: var(--glass-border);
         }
 
         .time-btn.active {
-            background: #3498db;
-            border-color: #3498db;
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-color: var(--glass-border);
         }
 
         .spin-animation {
@@ -126,7 +141,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(30, 30, 30, 0.9);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             color: #e0e0e0;
             padding: 15px 20px;
             border-radius: 8px;
@@ -135,7 +152,7 @@
             gap: 10px;
             z-index: 1000;
             font-size: 14px;
-            border: 1px solid #555;
+            border: 1px solid var(--glass-border);
         }
 
         .chart-loading .spin-animation {
@@ -147,16 +164,20 @@
         }
         
         .env-log-table {
-            background: #2c3e50;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
             overflow: hidden;
         }
         
         .log-table-header {
             padding: 15px 20px;
-            background-color: #2c3e50;
-            border-bottom: 1px solid #34495e;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border-bottom: 1px solid var(--glass-border);
             font-weight: bold;
             color: #ecf0f1;
         }
@@ -181,9 +202,11 @@
             margin-bottom: 20px;
             flex-wrap: wrap;
             padding: 15px;
-            background: #2c3e50;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
         }
         
         .filter-group {
@@ -200,11 +223,13 @@
         
         .filter-input {
             padding: 8px 12px;
-            border: 1px solid #34495e;
+            border: 1px solid var(--glass-border);
             border-radius: 4px;
             font-size: 0.9rem;
             min-width: 150px;
-            background-color: #34495e;
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: #ecf0f1;
         }
         
@@ -237,9 +262,11 @@
         }
         
         .time-btn {
-            background: rgba(52, 152, 219, 0.1);
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: #3498db;
-            border: 1px solid rgba(52, 152, 219, 0.3);
+            border: 1px solid var(--glass-border);
             padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
@@ -249,19 +276,25 @@
         }
         
         .time-btn:hover {
-            background: rgba(52, 152, 219, 0.2);
-            border-color: rgba(52, 152, 219, 0.5);
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-color: var(--glass-border);
         }
         
         .time-btn.active {
-            background: #3498db;
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: white;
-            border-color: #3498db;
+            border-color: var(--glass-border);
         }
         
         .time-btn.active:hover {
-            background: #2980b9;
-            border-color: #2980b9;
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-color: var(--glass-border);
         }
         
         /* 旋转动画 */
@@ -274,13 +307,17 @@
         }
         
         .log-table th {
-            background-color: #2c3e50;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             font-weight: 600;
             color: #ecf0f1;
         }
         
         .log-table tbody tr:hover {
-            background-color: #34495e;
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
         
         .log-table tbody tr:last-child td {
@@ -291,7 +328,7 @@
         .log-table td {
             padding: 12px 15px;
             text-align: left;
-            border-bottom: 1px solid #34495e;
+            border-bottom: 1px solid var(--glass-border);
         }
     </style>
     <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
@@ -1035,7 +1072,7 @@
 
 
     <!-- 备案号信息 -->
-    <footer style="background-color: #1a1a2e; color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #333;">
+    <footer style="background: var(--glass-bg); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); color: #888; text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid var(--glass-border);">
         <div style="max-width: 1200px; margin: 0 auto;">
             <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 20px;">
                 <img src="/static/picture/备案图标.png" alt="备案图标" style="width: 16px; height: 16px; vertical-align: middle;">

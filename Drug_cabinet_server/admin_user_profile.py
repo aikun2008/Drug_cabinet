@@ -140,35 +140,32 @@ def init_user_routes(app, login_required, get_db_connection, MYSQL_TABLE_USER_1)
     @login_required
     def update_user(user_id):
         conn = None
+        cursor = None
         try:
             conn = get_db_connection()
             data = request.json
             
-            # 准备更新字段
+            cursor = conn.cursor()
+            
+            if 'username' in data:
+                cursor.execute(f"SELECT id FROM {MYSQL_TABLE_USER_1} WHERE username = %s AND id != %s", 
+                              (data['username'], user_id))
+                if cursor.fetchone():
+                    return jsonify({'success': False, 'message': '用户名已存在'})
+            
+            if 'rfid_card_id' in data and data['rfid_card_id']:
+                cursor.execute(f"SELECT id FROM {MYSQL_TABLE_USER_1} WHERE rfid_card_id = %s AND id != %s", 
+                              (data['rfid_card_id'], user_id))
+                if cursor.fetchone():
+                    return jsonify({'success': False, 'message': 'RFID卡号已存在'})
+            
+            cursor.execute(f"SELECT id FROM {MYSQL_TABLE_USER_1} WHERE id = %s", (user_id,))
+            if not cursor.fetchone():
+                return jsonify({'success': False, 'message': '用户不存在'})
+            
             update_fields = []
             update_values = []
             
-            with conn.cursor() as cursor:
-                # 检查用户名是否已被其他用户使用
-                if 'username' in data:
-                    cursor.execute(f"SELECT id FROM {MYSQL_TABLE_USER_1} WHERE username = %s AND id != %s", 
-                                  (data['username'], user_id))
-                    if cursor.fetchone():
-                        return jsonify({'success': False, 'message': '用户名已存在'})
-                
-                # 检查RFID卡号是否已被其他用户使用
-                if 'rfid_card_id' in data and data['rfid_card_id']:
-                    cursor.execute(f"SELECT id FROM {MYSQL_TABLE_USER_1} WHERE rfid_card_id = %s AND id != %s", 
-                                  (data['rfid_card_id'], user_id))
-                    if cursor.fetchone():
-                        return jsonify({'success': False, 'message': 'RFID卡号已存在'})
-                
-                # 检查用户是否存在
-                cursor.execute(f"SELECT id FROM {MYSQL_TABLE_USER_1} WHERE id = %s", (user_id,))
-                if not cursor.fetchone():
-                    return jsonify({'success': False, 'message': '用户不存在'})
-            
-            # 检查并添加需要更新的字段
             updateable_fields = ['real_name', 'username', 'role', 'department', 'status', 
                                 'email', 'phone', 'rfid_card_id']
             
@@ -178,39 +175,34 @@ def init_user_routes(app, login_required, get_db_connection, MYSQL_TABLE_USER_1)
                     update_values.append(data[field])
             
             if 'password' in data and data['password']:
-                # 使用明文存储密码（仅用于测试环境）
                 update_fields.append('password = %s')
                 update_values.append(data['password'])
             
-            # 添加更新时间
             update_fields.append('updated_at = NOW()')
             
             if not update_fields:
                 return jsonify({'success': False, 'message': '没有需要更新的字段'})
             
-            # 构建SQL语句
             update_values.append(user_id)
             sql = f"UPDATE {MYSQL_TABLE_USER_1} SET {', '.join(update_fields)} WHERE id = %s"
             
-            with conn.cursor() as cursor:
-                # 执行更新
-                cursor.execute(sql, update_values)
-                conn.commit()
-                
-                # 获取更新后的用户信息
-                cursor.execute(f"SELECT id, real_name, username, role, department, status, email, phone, rfid_card_id, created_at, updated_at FROM {MYSQL_TABLE_USER_1} WHERE id = %s", (user_id,))
-                user = cursor.fetchone()
-                
-                if user:
-                    # 使用辅助函数处理角色和状态的显示名称
-                    enhance_user_data(user)
-                    return jsonify({'success': True, 'data': user, 'message': '用户信息更新成功'})
+            cursor.execute(sql, update_values)
+            conn.commit()
+            
+            cursor.execute(f"SELECT id, real_name, username, role, department, status, email, phone, rfid_card_id, created_at, updated_at FROM {MYSQL_TABLE_USER_1} WHERE id = %s", (user_id,))
+            user = cursor.fetchone()
+            
+            if user:
+                enhance_user_data(user)
+                return jsonify({'success': True, 'data': user, 'message': '用户信息更新成功'})
         except Exception as e:
             if conn:
                 conn.rollback()
             print(f"更新用户时出错: {e}")
             return jsonify({'success': False, 'message': '服务器内部错误'})
         finally:
+            if cursor:
+                cursor.close()
             if conn:
                 conn.close()
 
@@ -219,71 +211,63 @@ def init_user_routes(app, login_required, get_db_connection, MYSQL_TABLE_USER_1)
     @login_required
     def create_user():
         conn = None
+        cursor = None
         try:
             conn = get_db_connection()
             data = request.json
             
-            # 验证必填字段
             required_fields = ['real_name', 'username', 'role', 'status']
             for field in required_fields:
                 if field not in data:
                     return jsonify({'success': False, 'message': f'{field} 是必填字段'})
             
-            with conn.cursor() as cursor:
-                # 检查用户名是否已存在
-                cursor.execute(f"SELECT id FROM {MYSQL_TABLE_USER_1} WHERE username = %s", (data['username'],))
+            cursor = conn.cursor()
+            
+            cursor.execute(f"SELECT id FROM {MYSQL_TABLE_USER_1} WHERE username = %s", (data['username'],))
+            if cursor.fetchone():
+                return jsonify({'success': False, 'message': '用户名已存在'})
+            
+            if 'rfid_card_id' in data and data['rfid_card_id']:
+                cursor.execute(f"SELECT id FROM {MYSQL_TABLE_USER_1} WHERE rfid_card_id = %s", (data['rfid_card_id'],))
                 if cursor.fetchone():
-                    return jsonify({'success': False, 'message': '用户名已存在'})
-                
-                # 检查RFID卡号是否已存在
-                if 'rfid_card_id' in data and data['rfid_card_id']:
-                    cursor.execute(f"SELECT id FROM {MYSQL_TABLE_USER_1} WHERE rfid_card_id = %s", (data['rfid_card_id'],))
-                    if cursor.fetchone():
-                        return jsonify({'success': False, 'message': 'RFID卡号已存在'})
-                
-                # 准备插入字段和值
-                insert_fields = ['real_name', 'username', 'role', 'status', 'created_at', 'updated_at']
-                insert_values = [data['real_name'], data['username'], data['role'], data['status'], datetime.now(), datetime.now()]
-                
-                # 添加可选字段
-                optional_fields = ['department', 'email', 'phone', 'rfid_card_id']
-                for field in optional_fields:
-                    if field in data:
-                        insert_fields.append(field)
-                        insert_values.append(data[field])
-                
-                # 密码处理 - 如果提供了密码
-                if 'password' in data and data['password']:
-                    # 使用明文存储密码（仅用于测试环境）
-                    insert_fields.append('password')
-                    insert_values.append(data['password'])
-                
-                # 构建SQL语句
-                placeholders = ', '.join(['%s'] * len(insert_values))
-                sql = f"INSERT INTO {MYSQL_TABLE_USER_1} ({', '.join(insert_fields)}) VALUES ({placeholders})"
-                
-                # 执行插入
-                cursor.execute(sql, insert_values)
-                conn.commit()
-                
-                # 获取新创建的用户ID
-                new_user_id = cursor.lastrowid
-                
-                # 获取新创建的用户信息
-                cursor.execute(f"SELECT id, real_name, username, role, department, status, email, phone, rfid_card_id, created_at, updated_at FROM {MYSQL_TABLE_USER_1} WHERE id = %s", (new_user_id,))
-                user = cursor.fetchone()
-                
-                if user:
-                    # 使用辅助函数处理角色和状态的显示名称
-                    enhance_user_data(user)
-                    return jsonify({'success': True, 'data': user, 'message': '用户创建成功'})
-                else:
-                    return jsonify({'success': False, 'message': '创建用户后无法获取用户信息'})
+                    return jsonify({'success': False, 'message': 'RFID卡号已存在'})
+            
+            insert_fields = ['real_name', 'username', 'role', 'status', 'created_at', 'updated_at']
+            insert_values = [data['real_name'], data['username'], data['role'], data['status'], datetime.now(), datetime.now()]
+            
+            optional_fields = ['department', 'email', 'phone', 'rfid_card_id']
+            for field in optional_fields:
+                if field in data:
+                    insert_fields.append(field)
+                    insert_values.append(data[field])
+            
+            if 'password' in data and data['password']:
+                insert_fields.append('password')
+                insert_values.append(data['password'])
+            
+            placeholders = ', '.join(['%s'] * len(insert_values))
+            sql = f"INSERT INTO {MYSQL_TABLE_USER_1} ({', '.join(insert_fields)}) VALUES ({placeholders})"
+            
+            cursor.execute(sql, insert_values)
+            conn.commit()
+            
+            new_user_id = cursor.lastrowid
+            
+            cursor.execute(f"SELECT id, real_name, username, role, department, status, email, phone, rfid_card_id, created_at, updated_at FROM {MYSQL_TABLE_USER_1} WHERE id = %s", (new_user_id,))
+            user = cursor.fetchone()
+            
+            if user:
+                enhance_user_data(user)
+                return jsonify({'success': True, 'data': user, 'message': '用户创建成功'})
+            
+            return jsonify({'success': False, 'message': '创建用户后无法获取用户信息'})
         except Exception as e:
             if conn:
                 conn.rollback()
             print(f"创建用户时出错: {e}")
             return jsonify({'success': False, 'message': '服务器内部错误'})
         finally:
+            if cursor:
+                cursor.close()
             if conn:
                 conn.close()
