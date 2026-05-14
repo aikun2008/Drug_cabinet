@@ -529,9 +529,4 @@ Use STM32CubeProgrammer or Keil MDK to flash `drug.hex` via ST-Link.
 | Drug borrow/return failed | RFID card not bound / insufficient permissions | Check `web_user.rfid_card_id` and `permission_settings` |
 | Environmental data not updating | ESP32 not receiving UART data | Check UART connection and baud rate (115200) |
 | Redis connection failed | Redis service not running | Start Redis service, code auto-fallback to MockCacheManager |
-| OTA upgrade failed | Firmware URL inaccessible / missing otadata partition | Check URL accessibility, configure correct partition table |
-| Mini Program login failed | Backend service not running / baseUrl mismatch | Ensure Flask service is running, check app.js baseUrl |
-
-## License
-
-MIT License
+| OTA upgrade failed | Firmware URL inaccessible / missing otadata partition | Check URL accessibility, configure
