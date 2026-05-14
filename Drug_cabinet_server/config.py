@@ -1,29 +1,29 @@
 # config.py
+import os
+
 # 域名配置
-DOMAIN_NAME = "your-domain.com"
+DOMAIN_NAME = os.getenv('DOMAIN_NAME', 'your-domain.com')
 
 # MQTT (EMQX) 配置
-#EMQX_BROKER_IP = "your-mqtt-server-ip"
-EMQX_BROKER_IP = "8.134.109.28"  # 云服务器
-#EMQX_BROKER_IP = DOMAIN_NAME  # 使用域名访问（ICP备案完成后启用）
+EMQX_BROKER_IP = os.getenv('EMQX_BROKER_IP', 'your-mqtt-server-ip')
 
-EMQX_BROKER_PORT = 1883
-EMQX_USERNAME = "your-mqtt-username"
-EMQX_PASSWORD = "your-mqtt-password"
-EMQX_CLIENT_ID = "server_windows"  # 不要相同，否则会报错
+EMQX_BROKER_PORT = int(os.getenv('EMQX_BROKER_PORT', '1883'))
+EMQX_USERNAME = os.getenv('EMQX_USERNAME', 'your-mqtt-username')
+EMQX_PASSWORD = os.getenv('EMQX_PASSWORD', 'your-mqtt-password')
+EMQX_CLIENT_ID = os.getenv('EMQX_CLIENT_ID', 'server_windows')  # 不要相同，否则会报错
 
 # Redis配置
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
-REDIS_PASSWORD = None
-REDIS_DB = 0
-REDIS_DEFAULT_TTL = 3600  # 默认缓存过期时间（秒）
+REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+REDIS_PORT = int(os.getenv('REDIS_PORT', '6379'))
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', None)
+REDIS_DB = int(os.getenv('REDIS_DB', '0'))
+REDIS_DEFAULT_TTL = int(os.getenv('REDIS_DEFAULT_TTL', '3600'))  # 默认缓存过期时间（秒）
 
 # 数据库配置
-MYSQL_HOST = "localhost"
-MYSQL_PORT = 3306
-MYSQL_USER = "root"
-MYSQL_PASSWORD = "your-database-password"
+MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
+MYSQL_PORT = int(os.getenv('MYSQL_PORT', '3306'))
+MYSQL_USER = os.getenv('MYSQL_USER', 'root')
+MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', 'your-database-password')
 MYSQL_DATABASE_1 = "web"
 MYSQL_DATABASE_2 = "history"
 MYSQL_TABLE_USER_1 = "web_user"
@@ -34,16 +34,16 @@ MAX_LOGIN_ATTEMPTS = 5
 LOCK_DURATION_MINUTES = 30
 
 # JWT配置
-JWT_SECRET_KEY = 'your-jwt-secret-key-change-in-production'
+JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'your-jwt-secret-key-change-in-production')
 JWT_EXPIRATION_HOURS = 24  # Token有效期（小时）
 
 # EMQX 控制台配置
-EMQX_DASHBOARD_USERNAME = "admin"
-EMQX_DASHBOARD_PASSWORD = "your-emqx-dashboard-password"
+EMQX_DASHBOARD_USERNAME = os.getenv('EMQX_DASHBOARD_USERNAME', 'admin')
+EMQX_DASHBOARD_PASSWORD = os.getenv('EMQX_DASHBOARD_PASSWORD', 'your-emqx-dashboard-password')
 
 # EMQX 5.x API配置
-EMQX_API_KEY = "your-emqx-api-key"
-EMQX_API_SECRET = "your-emqx-api-secret"
+EMQX_API_KEY = os.getenv('EMQX_API_KEY', 'your-emqx-api-key')
+EMQX_API_SECRET = os.getenv('EMQX_API_SECRET', 'your-emqx-api-secret')
 EMQX_API_BASE_URL = f"http://{EMQX_BROKER_IP}:18083/api/v5"
 
 '''
